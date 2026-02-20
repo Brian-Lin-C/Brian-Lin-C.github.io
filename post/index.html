@@ -129,222 +129,98 @@
     </header>
     <!-- / header -->
     <!-- / content -->
-    <link rel="stylesheet" href="/css/i_slidebar.css">
+    <!-- content -->
+<link rel="stylesheet" href="/css/i_slidebar.css">
 <link rel="stylesheet" href="/css/i_post.css">
 <div id="page-content" class="container">
-    <!-- post content + sidebar -->
-    <section id="blog">
+    <!-- blog content + sidebar -->
+    <section>
         <div class="row">
-            <!-- post content area -->
-            <div class="col-md-9">
-                <div class="blog block post-content-area">
-                    <img src="/images/post_preview_default.jpg" alt="">
-                    <div class="post-info-box">
-                        <h1 style="font-size: 48px;">我的第一篇博客</h1>
-                        <p class="post-info" style="margin-bottom: 15px;">
-                            发表于:
-                            <span style="color: #aaa; margin: 0 15px">
-                                2026.02.20
-                            </span>
-                             | 分类：
-                             <a href="#" style="margin: 0 5px">
-                                
-                                    -
-                                
-                             </a>
-                             
-                        </p>
+            <!-- blog content area -->
+            <div class="col-sm-8 col-md-9">
+            	
+
+    
+        <article class="post-item">
+            <div class="blog block post-content-area">
+                
+                <div class="post-info-box">
+                    <a href="2026/02/20/我的第一篇博客/"><h1>我的第一篇博客</h1></a>
+                    <div class="post-meta">
+                      <span class="post-date">2026.02</span>
+                      <a href="#" class="post-author">
+                        
+                            -
+                        
+                      </a>
+                    </div>
+                    <div style="max-height: 350px; overflow: hidden; line-height: 24px">
                         
                     </div>
-                    <!-- / post-info-box -->
+                    <div class="blog-post-footer">
+                        <a href="2026/02/20/我的第一篇博客/" class="btn btn-primary-filled"><span>阅读全文</span><i class="fa fa-long-arrow-right"></i></a>
+                        <div class="pull-right">
+                            
+                        </div>
+                    </div>
+                    <!-- / blog-post-footer -->
                 </div>
-                <!-- / blog-block -->
+                <!-- / post-info-box -->
+            </div>
+            <!-- / blog-block -->
+        </article>
+        <div class="space-50">&nbsp;</div>
+        <!-- / col-sm-8 col-md-9 -->
+    
+        <article class="post-item">
+            <div class="blog block post-content-area">
                 
-<div id="comment">
-    <!--PC和WAP自适应版-->
-    <div id="SOHUCS" sid="请将此处替换为配置SourceID的语句"></div>
-    <script type="text/javascript">
-    (function() {
-        var appid = 'cysYE5nWR';
-        var conf = 'prod_ea59e8a942c2c4c0e72b24ed00ecddc9';
-        var width = window.innerWidth || document.documentElement.clientWidth;
-        if (width < 960) {
-            window.document.write('<script id="changyan_mobile_js" charset="utf-8" type="text/javascript" src="http://changyan.sohu.com/upload/mobile/wap-js/changyan_mobile.js?client_id=' + appid + '&conf=' + conf + '"><\/script>');
-        } else {
-            var loadJs = function(d, a) {
-                var c = document.getElementsByTagName("head")[0] || document.head || document.documentElement;
-                var b = document.createElement("script");
-                b.setAttribute("type", "text/javascript");
-                b.setAttribute("charset", "UTF-8");
-                b.setAttribute("src", d);
-                if (typeof a === "function") {
-                    if (window.attachEvent) {
-                        b.onreadystatechange = function() {
-                            var e = b.readyState;
-                            if (e === "loaded" || e === "complete") {
-                                b.onreadystatechange = null;
-                                a();
-                            }
-                        }
-                    } else {
-                        b.onload = a;
-                    }
-                }
-                c.appendChild(b)
-            };
-            loadJs("http://changyan.sohu.com/upload/changyan.js", function() {
-                window.changyan.api.config({
-                    appid: appid,
-                    conf: conf
-                })
-            });
-        }
-    })();
-    </script>
-</div>
-<!-- / comments -->
+                <div class="post-info-box">
+                    <a href="2026/02/20/hello-world/"><h1>Hello World</h1></a>
+                    <div class="post-meta">
+                      <span class="post-date">2026.02</span>
+                      <a href="#" class="post-author">
+                        
+                            -
+                        
+                      </a>
+                    </div>
+                    <div style="max-height: 350px; overflow: hidden; line-height: 24px">
+                        Welcome to Hexo! This is your very first post. Check documentation for more info. If you get any problems when using Hexo, you can find the answer in troubleshooting or you can ask me on GitHub.
+Quick StartCreate a new post1$ hexo new &quot;My New Post&quot;
 
+More info: Writing
+Run server1$ hexo server
 
-            </div>
-            <!-- / col-md-9 -->
-            <!-- / post content area -->
-            <style type="text/css">
-.post-tab-header {
-    width: 100%;
-    padding: 5px 50px;
-    height: 40px;
-    margin-bottom: 10px;
-}
+More info: Server
+Generate static files1$ hexo generate
 
-.post-tab-header li {
-    width: 50%;
-    float: left;
-    text-align: center;
-    cursor: pointer;
-    padding-bottom: 10px;
-}
+More info: Generating
+Deploy to remote sites1$ hexo deploy
 
-.post-tab-header li.active {
-    color: #c39d6d;
-    border-bottom: 1px solid #c39d6d;
-}
+More info: Deployment
 
-.post-tab-content .post-tab-item {
-    display: none;
-}
-
-.post-tab-content .post-tab-item.active {
-    display: block;
-}
-
-@keyframes MinefadeInUp {
-    from {
-        opacity: 0;
-        transform: translateY(45px);
-    }
-    to {
-        opacity: 1;
-        transform: none;
-    }
-}
-
-.MinefadeInUp {
-    animation-name: MinefadeInUp;
-}
-
-ol,
-ul,
-li {
-    list-style: none;
-}
-
-.post-toc {
-    font-size: 14px;
-    color: #666;
-    overflow: auto;
-}
-
-.post-toc .nav-link {
-    padding: 0px;
-}
-
-.post-toc ol {
-    margin: 0;
-    padding: 5px 0 5px 20px;
-    text-align: left;
-    list-style: none;
-    font-size: 14px;
-}
-
-.post-toc ol>ol {
-    padding-left: 0;
-}
-
-.post-toc ol a {
-    transition-duration: 0.2s;
-    transition-timing-function: ease-in-out;
-    transition-delay: 0s;
-    transition-property: all;
-    color: #666;
-    border-bottom-color: #ccc;
-}
-
-.post-toc ol a:hover {
-    color: #000;
-    border-bottom-color: #000;
-}
-
-.post-toc .nav-item {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    line-height: 1.8;
-}
-
-.post-toc .nav .nav-child {
-    display: none;
-}
-
-.post-toc .nav .active>.nav-child {
-    display: block;
-}
-
-.post-toc .nav .active-current>.nav-child {
-    display: block;
-}
-
-.post-toc .nav .active-current>.nav-child>.nav-item {
-    display: block;
-}
-
-.post-toc .nav .active>a {
-    color: #c39d6d;
-    border-bottom-color: #c39d6d;
-}
-
-.post-toc .nav .active-current>a {
-    color: #c39d6d;
-}
-
-.post-toc .nav .active-current>a:hover {
-    color: #c39d6d;
-}
-</style>
-<!-- post sidebar area -->
-<div class="col-md-3">
-    <div class="blog-sidebar" data-spy="affix" data-offset-top="627">
-        <ul class="post-tab-header">
-            <li class="active" data-index="0">文章目录</li>
-            <li data-index="1">站点概览</li>
-        </ul>
-        <div style="clear: both"></div>
-        <div class="post-tab-content">
-            <div id="post-scroll-spy" data-index="0" class="active post-tab-item animated MinefadeInUp">
-                <div class="post-toc">
-                    
+                    </div>
+                    <div class="blog-post-footer">
+                        <a href="2026/02/20/hello-world/" class="btn btn-primary-filled"><span>阅读全文</span><i class="fa fa-long-arrow-right"></i></a>
+                        <div class="pull-right">
+                            
+                        </div>
+                    </div>
+                    <!-- / blog-post-footer -->
                 </div>
+                <!-- / post-info-box -->
             </div>
-            <div data-index="1" class="post-tab-item animated MinefadeInUp">
+            <!-- / blog-block -->
+        </article>
+        <div class="space-50">&nbsp;</div>
+        <!-- / col-sm-8 col-md-9 -->
+    
+
+            </div><!-- / col-sm-8 col-md-9 -->
+            <!-- / blog content area -->
+            <!-- blog sidebar area -->
+            <div class="col-sm-4 col-md-3 blog-sidebar">
                 <div class="blog block post-sidebar-widget">
     <img class="site-author-image" src="/images/avatar.gif">
     <p class="site-author-name">Ckryo</p>
@@ -371,29 +247,19 @@ li {
         </div>
     </nav>
 </div>
-            </div>
-        </div>
-    </div>
-</div>
-<!-- / col-sm-4 col-md-3 -->
-<!-- / post sidebar area -->
-<script type="text/javascript">
-$(function() {
-    $('.post-tab-header').on('click', 'li', function() {
-        if ($(this).hasClass('active')) return;
-        $('.post-tab-header li').removeClass('active');
-        $('.post-tab-content .post-tab-item').removeClass('active');
-        $(this).addClass('active');
-        var index = $(this).data('index');
-        $('.post-tab-content').find('.post-tab-item[data-index=' + index + ']').addClass('active');
-    });
-});
-</script>
-        </div>
-        <!-- / row -->
+            </div><!-- / col-sm-4 col-md-3 -->
+            <!-- / blog sidebar area -->
+        </div><!-- / row -->
     </section>
-    <!-- / post content + sidebar -->
-</div>
+    <!-- / blog content + sidebar -->
+
+    <!-- pagination -->
+    
+    <!-- / pagination -->
+
+</div><!-- / container -->
+
+<!-- / content -->
 
         <!-- / content -->
 </body>
