@@ -3,6 +3,15 @@
   <entry>
     <title>我的第一篇博客</title>
     <url>/2026/02/20/%E6%88%91%E7%9A%84%E7%AC%AC%E4%B8%80%E7%AF%87%E5%8D%9A%E5%AE%A2/</url>
-    <content><![CDATA[]]></content>
+    <content><![CDATA[<p>这是我的第一篇博客文章，记录博客搭建的起点。</p>
+]]></content>
+      <categories>
+        <category>生活随笔</category>
+      </categories>
+      <tags>
+        <tag>博客搭建</tag>
+        <tag>Hexo</tag>
+        <tag>开始</tag>
+      </tags>
   </entry>
 </search>
