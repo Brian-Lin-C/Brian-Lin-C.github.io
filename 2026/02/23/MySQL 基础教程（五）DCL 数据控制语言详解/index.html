@@ -1,0 +1,579 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>MySQL 基础教程（五）DCL 数据控制语言详解 | 过拟合的炸鱼薯条</title><meta name="author" content="过拟合的炸鱼薯条"><meta name="copyright" content="过拟合的炸鱼薯条"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="MySQL 基础教程（五）DCL 数据控制语言详解DCL（Data Control Language，数据控制语言）用于管理数据库权限和事务控制。本文我们将学习如何创建用户、管理权限，以及事务控制的相关知识。 一、DCL 概述DCL 主要包含两类操作：  权限管理：GRANT（授权）、REVOKE（撤销权限） 事务控制：COMMIT（提交）、ROLLBACK（回滚）、SAVEPOINT（保存点）">
+<meta property="og:type" content="article">
+<meta property="og:title" content="MySQL 基础教程（五）DCL 数据控制语言详解">
+<meta property="og:url" content="https://brian-lin-c.github.io/2026/02/23/MySQL%20%E5%9F%BA%E7%A1%80%E6%95%99%E7%A8%8B%EF%BC%88%E4%BA%94%EF%BC%89DCL%20%E6%95%B0%E6%8D%AE%E6%8E%A7%E5%88%B6%E8%AF%AD%E8%A8%80%E8%AF%A6%E8%A7%A3/index.html">
+<meta property="og:site_name" content="过拟合的炸鱼薯条">
+<meta property="og:description" content="MySQL 基础教程（五）DCL 数据控制语言详解DCL（Data Control Language，数据控制语言）用于管理数据库权限和事务控制。本文我们将学习如何创建用户、管理权限，以及事务控制的相关知识。 一、DCL 概述DCL 主要包含两类操作：  权限管理：GRANT（授权）、REVOKE（撤销权限） 事务控制：COMMIT（提交）、ROLLBACK（回滚）、SAVEPOINT（保存点）">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://brian-lin-c.github.io/img/%E5%A4%B4%E5%83%8F.jpg">
+<meta property="article:published_time" content="2026-02-23T06:00:00.000Z">
+<meta property="article:modified_time" content="2026-02-23T03:32:17.611Z">
+<meta property="article:author" content="过拟合的炸鱼薯条">
+<meta property="article:tag" content="DCL">
+<meta property="article:tag" content="MySQL">
+<meta property="article:tag" content="权限管理">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://brian-lin-c.github.io/img/%E5%A4%B4%E5%83%8F.jpg"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "MySQL 基础教程（五）DCL 数据控制语言详解",
+  "url": "https://brian-lin-c.github.io/2026/02/23/MySQL%20%E5%9F%BA%E7%A1%80%E6%95%99%E7%A8%8B%EF%BC%88%E4%BA%94%EF%BC%89DCL%20%E6%95%B0%E6%8D%AE%E6%8E%A7%E5%88%B6%E8%AF%AD%E8%A8%80%E8%AF%A6%E8%A7%A3/",
+  "image": "https://brian-lin-c.github.io/img/%E5%A4%B4%E5%83%8F.jpg",
+  "datePublished": "2026-02-23T06:00:00.000Z",
+  "dateModified": "2026-02-23T03:32:17.611Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "过拟合的炸鱼薯条",
+      "url": "https://brian-lin-c.github.io"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://brian-lin-c.github.io/2026/02/23/MySQL%20%E5%9F%BA%E7%A1%80%E6%95%99%E7%A8%8B%EF%BC%88%E4%BA%94%EF%BC%89DCL%20%E6%95%B0%E6%8D%AE%E6%8E%A7%E5%88%B6%E8%AF%AD%E8%A8%80%E8%AF%A6%E8%A7%A3/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=5.5.4"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.1.0/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        if (!ttl) return
+        const expiry = Date.now() + ttl * 86400000
+        localStorage.setItem(key, JSON.stringify({ value, expiry }))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return undefined
+        const { value, expiry } = JSON.parse(itemStr)
+        if (Date.now() > expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return value
+      }
+    }
+
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        Object.entries(attr).forEach(([key, val]) => script.setAttribute(key, val))
+        script.onload = script.onreadystatechange = () => {
+          if (!script.readyState || /loaded|complete/.test(script.readyState)) resolve()
+        }
+        script.onerror = reject
+        document.head.appendChild(script)
+      }),
+      getCSS: (url, id) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onload = link.onreadystatechange = () => {
+          if (!link.readyState || /loaded|complete/.test(link.readyState)) resolve()
+        }
+        link.onerror = reject
+        document.head.appendChild(link)
+      }),
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"/search.xml","preload":true,"top_n_per_article":1,"unescape":false,"pagination":{"enable":false,"hitsPerPage":8},"languages":{"hits_empty":"未找到符合您查询的内容：${query}","hits_stats":"共找到 ${hits} 篇文章"}},
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.13.0/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'MySQL 基础教程（五）DCL 数据控制语言详解',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><meta name="generator" content="Hexo 8.1.1"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/img/%E5%A4%B4%E5%83%8F.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">12</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">26</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user"></i><span> 关于</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">过拟合的炸鱼薯条</span></a><a class="nav-page-title" href="/"><span class="site-name">MySQL 基础教程（五）DCL 数据控制语言详解</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div id="search-button"><span class="site-page social-icon search"><i class="fas fa-search fa-fw"></i><span> 搜索</span></span></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user"></i><span> 关于</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">MySQL 基础教程（五）DCL 数据控制语言详解</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2026-02-23T06:00:00.000Z" title="发表于 2026-02-23 14:00:00">2026-02-23</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-02-23T03:32:17.611Z" title="更新于 2026-02-23 11:32:17">2026-02-23</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/MySQL-%E5%9F%BA%E7%A1%80%E6%95%99%E7%A8%8B/">MySQL 基础教程</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-wordcount"><i class="far fa-file-word fa-fw post-meta-icon"></i><span class="post-meta-label">总字数:</span><span class="word-count">3.8k</span><span class="post-meta-separator">|</span><i class="far fa-clock fa-fw post-meta-icon"></i><span class="post-meta-label">阅读时长:</span><span>16分钟</span></span><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><h1 id="MySQL-基础教程（五）DCL-数据控制语言详解"><a href="#MySQL-基础教程（五）DCL-数据控制语言详解" class="headerlink" title="MySQL 基础教程（五）DCL 数据控制语言详解"></a>MySQL 基础教程（五）DCL 数据控制语言详解</h1><p>DCL（Data Control Language，数据控制语言）用于管理数据库权限和事务控制。本文我们将学习如何创建用户、管理权限，以及事务控制的相关知识。</p>
+<h2 id="一、DCL-概述"><a href="#一、DCL-概述" class="headerlink" title="一、DCL 概述"></a>一、DCL 概述</h2><p>DCL 主要包含两类操作：</p>
+<ol>
+<li><strong>权限管理</strong>：GRANT（授权）、REVOKE（撤销权限）</li>
+<li><strong>事务控制</strong>：COMMIT（提交）、ROLLBACK（回滚）、SAVEPOINT（保存点）</li>
+</ol>
+<table>
+<thead>
+<tr>
+<th>命令</th>
+<th>功能</th>
+<th>分类</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>GRANT</td>
+<td>授予用户权限</td>
+<td>权限管理</td>
+</tr>
+<tr>
+<td>REVOKE</td>
+<td>撤销用户权限</td>
+<td>权限管理</td>
+</tr>
+<tr>
+<td>COMMIT</td>
+<td>提交事务</td>
+<td>事务控制</td>
+</tr>
+<tr>
+<td>ROLLBACK</td>
+<td>回滚事务</td>
+<td>事务控制</td>
+</tr>
+<tr>
+<td>SAVEPOINT</td>
+<td>设置保存点</td>
+<td>事务控制</td>
+</tr>
+</tbody></table>
+<h2 id="二、用户管理"><a href="#二、用户管理" class="headerlink" title="二、用户管理"></a>二、用户管理</h2><h3 id="2-1-用户表结构"><a href="#2-1-用户表结构" class="headerlink" title="2.1 用户表结构"></a>2.1 用户表结构</h3><p>MySQL 的用户信息存储在 <code>mysql.user</code> 表中：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- 查看所有用户</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="keyword">user</span>, host <span class="keyword">FROM</span> mysql.user;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 查看用户详细信息</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="keyword">user</span>, host, authentication_string, plugin <span class="keyword">FROM</span> mysql.user;</span><br></pre></td></tr></table></figure>
+
+<p><strong>用户名的组成</strong>：<code>&#39;username&#39;@&#39;host&#39;</code></p>
+<ul>
+<li><code>username</code>：用户名</li>
+<li><code>host</code>：允许连接的主机<ul>
+<li><code>localhost</code>：仅本地连接</li>
+<li><code>%</code>：允许任何主机连接</li>
+<li><code>192.168.1.%</code>：允许特定网段连接</li>
+</ul>
+</li>
+</ul>
+<h3 id="2-2-创建用户（CREATE-USER）"><a href="#2-2-创建用户（CREATE-USER）" class="headerlink" title="2.2 创建用户（CREATE USER）"></a>2.2 创建用户（CREATE USER）</h3><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- 基础语法</span></span><br><span class="line"><span class="keyword">CREATE</span> <span class="keyword">USER</span> <span class="string">&#x27;用户名&#x27;</span>@<span class="string">&#x27;主机&#x27;</span> IDENTIFIED <span class="keyword">BY</span> <span class="string">&#x27;密码&#x27;</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 创建仅本地登录的用户</span></span><br><span class="line"><span class="keyword">CREATE</span> <span class="keyword">USER</span> <span class="string">&#x27;local_user&#x27;</span>@<span class="string">&#x27;localhost&#x27;</span> IDENTIFIED <span class="keyword">BY</span> <span class="string">&#x27;password123&#x27;</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 创建可远程登录的用户（任何主机）</span></span><br><span class="line"><span class="keyword">CREATE</span> <span class="keyword">USER</span> <span class="string">&#x27;remote_user&#x27;</span>@<span class="string">&#x27;%&#x27;</span> IDENTIFIED <span class="keyword">BY</span> <span class="string">&#x27;password123&#x27;</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 创建允许特定网段登录的用户</span></span><br><span class="line"><span class="keyword">CREATE</span> <span class="keyword">USER</span> <span class="string">&#x27;app_user&#x27;</span>@<span class="string">&#x27;192.168.1.%&#x27;</span> IDENTIFIED <span class="keyword">BY</span> <span class="string">&#x27;password123&#x27;</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 创建用户时不设置密码（不推荐）</span></span><br><span class="line"><span class="keyword">CREATE</span> <span class="keyword">USER</span> <span class="string">&#x27;nopass_user&#x27;</span>@<span class="string">&#x27;localhost&#x27;</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 创建用户并指定密码过期策略</span></span><br><span class="line"><span class="keyword">CREATE</span> <span class="keyword">USER</span> <span class="string">&#x27;temp_user&#x27;</span>@<span class="string">&#x27;localhost&#x27;</span></span><br><span class="line">IDENTIFIED <span class="keyword">BY</span> <span class="string">&#x27;password123&#x27;</span></span><br><span class="line">PASSWORD EXPIRE <span class="type">INTERVAL</span> <span class="number">90</span> <span class="keyword">DAY</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 创建用户并限制连接数</span></span><br><span class="line"><span class="keyword">CREATE</span> <span class="keyword">USER</span> <span class="string">&#x27;limited_user&#x27;</span>@<span class="string">&#x27;localhost&#x27;</span></span><br><span class="line">IDENTIFIED <span class="keyword">BY</span> <span class="string">&#x27;password123&#x27;</span></span><br><span class="line"><span class="keyword">WITH</span> MAX_USER_CONNECTIONS <span class="number">10</span>;</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-3-修改用户（ALTER-USER）"><a href="#2-3-修改用户（ALTER-USER）" class="headerlink" title="2.3 修改用户（ALTER USER）"></a>2.3 修改用户（ALTER USER）</h3><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- 修改用户密码（MySQL 5.7.6+）</span></span><br><span class="line"><span class="keyword">ALTER</span> <span class="keyword">USER</span> <span class="string">&#x27;local_user&#x27;</span>@<span class="string">&#x27;localhost&#x27;</span> IDENTIFIED <span class="keyword">BY</span> <span class="string">&#x27;new_password&#x27;</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 修改用户密码（MySQL 5.7.6 之前）</span></span><br><span class="line"><span class="keyword">SET</span> PASSWORD <span class="keyword">FOR</span> <span class="string">&#x27;local_user&#x27;</span>@<span class="string">&#x27;localhost&#x27;</span> <span class="operator">=</span> PASSWORD(<span class="string">&#x27;new_password&#x27;</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 解锁用户</span></span><br><span class="line"><span class="keyword">ALTER</span> <span class="keyword">USER</span> <span class="string">&#x27;local_user&#x27;</span>@<span class="string">&#x27;localhost&#x27;</span> ACCOUNT UNLOCK;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 锁定用户</span></span><br><span class="line"><span class="keyword">ALTER</span> <span class="keyword">USER</span> <span class="string">&#x27;local_user&#x27;</span>@<span class="string">&#x27;localhost&#x27;</span> ACCOUNT LOCK;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 设置密码过期</span></span><br><span class="line"><span class="keyword">ALTER</span> <span class="keyword">USER</span> <span class="string">&#x27;local_user&#x27;</span>@<span class="string">&#x27;localhost&#x27;</span> PASSWORD EXPIRE;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 设置密码永不过期</span></span><br><span class="line"><span class="keyword">ALTER</span> <span class="keyword">USER</span> <span class="string">&#x27;local_user&#x27;</span>@<span class="string">&#x27;localhost&#x27;</span> PASSWORD EXPIRE NEVER;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 修改主机权限（先删除再创建）</span></span><br><span class="line"><span class="keyword">DROP</span> <span class="keyword">USER</span> <span class="string">&#x27;local_user&#x27;</span>@<span class="string">&#x27;localhost&#x27;</span>;</span><br><span class="line"><span class="keyword">CREATE</span> <span class="keyword">USER</span> <span class="string">&#x27;local_user&#x27;</span>@<span class="string">&#x27;%&#x27;</span> IDENTIFIED <span class="keyword">BY</span> <span class="string">&#x27;password123&#x27;</span>;</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-4-删除用户（DROP-USER）"><a href="#2-4-删除用户（DROP-USER）" class="headerlink" title="2.4 删除用户（DROP USER）"></a>2.4 删除用户（DROP USER）</h3><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- 删除用户</span></span><br><span class="line"><span class="keyword">DROP</span> <span class="keyword">USER</span> <span class="string">&#x27;local_user&#x27;</span>@<span class="string">&#x27;localhost&#x27;</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 删除多个用户</span></span><br><span class="line"><span class="keyword">DROP</span> <span class="keyword">USER</span> <span class="string">&#x27;user1&#x27;</span>@<span class="string">&#x27;localhost&#x27;</span>, <span class="string">&#x27;user2&#x27;</span>@<span class="string">&#x27;%&#x27;</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 删除不存在的用户（MySQL 8.0+ 支持 IF EXISTS）</span></span><br><span class="line"><span class="keyword">DROP</span> <span class="keyword">USER</span> IF <span class="keyword">EXISTS</span> <span class="string">&#x27;nonexistent&#x27;</span>@<span class="string">&#x27;localhost&#x27;</span>;</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-5-查看用户权限"><a href="#2-5-查看用户权限" class="headerlink" title="2.5 查看用户权限"></a>2.5 查看用户权限</h3><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- 查看当前用户</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="keyword">USER</span>();</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 查看当前登录用户的所有权限</span></span><br><span class="line"><span class="keyword">SHOW</span> GRANTS;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 查看指定用户的权限</span></span><br><span class="line"><span class="keyword">SHOW</span> GRANTS <span class="keyword">FOR</span> <span class="string">&#x27;root&#x27;</span>@<span class="string">&#x27;localhost&#x27;</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 查看用户表</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="keyword">user</span>, host, Select_priv, Insert_priv, Update_priv, Delete_priv</span><br><span class="line"><span class="keyword">FROM</span> mysql.user;</span><br></pre></td></tr></table></figure>
+
+<h2 id="三、权限管理"><a href="#三、权限管理" class="headerlink" title="三、权限管理"></a>三、权限管理</h2><h3 id="3-1-权限类型"><a href="#3-1-权限类型" class="headerlink" title="3.1 权限类型"></a>3.1 权限类型</h3><p>MySQL 支持多种权限类型，按作用范围分为：</p>
+<table>
+<thead>
+<tr>
+<th>权限级别</th>
+<th>说明</th>
+<th>示例</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>全局权限</td>
+<td>作用于所有数据库</td>
+<td><code>GRANT SELECT ON *.*</code></td>
+</tr>
+<tr>
+<td>数据库权限</td>
+<td>作用于特定数据库</td>
+<td><code>GRANT SELECT ON db.*</code></td>
+</tr>
+<tr>
+<td>表权限</td>
+<td>作用于特定表</td>
+<td><code>GRANT SELECT ON db.table</code></td>
+</tr>
+<tr>
+<td>列权限</td>
+<td>作用于特定列</td>
+<td><code>GRANT SELECT(id, name) ON db.table</code></td>
+</tr>
+<tr>
+<td>存储过程权限</td>
+<td>作用于存储过程</td>
+<td><code>GRANT EXECUTE ON PROCEDURE db.proc</code></td>
+</tr>
+</tbody></table>
+<p><strong>常用权限</strong>：</p>
+<table>
+<thead>
+<tr>
+<th>权限</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>SELECT</td>
+<td>查询权限</td>
+</tr>
+<tr>
+<td>INSERT</td>
+<td>插入权限</td>
+</tr>
+<tr>
+<td>UPDATE</td>
+<td>更新权限</td>
+</tr>
+<tr>
+<td>DELETE</td>
+<td>删除权限</td>
+</tr>
+<tr>
+<td>CREATE</td>
+<td>创建数据库&#x2F;表权限</td>
+</tr>
+<tr>
+<td>DROP</td>
+<td>删除数据库&#x2F;表权限</td>
+</tr>
+<tr>
+<td>ALTER</td>
+<td>修改表结构权限</td>
+</tr>
+<tr>
+<td>INDEX</td>
+<td>创建&#x2F;删除索引权限</td>
+</tr>
+<tr>
+<td>CREATE VIEW</td>
+<td>创建视图权限</td>
+</tr>
+<tr>
+<td>EXECUTE</td>
+<td>执行存储过程权限</td>
+</tr>
+<tr>
+<td>TRIGGER</td>
+<td>触发器权限</td>
+</tr>
+<tr>
+<td>ALL PRIVILEGES</td>
+<td>所有权限</td>
+</tr>
+<tr>
+<td>GRANT OPTION</td>
+<td>授权权限</td>
+</tr>
+</tbody></table>
+<h3 id="3-2-授予权限（GRANT）"><a href="#3-2-授予权限（GRANT）" class="headerlink" title="3.2 授予权限（GRANT）"></a>3.2 授予权限（GRANT）</h3><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- 基础语法</span></span><br><span class="line"><span class="keyword">GRANT</span> 权限列表 <span class="keyword">ON</span> 数据库。表 <span class="keyword">TO</span> <span class="string">&#x27;用户名&#x27;</span>@<span class="string">&#x27;主机&#x27;</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 授予所有权限（慎用！）</span></span><br><span class="line"><span class="keyword">GRANT</span> <span class="keyword">ALL</span> PRIVILEGES <span class="keyword">ON</span> <span class="operator">*</span>.<span class="operator">*</span> <span class="keyword">TO</span> <span class="string">&#x27;admin&#x27;</span>@<span class="string">&#x27;localhost&#x27;</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 授予全局查询权限</span></span><br><span class="line"><span class="keyword">GRANT</span> <span class="keyword">SELECT</span> <span class="keyword">ON</span> <span class="operator">*</span>.<span class="operator">*</span> <span class="keyword">TO</span> <span class="string">&#x27;reader&#x27;</span>@<span class="string">&#x27;%&#x27;</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 授予特定数据库的所有权限</span></span><br><span class="line"><span class="keyword">GRANT</span> <span class="keyword">ALL</span> PRIVILEGES <span class="keyword">ON</span> mydb.<span class="operator">*</span> <span class="keyword">TO</span> <span class="string">&#x27;dbuser&#x27;</span>@<span class="string">&#x27;localhost&#x27;</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 授予特定表的部分权限</span></span><br><span class="line"><span class="keyword">GRANT</span> <span class="keyword">SELECT</span>, <span class="keyword">INSERT</span>, <span class="keyword">UPDATE</span> <span class="keyword">ON</span> mydb.employees <span class="keyword">TO</span> <span class="string">&#x27;hr&#x27;</span>@<span class="string">&#x27;localhost&#x27;</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 授予特定列的权限</span></span><br><span class="line"><span class="keyword">GRANT</span> <span class="keyword">SELECT</span>(id, name, salary) <span class="keyword">ON</span> mydb.employees <span class="keyword">TO</span> <span class="string">&#x27;manager&#x27;</span>@<span class="string">&#x27;localhost&#x27;</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 授予存储过程执行权限</span></span><br><span class="line"><span class="keyword">GRANT</span> <span class="keyword">EXECUTE</span> <span class="keyword">ON</span> <span class="keyword">PROCEDURE</span> mydb.get_employee <span class="keyword">TO</span> <span class="string">&#x27;app&#x27;</span>@<span class="string">&#x27;localhost&#x27;</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 授予创建数据库权限</span></span><br><span class="line"><span class="keyword">GRANT</span> <span class="keyword">CREATE</span> <span class="keyword">ON</span> <span class="operator">*</span>.<span class="operator">*</span> <span class="keyword">TO</span> <span class="string">&#x27;developer&#x27;</span>@<span class="string">&#x27;localhost&#x27;</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 授予授权权限（允许该用户再授权给其他人）</span></span><br><span class="line"><span class="keyword">GRANT</span> <span class="keyword">SELECT</span> <span class="keyword">ON</span> mydb.<span class="operator">*</span> <span class="keyword">TO</span> <span class="string">&#x27;reader&#x27;</span>@<span class="string">&#x27;%&#x27;</span> <span class="keyword">WITH</span> <span class="keyword">GRANT</span> OPTION;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 授予文件权限（可读写服务器文件，危险！）</span></span><br><span class="line"><span class="keyword">GRANT</span> FILE <span class="keyword">ON</span> <span class="operator">*</span>.<span class="operator">*</span> <span class="keyword">TO</span> <span class="string">&#x27;data_importer&#x27;</span>@<span class="string">&#x27;localhost&#x27;</span>;</span><br></pre></td></tr></table></figure>
+
+<p><strong>权限范围语法</strong>：</p>
+<ul>
+<li><code>*.*</code>：所有数据库的所有表</li>
+<li><code>db.*</code>：特定数据库的所有表</li>
+<li><code>db.table</code>：特定数据库的特定表</li>
+</ul>
+<h3 id="3-3-撤销权限（REVOKE）"><a href="#3-3-撤销权限（REVOKE）" class="headerlink" title="3.3 撤销权限（REVOKE）"></a>3.3 撤销权限（REVOKE）</h3><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- 基础语法</span></span><br><span class="line"><span class="keyword">REVOKE</span> 权限列表 <span class="keyword">ON</span> 数据库。表 <span class="keyword">FROM</span> <span class="string">&#x27;用户名&#x27;</span>@<span class="string">&#x27;主机&#x27;</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 撤销所有权限</span></span><br><span class="line"><span class="keyword">REVOKE</span> <span class="keyword">ALL</span> PRIVILEGES, <span class="keyword">GRANT</span> OPTION <span class="keyword">FROM</span> <span class="string">&#x27;user&#x27;</span>@<span class="string">&#x27;localhost&#x27;</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 撤销特定权限</span></span><br><span class="line"><span class="keyword">REVOKE</span> <span class="keyword">DELETE</span>, <span class="keyword">UPDATE</span> <span class="keyword">ON</span> mydb.employees <span class="keyword">FROM</span> <span class="string">&#x27;hr&#x27;</span>@<span class="string">&#x27;localhost&#x27;</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 撤销全局权限</span></span><br><span class="line"><span class="keyword">REVOKE</span> <span class="keyword">SELECT</span> <span class="keyword">ON</span> <span class="operator">*</span>.<span class="operator">*</span> <span class="keyword">FROM</span> <span class="string">&#x27;reader&#x27;</span>@<span class="string">&#x27;%&#x27;</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 撤销授权权限</span></span><br><span class="line"><span class="keyword">REVOKE</span> <span class="keyword">GRANT</span> OPTION <span class="keyword">ON</span> mydb.<span class="operator">*</span> <span class="keyword">FROM</span> <span class="string">&#x27;manager&#x27;</span>@<span class="string">&#x27;localhost&#x27;</span>;</span><br></pre></td></tr></table></figure>
+
+<h3 id="3-4-权限刷新"><a href="#3-4-权限刷新" class="headerlink" title="3.4 权限刷新"></a>3.4 权限刷新</h3><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- 刷新权限（修改权限表后生效）</span></span><br><span class="line">FLUSH PRIVILEGES;</span><br></pre></td></tr></table></figure>
+
+<p><strong>注意</strong>：使用 GRANT 和 REVOKE 修改权限后会自动生效，不需要 FLUSH PRIVILEGES。只有直接修改 <code>mysql.user</code> 表后才需要刷新。</p>
+<h3 id="3-5-权限查看与继承"><a href="#3-5-权限查看与继承" class="headerlink" title="3.5 权限查看与继承"></a>3.5 权限查看与继承</h3><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- 查看当前用户权限</span></span><br><span class="line"><span class="keyword">SHOW</span> GRANTS;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 查看其他用户权限</span></span><br><span class="line"><span class="keyword">SHOW</span> GRANTS <span class="keyword">FOR</span> <span class="string">&#x27;root&#x27;</span>@<span class="string">&#x27;localhost&#x27;</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 查看具有全局 SELECT 权限的用户</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="keyword">user</span>, host <span class="keyword">FROM</span> mysql.user <span class="keyword">WHERE</span> Select_priv <span class="operator">=</span> <span class="string">&#x27;Y&#x27;</span>;</span><br></pre></td></tr></table></figure>
+
+<p><strong>权限继承规则</strong>：</p>
+<ul>
+<li>全局权限 &gt; 数据库权限 &gt; 表权限 &gt; 列权限</li>
+<li>用户拥有多个权限时，取并集</li>
+</ul>
+<h2 id="四、角色管理（MySQL-8-0-）"><a href="#四、角色管理（MySQL-8-0-）" class="headerlink" title="四、角色管理（MySQL 8.0+）"></a>四、角色管理（MySQL 8.0+）</h2><p>角色是一组权限的集合，可以分配给用户。</p>
+<h3 id="4-1-创建角色"><a href="#4-1-创建角色" class="headerlink" title="4.1 创建角色"></a>4.1 创建角色</h3><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- 创建角色</span></span><br><span class="line"><span class="keyword">CREATE</span> ROLE <span class="string">&#x27;read_only&#x27;</span>;</span><br><span class="line"><span class="keyword">CREATE</span> ROLE <span class="string">&#x27;app_read&#x27;</span>, <span class="string">&#x27;app_write&#x27;</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 查看角色</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> mysql.default_roles;</span><br></pre></td></tr></table></figure>
+
+<h3 id="4-2-给角色授权"><a href="#4-2-给角色授权" class="headerlink" title="4.2 给角色授权"></a>4.2 给角色授权</h3><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- 给角色授予权限</span></span><br><span class="line"><span class="keyword">GRANT</span> <span class="keyword">SELECT</span> <span class="keyword">ON</span> mydb.<span class="operator">*</span> <span class="keyword">TO</span> <span class="string">&#x27;read_only&#x27;</span>;</span><br><span class="line"><span class="keyword">GRANT</span> <span class="keyword">SELECT</span>, <span class="keyword">INSERT</span> <span class="keyword">ON</span> mydb.<span class="operator">*</span> <span class="keyword">TO</span> <span class="string">&#x27;app_read&#x27;</span>;</span><br><span class="line"><span class="keyword">GRANT</span> <span class="keyword">INSERT</span>, <span class="keyword">UPDATE</span>, <span class="keyword">DELETE</span> <span class="keyword">ON</span> mydb.<span class="operator">*</span> <span class="keyword">TO</span> <span class="string">&#x27;app_write&#x27;</span>;</span><br></pre></td></tr></table></figure>
+
+<h3 id="4-3-给用户分配角色"><a href="#4-3-给用户分配角色" class="headerlink" title="4.3 给用户分配角色"></a>4.3 给用户分配角色</h3><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- 给用户分配角色</span></span><br><span class="line"><span class="keyword">GRANT</span> <span class="string">&#x27;read_only&#x27;</span> <span class="keyword">TO</span> <span class="string">&#x27;user1&#x27;</span>@<span class="string">&#x27;localhost&#x27;</span>;</span><br><span class="line"><span class="keyword">GRANT</span> <span class="string">&#x27;app_read&#x27;</span>, <span class="string">&#x27;app_write&#x27;</span> <span class="keyword">TO</span> <span class="string">&#x27;app_user&#x27;</span>@<span class="string">&#x27;localhost&#x27;</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 设置默认角色</span></span><br><span class="line"><span class="keyword">SET</span> <span class="keyword">DEFAULT</span> ROLE <span class="string">&#x27;read_only&#x27;</span> <span class="keyword">TO</span> <span class="string">&#x27;user1&#x27;</span>@<span class="string">&#x27;localhost&#x27;</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 查看用户的角色</span></span><br><span class="line"><span class="keyword">SHOW</span> GRANTS <span class="keyword">FOR</span> <span class="string">&#x27;user1&#x27;</span>@<span class="string">&#x27;localhost&#x27;</span>;</span><br></pre></td></tr></table></figure>
+
+<h3 id="4-4-激活角色"><a href="#4-4-激活角色" class="headerlink" title="4.4 激活角色"></a>4.4 激活角色</h3><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- 激活所有角色</span></span><br><span class="line"><span class="keyword">SET</span> ROLE <span class="keyword">ALL</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 激活特定角色</span></span><br><span class="line"><span class="keyword">SET</span> ROLE <span class="string">&#x27;read_only&#x27;</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 激活所有默认角色</span></span><br><span class="line"><span class="keyword">SET</span> ROLE <span class="keyword">DEFAULT</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 查看当前激活的角色</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="built_in">CURRENT_ROLE</span>();</span><br></pre></td></tr></table></figure>
+
+<h3 id="4-5-撤销角色"><a href="#4-5-撤销角色" class="headerlink" title="4.5 撤销角色"></a>4.5 撤销角色</h3><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- 撤销用户的角色</span></span><br><span class="line"><span class="keyword">REVOKE</span> <span class="string">&#x27;read_only&#x27;</span> <span class="keyword">FROM</span> <span class="string">&#x27;user1&#x27;</span>@<span class="string">&#x27;localhost&#x27;</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 删除角色</span></span><br><span class="line"><span class="keyword">DROP</span> ROLE <span class="string">&#x27;read_only&#x27;</span>;</span><br></pre></td></tr></table></figure>
+
+<h2 id="五、事务控制"><a href="#五、事务控制" class="headerlink" title="五、事务控制"></a>五、事务控制</h2><h3 id="5-1-事务基础"><a href="#5-1-事务基础" class="headerlink" title="5.1 事务基础"></a>5.1 事务基础</h3><p>事务是一组原子性的 SQL 操作，要么全部成功，要么全部失败。</p>
+<p><strong>事务的 ACID 特性</strong>：</p>
+<table>
+<thead>
+<tr>
+<th>特性</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>原子性（Atomicity）</td>
+<td>事务是不可分割的最小单位</td>
+</tr>
+<tr>
+<td>一致性（Consistency）</td>
+<td>事务执行前后数据保持一致</td>
+</tr>
+<tr>
+<td>隔离性（Isolation）</td>
+<td>并发事务互不干扰</td>
+</tr>
+<tr>
+<td>持久性（Durability）</td>
+<td>事务提交后永久保存</td>
+</tr>
+</tbody></table>
+<h3 id="5-2-事务操作"><a href="#5-2-事务操作" class="headerlink" title="5.2 事务操作"></a>5.2 事务操作</h3><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- 查看自动提交状态</span></span><br><span class="line"><span class="keyword">SELECT</span> @<span class="variable">@autocommit</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 关闭自动提交</span></span><br><span class="line"><span class="keyword">SET</span> autocommit <span class="operator">=</span> <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 开启事务</span></span><br><span class="line"><span class="keyword">START</span> TRANSACTION;</span><br><span class="line"><span class="comment">-- 或</span></span><br><span class="line"><span class="keyword">BEGIN</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 执行 DML 操作</span></span><br><span class="line"><span class="keyword">UPDATE</span> accounts <span class="keyword">SET</span> balance <span class="operator">=</span> balance <span class="operator">-</span> <span class="number">100</span> <span class="keyword">WHERE</span> id <span class="operator">=</span> <span class="number">1</span>;</span><br><span class="line"><span class="keyword">UPDATE</span> accounts <span class="keyword">SET</span> balance <span class="operator">=</span> balance <span class="operator">+</span> <span class="number">100</span> <span class="keyword">WHERE</span> id <span class="operator">=</span> <span class="number">2</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 提交事务</span></span><br><span class="line"><span class="keyword">COMMIT</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 回滚事务</span></span><br><span class="line"><span class="keyword">ROLLBACK</span>;</span><br></pre></td></tr></table></figure>
+
+<h3 id="5-3-保存点（SAVEPOINT）"><a href="#5-3-保存点（SAVEPOINT）" class="headerlink" title="5.3 保存点（SAVEPOINT）"></a>5.3 保存点（SAVEPOINT）</h3><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- 开始事务</span></span><br><span class="line"><span class="keyword">START</span> TRANSACTION;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 第一条操作</span></span><br><span class="line"><span class="keyword">INSERT INTO</span> orders (order_no, amount) <span class="keyword">VALUES</span> (<span class="string">&#x27;ORD001&#x27;</span>, <span class="number">100</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 设置保存点</span></span><br><span class="line"><span class="keyword">SAVEPOINT</span> sp1;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 第二条操作</span></span><br><span class="line"><span class="keyword">INSERT INTO</span> orders (order_no, amount) <span class="keyword">VALUES</span> (<span class="string">&#x27;ORD002&#x27;</span>, <span class="number">200</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 设置保存点</span></span><br><span class="line"><span class="keyword">SAVEPOINT</span> sp2;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 第三条操作（假设出错了）</span></span><br><span class="line"><span class="keyword">INSERT INTO</span> orders (order_no, amount) <span class="keyword">VALUES</span> (<span class="string">&#x27;ORD003&#x27;</span>, <span class="number">300</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 回滚到保存点 sp2</span></span><br><span class="line"><span class="keyword">ROLLBACK</span> <span class="keyword">TO</span> sp2;  <span class="comment">-- ORD003 被撤销</span></span><br><span class="line"></span><br><span class="line"><span class="comment">-- 提交事务（ORD001 和 ORD002 保留）</span></span><br><span class="line"><span class="keyword">COMMIT</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 释放保存点</span></span><br><span class="line"><span class="keyword">RELEASE</span> <span class="keyword">SAVEPOINT</span> sp1;</span><br></pre></td></tr></table></figure>
+
+<h3 id="5-4-事务隔离级别"><a href="#5-4-事务隔离级别" class="headerlink" title="5.4 事务隔离级别"></a>5.4 事务隔离级别</h3><p>MySQL 支持四种事务隔离级别：</p>
+<table>
+<thead>
+<tr>
+<th>隔离级别</th>
+<th>脏读</th>
+<th>不可重复读</th>
+<th>幻读</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>READ UNCOMMITTED</td>
+<td>可能</td>
+<td>可能</td>
+<td>可能</td>
+</tr>
+<tr>
+<td>READ COMMITTED</td>
+<td>否</td>
+<td>可能</td>
+<td>可能</td>
+</tr>
+<tr>
+<td>REPEATABLE READ（默认）</td>
+<td>否</td>
+<td>否</td>
+<td>可能</td>
+</tr>
+<tr>
+<td>SERIALIZABLE</td>
+<td>否</td>
+<td>否</td>
+<td>否</td>
+</tr>
+</tbody></table>
+<p><strong>并发读问题</strong>：</p>
+<ul>
+<li><strong>脏读</strong>：读到其他事务未提交的数据</li>
+<li><strong>不可重复读</strong>：同一事务中多次读取结果不一致</li>
+<li><strong>幻读</strong>：同一事务中多次查询，记录数不一致</li>
+</ul>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- 查看当前隔离级别</span></span><br><span class="line"><span class="keyword">SELECT</span> @<span class="variable">@transaction_isolation</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 设置隔离级别（会话级）</span></span><br><span class="line"><span class="keyword">SET</span> SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 设置隔离级别（全局级）</span></span><br><span class="line"><span class="keyword">SET</span> <span class="keyword">GLOBAL</span> TRANSACTION ISOLATION LEVEL READ COMMITTED;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 设置隔离级别（在事务开始前）</span></span><br><span class="line"><span class="keyword">SET</span> TRANSACTION ISOLATION LEVEL SERIALIZABLE;</span><br><span class="line"><span class="keyword">START</span> TRANSACTION;</span><br></pre></td></tr></table></figure>
+
+<p><strong>MySQL InnoDB 的隔离级别特点</strong>：</p>
+<ul>
+<li>默认使用 <code>REPEATABLE READ</code></li>
+<li>通过 MVCC（多版本并发控制）避免了幻读</li>
+<li><code>READ COMMITTED</code> 下会使用不同的锁定策略</li>
+</ul>
+<h3 id="5-5-锁机制"><a href="#5-5-锁机制" class="headerlink" title="5.5 锁机制"></a>5.5 锁机制</h3><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- 查看锁信息</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> information_schema.innodb_locks;</span><br><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> information_schema.innodb_lock_waits;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 查看正在执行的事务</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> information_schema.innodb_trx;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 表锁</span></span><br><span class="line">LOCK TABLES employees READ;   <span class="comment">-- 读锁</span></span><br><span class="line">LOCK TABLES employees WRITE;  <span class="comment">-- 写锁</span></span><br><span class="line">UNLOCK TABLES;                <span class="comment">-- 解锁</span></span><br><span class="line"></span><br><span class="line"><span class="comment">-- 行锁（InnoDB 自动加锁，无需手动）</span></span><br><span class="line"><span class="comment">-- 在 SELECT 时加锁</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> employees <span class="keyword">WHERE</span> id <span class="operator">=</span> <span class="number">1</span> <span class="keyword">FOR</span> <span class="keyword">UPDATE</span>;  <span class="comment">-- 排他锁</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> employees <span class="keyword">WHERE</span> id <span class="operator">=</span> <span class="number">1</span> LOCK <span class="keyword">IN</span> SHARE MODE;  <span class="comment">-- 共享锁（8.0 语法已变更）</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>MySQL 8.0 新的锁语法</strong>：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- 共享锁</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> employees <span class="keyword">WHERE</span> id <span class="operator">=</span> <span class="number">1</span> <span class="keyword">FOR</span> SHARE;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 排他锁</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> employees <span class="keyword">WHERE</span> id <span class="operator">=</span> <span class="number">1</span> <span class="keyword">FOR</span> <span class="keyword">UPDATE</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 跳过锁定的行</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> employees <span class="keyword">WHERE</span> id <span class="operator">=</span> <span class="number">1</span> <span class="keyword">FOR</span> <span class="keyword">UPDATE</span> <span class="keyword">SKIP</span> LOCKED;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 等待锁超时</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> employees <span class="keyword">WHERE</span> id <span class="operator">=</span> <span class="number">1</span> <span class="keyword">FOR</span> <span class="keyword">UPDATE</span> NOWAIT;</span><br></pre></td></tr></table></figure>
+
+<h2 id="六、实战案例"><a href="#六、实战案例" class="headerlink" title="六、实战案例"></a>六、实战案例</h2><h3 id="6-1-创建应用数据库和用户"><a href="#6-1-创建应用数据库和用户" class="headerlink" title="6.1 创建应用数据库和用户"></a>6.1 创建应用数据库和用户</h3><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- 1. 创建数据库</span></span><br><span class="line"><span class="keyword">CREATE</span> DATABASE IF <span class="keyword">NOT</span> <span class="keyword">EXISTS</span> webapp</span><br><span class="line"><span class="keyword">CHARACTER SET</span> utf8mb4</span><br><span class="line"><span class="keyword">COLLATE</span> utf8mb4_unicode_ci;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 2. 创建只读用户（用于报表查询）</span></span><br><span class="line"><span class="keyword">CREATE</span> <span class="keyword">USER</span> <span class="string">&#x27;readonly&#x27;</span>@<span class="string">&#x27;%&#x27;</span> IDENTIFIED <span class="keyword">BY</span> <span class="string">&#x27;readonly_pwd&#x27;</span>;</span><br><span class="line"><span class="keyword">GRANT</span> <span class="keyword">SELECT</span> <span class="keyword">ON</span> webapp.<span class="operator">*</span> <span class="keyword">TO</span> <span class="string">&#x27;readonly&#x27;</span>@<span class="string">&#x27;%&#x27;</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 3. 创建应用用户（用于日常操作）</span></span><br><span class="line"><span class="keyword">CREATE</span> <span class="keyword">USER</span> <span class="string">&#x27;appuser&#x27;</span>@<span class="string">&#x27;%&#x27;</span> IDENTIFIED <span class="keyword">BY</span> <span class="string">&#x27;app_pwd&#x27;</span>;</span><br><span class="line"><span class="keyword">GRANT</span> <span class="keyword">SELECT</span>, <span class="keyword">INSERT</span>, <span class="keyword">UPDATE</span>, <span class="keyword">DELETE</span> <span class="keyword">ON</span> webapp.<span class="operator">*</span> <span class="keyword">TO</span> <span class="string">&#x27;appuser&#x27;</span>@<span class="string">&#x27;%&#x27;</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 4. 创建管理员用户（拥有所有权限）</span></span><br><span class="line"><span class="keyword">CREATE</span> <span class="keyword">USER</span> <span class="string">&#x27;admin&#x27;</span>@<span class="string">&#x27;localhost&#x27;</span> IDENTIFIED <span class="keyword">BY</span> <span class="string">&#x27;admin_pwd&#x27;</span>;</span><br><span class="line"><span class="keyword">GRANT</span> <span class="keyword">ALL</span> PRIVILEGES <span class="keyword">ON</span> webapp.<span class="operator">*</span> <span class="keyword">TO</span> <span class="string">&#x27;admin&#x27;</span>@<span class="string">&#x27;localhost&#x27;</span> <span class="keyword">WITH</span> <span class="keyword">GRANT</span> OPTION;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 5. 刷新权限</span></span><br><span class="line">FLUSH PRIVILEGES;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 6. 验证权限</span></span><br><span class="line"><span class="keyword">SHOW</span> GRANTS <span class="keyword">FOR</span> <span class="string">&#x27;readonly&#x27;</span>@<span class="string">&#x27;%&#x27;</span>;</span><br><span class="line"><span class="keyword">SHOW</span> GRANTS <span class="keyword">FOR</span> <span class="string">&#x27;appuser&#x27;</span>@<span class="string">&#x27;%&#x27;</span>;</span><br><span class="line"><span class="keyword">SHOW</span> GRANTS <span class="keyword">FOR</span> <span class="string">&#x27;admin&#x27;</span>@<span class="string">&#x27;localhost&#x27;</span>;</span><br></pre></td></tr></table></figure>
+
+<h3 id="6-2-银行转账事务"><a href="#6-2-银行转账事务" class="headerlink" title="6.2 银行转账事务"></a>6.2 银行转账事务</h3><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- 创建账户表</span></span><br><span class="line"><span class="keyword">CREATE TABLE</span> IF <span class="keyword">NOT</span> <span class="keyword">EXISTS</span> accounts (</span><br><span class="line">    id <span class="type">INT</span> <span class="keyword">PRIMARY KEY</span> AUTO_INCREMENT,</span><br><span class="line">    account_no <span class="type">VARCHAR</span>(<span class="number">50</span>) <span class="keyword">UNIQUE</span> <span class="keyword">NOT NULL</span>,</span><br><span class="line">    balance <span class="type">DECIMAL</span>(<span class="number">12</span>, <span class="number">2</span>) <span class="keyword">DEFAULT</span> <span class="number">0</span>,</span><br><span class="line">    version <span class="type">INT</span> <span class="keyword">DEFAULT</span> <span class="number">0</span>  <span class="comment">-- 乐观锁版本号</span></span><br><span class="line">);</span><br><span class="line"></span><br><span class="line"><span class="keyword">INSERT INTO</span> accounts (account_no, balance) <span class="keyword">VALUES</span></span><br><span class="line">(<span class="string">&#x27;ACC001&#x27;</span>, <span class="number">10000</span>),</span><br><span class="line">(<span class="string">&#x27;ACC002&#x27;</span>, <span class="number">5000</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 转账存储过程（带事务）</span></span><br><span class="line">DELIMITER <span class="operator">/</span><span class="operator">/</span></span><br><span class="line"><span class="keyword">CREATE</span> <span class="keyword">PROCEDURE</span> transfer_money(</span><br><span class="line">    <span class="keyword">IN</span> from_acc <span class="type">VARCHAR</span>(<span class="number">50</span>),</span><br><span class="line">    <span class="keyword">IN</span> to_acc <span class="type">VARCHAR</span>(<span class="number">50</span>),</span><br><span class="line">    <span class="keyword">IN</span> amount <span class="type">DECIMAL</span>(<span class="number">12</span>, <span class="number">2</span>)</span><br><span class="line">)</span><br><span class="line"><span class="keyword">BEGIN</span></span><br><span class="line">    <span class="keyword">DECLARE</span> EXIT HANDLER <span class="keyword">FOR</span> <span class="keyword">SQLEXCEPTION</span></span><br><span class="line">    <span class="keyword">BEGIN</span></span><br><span class="line">        <span class="keyword">ROLLBACK</span>;  <span class="comment">-- 出错回滚</span></span><br><span class="line">        <span class="keyword">SELECT</span> <span class="string">&#x27;Transfer failed&#x27;</span> <span class="keyword">AS</span> <span class="keyword">result</span>;</span><br><span class="line">    <span class="keyword">END</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">START</span> TRANSACTION;</span><br><span class="line"></span><br><span class="line">    <span class="comment">-- 检查余额</span></span><br><span class="line">    IF (<span class="keyword">SELECT</span> balance <span class="keyword">FROM</span> accounts <span class="keyword">WHERE</span> account_no <span class="operator">=</span> from_acc) <span class="operator">&gt;=</span> amount <span class="keyword">THEN</span></span><br><span class="line">        <span class="comment">-- 扣款</span></span><br><span class="line">        <span class="keyword">UPDATE</span> accounts <span class="keyword">SET</span> balance <span class="operator">=</span> balance <span class="operator">-</span> amount</span><br><span class="line">        <span class="keyword">WHERE</span> account_no <span class="operator">=</span> from_acc;</span><br><span class="line"></span><br><span class="line">        <span class="comment">-- 收款</span></span><br><span class="line">        <span class="keyword">UPDATE</span> accounts <span class="keyword">SET</span> balance <span class="operator">=</span> balance <span class="operator">+</span> amount</span><br><span class="line">        <span class="keyword">WHERE</span> account_no <span class="operator">=</span> to_acc;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">COMMIT</span>;</span><br><span class="line">        <span class="keyword">SELECT</span> <span class="string">&#x27;Transfer success&#x27;</span> <span class="keyword">AS</span> <span class="keyword">result</span>;</span><br><span class="line">    <span class="keyword">ELSE</span></span><br><span class="line">        <span class="keyword">ROLLBACK</span>;</span><br><span class="line">        <span class="keyword">SELECT</span> <span class="string">&#x27;Insufficient balance&#x27;</span> <span class="keyword">AS</span> <span class="keyword">result</span>;</span><br><span class="line">    <span class="keyword">END</span> IF;</span><br><span class="line"><span class="keyword">END</span> <span class="operator">/</span><span class="operator">/</span></span><br><span class="line">DELIMITER ;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 调用转账</span></span><br><span class="line"><span class="keyword">CALL</span> transfer_money(<span class="string">&#x27;ACC001&#x27;</span>, <span class="string">&#x27;ACC002&#x27;</span>, <span class="number">1000</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 查看结果</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> accounts;</span><br></pre></td></tr></table></figure>
+
+<h3 id="6-3-使用乐观锁"><a href="#6-3-使用乐观锁" class="headerlink" title="6.3 使用乐观锁"></a>6.3 使用乐观锁</h3><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- 使用版本号实现乐观锁</span></span><br><span class="line"><span class="keyword">START</span> TRANSACTION;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 读取当前版本</span></span><br><span class="line"><span class="keyword">SELECT</span> balance, version <span class="keyword">FROM</span> accounts <span class="keyword">WHERE</span> account_no <span class="operator">=</span> <span class="string">&#x27;ACC001&#x27;</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 更新时检查版本号</span></span><br><span class="line"><span class="keyword">UPDATE</span> accounts</span><br><span class="line"><span class="keyword">SET</span> balance <span class="operator">=</span> balance <span class="operator">-</span> <span class="number">1000</span>, version <span class="operator">=</span> version <span class="operator">+</span> <span class="number">1</span></span><br><span class="line"><span class="keyword">WHERE</span> account_no <span class="operator">=</span> <span class="string">&#x27;ACC001&#x27;</span> <span class="keyword">AND</span> version <span class="operator">=</span> <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 检查影响行数，如果为 0 说明被其他事务修改过</span></span><br><span class="line"><span class="comment">-- 需要回滚重试</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">COMMIT</span>;</span><br></pre></td></tr></table></figure>
+
+<h2 id="七、安全管理最佳实践"><a href="#七、安全管理最佳实践" class="headerlink" title="七、安全管理最佳实践"></a>七、安全管理最佳实践</h2><h3 id="7-1-密码安全"><a href="#7-1-密码安全" class="headerlink" title="7.1 密码安全"></a>7.1 密码安全</h3><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- 设置密码复杂度验证插件</span></span><br><span class="line">INSTALL PLUGIN validate_password SONAME <span class="string">&#x27;validate_password.so&#x27;</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 查看密码策略</span></span><br><span class="line"><span class="keyword">SHOW</span> VARIABLES <span class="keyword">LIKE</span> <span class="string">&#x27;validate_password%&#x27;</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 设置密码策略级别</span></span><br><span class="line"><span class="keyword">SET</span> <span class="keyword">GLOBAL</span> validate_password.policy <span class="operator">=</span> MEDIUM;</span><br><span class="line"><span class="keyword">SET</span> <span class="keyword">GLOBAL</span> validate_password.length <span class="operator">=</span> <span class="number">8</span>;</span><br></pre></td></tr></table></figure>
+
+<h3 id="7-2-最小权限原则"><a href="#7-2-最小权限原则" class="headerlink" title="7.2 最小权限原则"></a>7.2 最小权限原则</h3><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- 错误：给应用用户授予过多权限</span></span><br><span class="line"><span class="keyword">GRANT</span> <span class="keyword">ALL</span> PRIVILEGES <span class="keyword">ON</span> <span class="operator">*</span>.<span class="operator">*</span> <span class="keyword">TO</span> <span class="string">&#x27;app&#x27;</span>@<span class="string">&#x27;%&#x27;</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 正确：只授予必要权限</span></span><br><span class="line"><span class="keyword">GRANT</span> <span class="keyword">SELECT</span>, <span class="keyword">INSERT</span>, <span class="keyword">UPDATE</span>, <span class="keyword">DELETE</span> <span class="keyword">ON</span> mydb.<span class="operator">*</span> <span class="keyword">TO</span> <span class="string">&#x27;app&#x27;</span>@<span class="string">&#x27;localhost&#x27;</span>;</span><br></pre></td></tr></table></figure>
+
+<h3 id="7-3-限制主机访问"><a href="#7-3-限制主机访问" class="headerlink" title="7.3 限制主机访问"></a>7.3 限制主机访问</h3><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- 错误：允许任何主机连接</span></span><br><span class="line"><span class="keyword">CREATE</span> <span class="keyword">USER</span> <span class="string">&#x27;app&#x27;</span>@<span class="string">&#x27;%&#x27;</span> IDENTIFIED <span class="keyword">BY</span> <span class="string">&#x27;pwd&#x27;</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 正确：限制特定主机或网段</span></span><br><span class="line"><span class="keyword">CREATE</span> <span class="keyword">USER</span> <span class="string">&#x27;app&#x27;</span>@<span class="string">&#x27;192.168.1.%&#x27;</span> IDENTIFIED <span class="keyword">BY</span> <span class="string">&#x27;pwd&#x27;</span>;</span><br><span class="line"><span class="keyword">CREATE</span> <span class="keyword">USER</span> <span class="string">&#x27;app&#x27;</span>@<span class="string">&#x27;10.0.0.100&#x27;</span> IDENTIFIED <span class="keyword">BY</span> <span class="string">&#x27;pwd&#x27;</span>;</span><br></pre></td></tr></table></figure>
+
+<h3 id="7-4-定期清理无用用户"><a href="#7-4-定期清理无用用户" class="headerlink" title="7.4 定期清理无用用户"></a>7.4 定期清理无用用户</h3><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- 查看长期未登录的用户</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="keyword">user</span>, host, password_last_changed</span><br><span class="line"><span class="keyword">FROM</span> mysql.user</span><br><span class="line"><span class="keyword">ORDER</span> <span class="keyword">BY</span> password_last_changed;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 删除无用用户</span></span><br><span class="line"><span class="keyword">DROP</span> <span class="keyword">USER</span> <span class="string">&#x27;old_user&#x27;</span>@<span class="string">&#x27;localhost&#x27;</span>;</span><br></pre></td></tr></table></figure>
+
+<h3 id="7-5-审计和监控"><a href="#7-5-审计和监控" class="headerlink" title="7.5 审计和监控"></a>7.5 审计和监控</h3><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- 开启通用查询日志（生产环境慎用）</span></span><br><span class="line"><span class="keyword">SET</span> <span class="keyword">GLOBAL</span> general_log <span class="operator">=</span> <span class="string">&#x27;ON&#x27;</span>;</span><br><span class="line"><span class="keyword">SET</span> <span class="keyword">GLOBAL</span> general_log_file <span class="operator">=</span> <span class="string">&#x27;/var/log/mysql/general.log&#x27;</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 查看当前连接</span></span><br><span class="line"><span class="keyword">SHOW</span> PROCESSLIST;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 查看慢查询日志</span></span><br><span class="line"><span class="keyword">SET</span> <span class="keyword">GLOBAL</span> slow_query_log <span class="operator">=</span> <span class="string">&#x27;ON&#x27;</span>;</span><br><span class="line"><span class="keyword">SET</span> <span class="keyword">GLOBAL</span> long_query_time <span class="operator">=</span> <span class="number">2</span>;  <span class="comment">-- 超过 2 秒的查询记入日志</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="八、小结"><a href="#八、小结" class="headerlink" title="八、小结"></a>八、小结</h2><h3 id="知识点回顾"><a href="#知识点回顾" class="headerlink" title="知识点回顾"></a>知识点回顾</h3><ol>
+<li><p><strong>用户管理</strong></p>
+<ul>
+<li>CREATE USER、ALTER USER、DROP USER</li>
+<li>用户名格式：‘user‘@’host’</li>
+</ul>
+</li>
+<li><p><strong>权限管理</strong></p>
+<ul>
+<li>GRANT 授权、REVOKE 撤销</li>
+<li>权限级别：全局、数据库、表、列</li>
+<li>常用权限：SELECT、INSERT、UPDATE、DELETE、ALL PRIVILEGES</li>
+</ul>
+</li>
+<li><p><strong>角色管理（MySQL 8.0+）</strong></p>
+<ul>
+<li>CREATE ROLE 创建角色</li>
+<li>角色是一组权限的集合</li>
+</ul>
+</li>
+<li><p><strong>事务控制</strong></p>
+<ul>
+<li>START TRANSACTION、COMMIT、ROLLBACK</li>
+<li>SAVEPOINT 保存点</li>
+<li>隔离级别：READ UNCOMMITTED、READ COMMITTED、REPEATABLE READ、SERIALIZABLE</li>
+</ul>
+</li>
+</ol>
+<h3 id="DCL-命令速查表"><a href="#DCL-命令速查表" class="headerlink" title="DCL 命令速查表"></a>DCL 命令速查表</h3><table>
+<thead>
+<tr>
+<th>命令</th>
+<th>语法</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>CREATE USER</td>
+<td><code>CREATE USER &#39;u&#39;@&#39;h&#39; IDENTIFIED BY &#39;pwd&#39;</code></td>
+<td>创建用户</td>
+</tr>
+<tr>
+<td>DROP USER</td>
+<td><code>DROP USER &#39;u&#39;@&#39;h&#39;</code></td>
+<td>删除用户</td>
+</tr>
+<tr>
+<td>GRANT</td>
+<td><code>GRANT 权限 ON 库。表 TO &#39;u&#39;@&#39;h&#39;</code></td>
+<td>授权</td>
+</tr>
+<tr>
+<td>REVOKE</td>
+<td><code>REVOKE 权限 ON 库。表 FROM &#39;u&#39;@&#39;h&#39;</code></td>
+<td>撤销权限</td>
+</tr>
+<tr>
+<td>SHOW GRANTS</td>
+<td><code>SHOW GRANTS FOR &#39;u&#39;@&#39;h&#39;</code></td>
+<td>查看权限</td>
+</tr>
+<tr>
+<td>START TRANSACTION</td>
+<td><code>START TRANSACTION</code></td>
+<td>开启事务</td>
+</tr>
+<tr>
+<td>COMMIT</td>
+<td><code>COMMIT</code></td>
+<td>提交事务</td>
+</tr>
+<tr>
+<td>ROLLBACK</td>
+<td><code>ROLLBACK</code></td>
+<td>回滚事务</td>
+</tr>
+<tr>
+<td>SAVEPOINT</td>
+<td><code>SAVEPOINT sp_name</code></td>
+<td>设置保存点</td>
+</tr>
+</tbody></table>
+<h3 id="安全建议"><a href="#安全建议" class="headerlink" title="安全建议"></a>安全建议</h3><ol>
+<li><strong>最小权限原则</strong>：只授予必要的权限</li>
+<li><strong>限制主机</strong>：避免使用 <code>&#39;user&#39;@&#39;%&#39;</code></li>
+<li><strong>强密码策略</strong>：使用密码复杂度验证</li>
+<li><strong>定期审计</strong>：清理无用用户，检查权限分配</li>
+<li><strong>生产环境</strong>：避免使用 root 用户连接应用</li>
+</ol>
+<hr>
+<p><strong>上一篇</strong>：[MySQL 基础教程（四）DQL 数据查询语言详解（下）](&#x2F;2026&#x2F;02&#x2F;23&#x2F;MySQL 基础教程（四）DQL 数据查询语言详解（下）&#x2F;)</p>
+<h2 id="MySQL-基础教程系列总结"><a href="#MySQL-基础教程系列总结" class="headerlink" title="MySQL 基础教程系列总结"></a>MySQL 基础教程系列总结</h2><p>至此，MySQL 基础教程系列全部完成！让我们回顾一下整个系列的内容：</p>
+<h3 id="系列文章回顾"><a href="#系列文章回顾" class="headerlink" title="系列文章回顾"></a>系列文章回顾</h3><ol>
+<li><p><strong>（一）数据库基础与环境搭建</strong></p>
+<ul>
+<li>数据库概念、MySQL 安装、数据模型、SQL 分类</li>
+</ul>
+</li>
+<li><p><strong>（二）DDL 数据定义语言详解</strong></p>
+<ul>
+<li>数据库操作、表操作、数据类型、DataGrip 工具</li>
+</ul>
+</li>
+<li><p><strong>（三）DML 数据操作语言详解</strong></p>
+<ul>
+<li>INSERT 插入、UPDATE 更新、DELETE 删除、事务基础</li>
+</ul>
+</li>
+<li><p><strong>（四）DQL 数据查询语言详解</strong></p>
+<ul>
+<li>基础查询、条件查询、聚合函数、分组、排序、分页、连接查询、子查询</li>
+</ul>
+</li>
+<li><p><strong>（五）DCL 数据控制语言详解</strong></p>
+<ul>
+<li>用户管理、权限控制、事务控制、安全管理</li>
+</ul>
+</li>
+</ol>
+<h3 id="学习建议"><a href="#学习建议" class="headerlink" title="学习建议"></a>学习建议</h3><ol>
+<li><strong>多动手实践</strong>：SQL 是一门实践性很强的语言，建议边学边练</li>
+<li><strong>理解原理</strong>：不仅要会写 SQL，还要理解执行顺序和原理</li>
+<li><strong>注意性能</strong>：养成写高效 SQL 的习惯，避免全表扫描</li>
+<li><strong>善用工具</strong>：使用 DataGrip 等工具提高开发效率</li>
+<li><strong>持续学习</strong>：数据库知识博大精深，保持学习的热情</li>
+</ol>
+<p>希望本系列教程能帮助你系统地掌握 MySQL 基础！如有问题，欢迎留言讨论。</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://brian-lin-c.github.io">过拟合的炸鱼薯条</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://brian-lin-c.github.io/2026/02/23/MySQL%20%E5%9F%BA%E7%A1%80%E6%95%99%E7%A8%8B%EF%BC%88%E4%BA%94%EF%BC%89DCL%20%E6%95%B0%E6%8D%AE%E6%8E%A7%E5%88%B6%E8%AF%AD%E8%A8%80%E8%AF%A6%E8%A7%A3/">https://brian-lin-c.github.io/2026/02/23/MySQL%20%E5%9F%BA%E7%A1%80%E6%95%99%E7%A8%8B%EF%BC%88%E4%BA%94%EF%BC%89DCL%20%E6%95%B0%E6%8D%AE%E6%8E%A7%E5%88%B6%E8%AF%AD%E8%A8%80%E8%AF%A6%E8%A7%A3/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://brian-lin-c.github.io" target="_blank">过拟合的炸鱼薯条</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/MySQL/">MySQL</a><a class="post-meta__tags" href="/tags/DCL/">DCL</a><a class="post-meta__tags" href="/tags/%E6%9D%83%E9%99%90%E7%AE%A1%E7%90%86/">权限管理</a></div><div class="post-share"><div class="social-share" data-image="/img/%E5%A4%B4%E5%83%8F.jpg" data-sites="facebook,x,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related" href="/2026/02/23/MySQL%20%E8%BF%9B%E9%98%B6%E6%95%99%E7%A8%8B%EF%BC%88%E4%B8%80%EF%BC%89%E5%B8%B8%E7%94%A8%E5%87%BD%E6%95%B0%E8%AF%A6%E8%A7%A3/" title="MySQL 进阶教程（一）常用函数详解"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">MySQL 进阶教程（一）常用函数详解</div></div><div class="info-2"><div class="info-item-1">MySQL 进阶教程（一）常用函数详解在基础教程中，我们学习了 SQL 的基本查询和操作。本文将系统讲解 MySQL 提供的常用内置函数，包括字符串函数、数值函数、日期函数和流程函数。 一、函数概述MySQL 函数是对数据进行特定操作的预定义程序，可以简化 SQL 语句，提高开发效率。 函数的分类：  字符串函数：处理字符串数据 数值函数：处理数值数据 日期时间函数：处理日期和时间 流程函数：条件判断和流程控制 聚合函数：对一组数据进行计算（已在 DQL 章节讲解） 加密函数：数据加密和哈希 其他函数：信息函数、加锁函数等  二、字符串函数2.1 字符串连接与长度123456789101112131415-- CONCAT(s1, s2, ...)：连接字符串SELECT CONCAT(&#x27;Hello&#x27;, &#x27; &#x27;, &#x27;World&#x27;) AS result;  -- &#x27;Hello World&#x27;SELECT CONCAT(&#x27;姓名：&#x27;, name) FROM employees;-- CON...</div></div></div></a><a class="pagination-related" href="/2026/02/23/MySQL%20%E5%9F%BA%E7%A1%80%E6%95%99%E7%A8%8B%EF%BC%88%E5%9B%9B%EF%BC%89DQL%20%E6%95%B0%E6%8D%AE%E6%9F%A5%E8%AF%A2%E8%AF%AD%E8%A8%80%E8%AF%A6%E8%A7%A3%EF%BC%88%E4%B8%8B%EF%BC%89/" title="MySQL 基础教程（四）DQL 数据查询语言详解（下）"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">MySQL 基础教程（四）DQL 数据查询语言详解（下）</div></div><div class="info-2"><div class="info-item-1">MySQL 基础教程（四）DQL 数据查询语言详解（下）承接上文，本文继续讲解 DQL 的排序查询、分页查询、综合案例以及 SQL 执行顺序。 七、排序查询（ORDER BY）ORDER BY 用于对查询结果进行排序。 7.1 基础排序1234567891011-- 升序排序（ASC，默认）SELECT name, salary FROM employeesORDER BY salary ASC;-- 降序排序（DESC）SELECT name, salary FROM employeesORDER BY salary DESC;-- 按字符串排序SELECT name FROM employeesORDER BY name ASC;  -- 按拼音排序  7.2 多列排序123456789-- 先按部门排序，部门相同按工资降序SELECT name, dept_id, salaryFROM employeesORDER BY dept_id ASC, salary DESC;-- 先按在职状态排序，再按工资降序SELECT name, status, salaryFROM em...</div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/2026/02/23/MySQL%20%E8%BF%9B%E9%98%B6%E6%95%99%E7%A8%8B%EF%BC%88%E4%BA%94%EF%BC%89%E5%9F%BA%E7%A1%80%E7%AF%87%E6%80%BB%E7%BB%93/" title="MySQL 进阶教程（五）基础篇总结"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-02-23</div><div class="info-item-2">MySQL 进阶教程（五）基础篇总结</div></div><div class="info-2"><div class="info-item-1">MySQL 进阶教程（五）基础篇总结至此，MySQL 基础篇和进阶教程全部完成！本文将对整个系列进行系统总结，并提供学习路线建议。 一、系列文章回顾基础教程系列   篇目 主题 核心内容    基础（一） 数据库基础与环境搭建 数据库概念、MySQL 安装、数据模型、SQL 分类   基础（二） DDL 数据定义语言 数据库操作、表操作、数据类型、DataGrip   基础（三） DML 数据操作语言 INSERT、UPDATE、DELETE、事务基础   基础（四） DQL 数据查询语言 基础查询、条件查询、聚合函数、分组、排序、分页、连接查询、子查询   基础（五） DCL 数据控制语言 用户管理、权限控制、事务控制   进阶教程系列   篇目 主题 核心内容    进阶（一） 常用函数详解 字符串函数、数值函数、日期函数、流程函数   进阶（二） 数据库约束 主键、外键、唯一、非空、默认、检查约束   进阶（三） 多表查询 表关系、连接查询、联合查询、子查询   进阶（四） 事务 ACID 特性、并发问题、隔离级别、锁机制   二、知识体系思维导图2.1 SQL 语言分类1...</div></div></div></a><a class="pagination-related" href="/2026/02/23/MySQL%20%E5%9F%BA%E7%A1%80%E6%95%99%E7%A8%8B%EF%BC%88%E4%B8%80%EF%BC%89%E6%95%B0%E6%8D%AE%E5%BA%93%E5%9F%BA%E7%A1%80%E4%B8%8E%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/" title="MySQL 基础教程（一）数据库基础与环境搭建"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-02-23</div><div class="info-item-2">MySQL 基础教程（一）数据库基础与环境搭建</div></div><div class="info-2"><div class="info-item-1">MySQL 基础教程（一）数据库基础与环境搭建欢迎来到 MySQL 基础教程系列的第一篇！在本篇文章中，我们将从零开始了解数据库的基本概念，完成 MySQL 的安装配置，并了解数据模型和 SQL 的分类。 一、数据库相关概念1.1 什么是数据库？数据库（Database） 是按照数据结构来组织、存储和管理数据的仓库。它可以持久化存储数据，并且支持高效的数据访问和管理。 简单来说，数据库就是一个电子化的文件柜，用于存储和管理数据。 1.2 什么是 DBMS？DBMS（Database Management System，数据库管理系统） 是用于创建、管理和维护数据库的软件。 常见的 DBMS 有：  MySQL：开源、轻量、流行，适合中小型项目 Oracle：功能强大、性能优异，适合大型企业 SQL Server：微软出品，与 Windows 生态集成良好 PostgreSQL：开源、功能丰富，支持复杂查询 SQLite：嵌入式数据库，适合移动端和小型应用  1.3 数据库的优势   对比项 文件系统 数据库系统    数据结构 松散，由应用程序定义 结构化，由 DBMS 统一管理...</div></div></div></a><a class="pagination-related" href="/2026/02/23/MySQL%20%E5%9F%BA%E7%A1%80%E6%95%99%E7%A8%8B%EF%BC%88%E4%BA%8C%EF%BC%89DDL%20%E6%95%B0%E6%8D%AE%E5%AE%9A%E4%B9%89%E8%AF%AD%E8%A8%80%E8%AF%A6%E8%A7%A3/" title="MySQL 基础教程（二）DDL 数据定义语言详解"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-02-23</div><div class="info-item-2">MySQL 基础教程（二）DDL 数据定义语言详解</div></div><div class="info-2"><div class="info-item-1">MySQL 基础教程（二）DDL 数据定义语言详解在上一篇中，我们完成了 MySQL 的安装并了解了 SQL 的分类。本文我们将深入学习 DDL（Data Definition Language）数据定义语言，掌握如何创建和管理数据库与表。 一、DDL 概述DDL 用于定义和管理数据库对象，包括：  数据库操作：CREATE DATABASE、DROP DATABASE、ALTER DATABASE、USE 表操作：CREATE TABLE、ALTER TABLE、DROP TABLE、TRUNCATE、RENAME 索引操作：CREATE INDEX、DROP INDEX 视图操作：CREATE VIEW、DROP VIEW  DDL 的特点：  操作会自动提交，无法回滚 操作的是数据库结构，而非数据内容  二、数据库操作2.1 创建数据库12345678910111213-- 创建数据库（如果不存在）CREATE DATABASE IF NOT EXISTS mydb;-- 创建数据库并指定字符集CREATE DATABASE IF NOT EXISTS mydbCHARAC...</div></div></div></a><a class="pagination-related" href="/2026/02/23/MySQL%20%E8%BF%9B%E9%98%B6%E6%95%99%E7%A8%8B%EF%BC%88%E5%9B%9B%EF%BC%89%E4%BA%8B%E5%8A%A1%E8%AF%A6%E8%A7%A3/" title="MySQL 进阶教程（四）事务详解"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-02-23</div><div class="info-item-2">MySQL 进阶教程（四）事务详解</div></div><div class="info-2"><div class="info-item-1">MySQL 进阶教程（四）事务详解事务是数据库管理的核心技术之一，用于保证数据的完整性和一致性。本文将详细讲解事务的概念、ACID 特性、并发问题以及隔离级别。 一、事务简介1.1 什么是事务？事务（Transaction） 是数据库管理系统执行过程中的一个逻辑单位，由一个有限的数据库操作序列构成。这些操作要么全部成功执行，要么全部不执行，是一个不可分割的工作单位。 1.2 事务的特点 原子性：事务是一个不可分割的操作序列 一致性：事务执行前后，数据保持一致 独立性：多个事务并发执行时互不干扰 持久性：事务一旦提交，修改永久保存  1.3 事务的使用场景   场景 说明    银行转账 A 转给 B 钱，A 扣款和 B 收款必须同时成功或失败   订单创建 创建订单、扣减库存、生成物流单必须同时成功   批量操作 批量导入数据，要么全部导入成功，要么全部回滚   数据一致性 更新多个关联表时保持一致性   1.4 不使用事务的问题12345678910-- 不使用事务的转账操作-- 步骤 1：A 账户扣款UPDATE accounts SET balance = balance ...</div></div></div></a><a class="pagination-related" href="/2026/02/23/MySQL%20%E8%BF%9B%E9%98%B6%E6%95%99%E7%A8%8B%EF%BC%88%E4%B8%89%EF%BC%89%E5%A4%9A%E8%A1%A8%E6%9F%A5%E8%AF%A2%E8%AF%A6%E8%A7%A3/" title="MySQL 进阶教程（三）多表查询详解"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-02-23</div><div class="info-item-2">MySQL 进阶教程（三）多表查询详解</div></div><div class="info-2"><div class="info-item-1">MySQL 进阶教程（三）多表查询详解在实际应用中，数据通常分布在多个表中。多表查询是 SQL 中最重要、最实用的技能之一。本文将详细讲解多表关系、连接查询、联合查询和子查询。 一、多表关系介绍1.1 表与表之间的关系数据库中的表不是孤立的，它们之间通过各种关系相互关联。主要有三种关系：    关系类型 说明 示例    一对一（1:1） 一个表的一条记录对应另一个表的一条记录 用户和用户详情   一对多（1:N） 一个表的一条记录对应另一个表的多条记录 部门和员工   多对多（N:M） 一个表的多条记录对应另一个表的多条记录 学生和课程   1.2 一对一关系（1:1）特点：  表 A 的一条记录对应表 B 的一条记录 通常用于拆分大表，提高性能 外键可以放在任意一方  1234567891011121314151617181920-- 用户表CREATE TABLE users (    id INT PRIMARY KEY AUTO_INCREMENT,    username VARCHAR(50) NOT NULL,    password VARCHAR(255) N...</div></div></div></a><a class="pagination-related" href="/2026/02/23/MySQL%20%E8%BF%9B%E9%98%B6%E6%95%99%E7%A8%8B%EF%BC%88%E4%BA%8C%EF%BC%89%E6%95%B0%E6%8D%AE%E5%BA%93%E7%BA%A6%E6%9D%9F%E8%AF%A6%E8%A7%A3/" title="MySQL 进阶教程（二）数据库约束详解"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-02-23</div><div class="info-item-2">MySQL 进阶教程（二）数据库约束详解</div></div><div class="info-2"><div class="info-item-1">MySQL 进阶教程（二）数据库约束详解数据库约束用于保证数据的完整性、一致性和有效性。本文将详细讲解 MySQL 中的各种约束类型及其使用方法。 一、约束概述1.1 什么是约束？约束（Constraint） 是施加在数据库表上的规则，用于限制可以存储在表中的数据，确保数据的准确性和可靠性。 1.2 约束的作用 保证数据完整性：防止无效或不一致的数据 维护数据一致性：确保相关表之间的数据关系正确 提高数据质量：强制执行业务规则 减少应用层验证：在数据库层面进行数据验证  1.3 约束的分类   约束类型 关键字 说明 列级&#x2F;表级    主键约束 PRIMARY KEY 唯一标识每条记录 两者   外键约束 FOREIGN KEY 建立表与表之间的关系 表级   唯一约束 UNIQUE 列值必须唯一 两者   非空约束 NOT NULL 列值不能为空 列级   默认约束 DEFAULT 列的默认值 列级   检查约束 CHECK 满足指定条件 表级   1.4 约束的定义时机 列级约束：在定义列时指定，直接跟在列名后面 表级约束：在所有列定义完成后，在表末尾指定  二、约...</div></div></div></a></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/img/%E5%A4%B4%E5%83%8F.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">过拟合的炸鱼薯条</div><div class="author-info-description">好好学习，天天向上</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">12</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">26</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/Brian-Lin-C"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons"><a class="social-icon" href="https://github.com/Brian-Lin-C" target="_blank" title="Github"><i class="fab fa-github" style="color: #24292e;"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">欢迎来到我的个人博客！</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#MySQL-%E5%9F%BA%E7%A1%80%E6%95%99%E7%A8%8B%EF%BC%88%E4%BA%94%EF%BC%89DCL-%E6%95%B0%E6%8D%AE%E6%8E%A7%E5%88%B6%E8%AF%AD%E8%A8%80%E8%AF%A6%E8%A7%A3"><span class="toc-number">1.</span> <span class="toc-text">MySQL 基础教程（五）DCL 数据控制语言详解</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%80%E3%80%81DCL-%E6%A6%82%E8%BF%B0"><span class="toc-number">1.1.</span> <span class="toc-text">一、DCL 概述</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%8C%E3%80%81%E7%94%A8%E6%88%B7%E7%AE%A1%E7%90%86"><span class="toc-number">1.2.</span> <span class="toc-text">二、用户管理</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#2-1-%E7%94%A8%E6%88%B7%E8%A1%A8%E7%BB%93%E6%9E%84"><span class="toc-number">1.2.1.</span> <span class="toc-text">2.1 用户表结构</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-2-%E5%88%9B%E5%BB%BA%E7%94%A8%E6%88%B7%EF%BC%88CREATE-USER%EF%BC%89"><span class="toc-number">1.2.2.</span> <span class="toc-text">2.2 创建用户（CREATE USER）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-3-%E4%BF%AE%E6%94%B9%E7%94%A8%E6%88%B7%EF%BC%88ALTER-USER%EF%BC%89"><span class="toc-number">1.2.3.</span> <span class="toc-text">2.3 修改用户（ALTER USER）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-4-%E5%88%A0%E9%99%A4%E7%94%A8%E6%88%B7%EF%BC%88DROP-USER%EF%BC%89"><span class="toc-number">1.2.4.</span> <span class="toc-text">2.4 删除用户（DROP USER）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-5-%E6%9F%A5%E7%9C%8B%E7%94%A8%E6%88%B7%E6%9D%83%E9%99%90"><span class="toc-number">1.2.5.</span> <span class="toc-text">2.5 查看用户权限</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%89%E3%80%81%E6%9D%83%E9%99%90%E7%AE%A1%E7%90%86"><span class="toc-number">1.3.</span> <span class="toc-text">三、权限管理</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#3-1-%E6%9D%83%E9%99%90%E7%B1%BB%E5%9E%8B"><span class="toc-number">1.3.1.</span> <span class="toc-text">3.1 权限类型</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-2-%E6%8E%88%E4%BA%88%E6%9D%83%E9%99%90%EF%BC%88GRANT%EF%BC%89"><span class="toc-number">1.3.2.</span> <span class="toc-text">3.2 授予权限（GRANT）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-3-%E6%92%A4%E9%94%80%E6%9D%83%E9%99%90%EF%BC%88REVOKE%EF%BC%89"><span class="toc-number">1.3.3.</span> <span class="toc-text">3.3 撤销权限（REVOKE）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-4-%E6%9D%83%E9%99%90%E5%88%B7%E6%96%B0"><span class="toc-number">1.3.4.</span> <span class="toc-text">3.4 权限刷新</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-5-%E6%9D%83%E9%99%90%E6%9F%A5%E7%9C%8B%E4%B8%8E%E7%BB%A7%E6%89%BF"><span class="toc-number">1.3.5.</span> <span class="toc-text">3.5 权限查看与继承</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9B%9B%E3%80%81%E8%A7%92%E8%89%B2%E7%AE%A1%E7%90%86%EF%BC%88MySQL-8-0-%EF%BC%89"><span class="toc-number">1.4.</span> <span class="toc-text">四、角色管理（MySQL 8.0+）</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#4-1-%E5%88%9B%E5%BB%BA%E8%A7%92%E8%89%B2"><span class="toc-number">1.4.1.</span> <span class="toc-text">4.1 创建角色</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-2-%E7%BB%99%E8%A7%92%E8%89%B2%E6%8E%88%E6%9D%83"><span class="toc-number">1.4.2.</span> <span class="toc-text">4.2 给角色授权</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-3-%E7%BB%99%E7%94%A8%E6%88%B7%E5%88%86%E9%85%8D%E8%A7%92%E8%89%B2"><span class="toc-number">1.4.3.</span> <span class="toc-text">4.3 给用户分配角色</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-4-%E6%BF%80%E6%B4%BB%E8%A7%92%E8%89%B2"><span class="toc-number">1.4.4.</span> <span class="toc-text">4.4 激活角色</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-5-%E6%92%A4%E9%94%80%E8%A7%92%E8%89%B2"><span class="toc-number">1.4.5.</span> <span class="toc-text">4.5 撤销角色</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%94%E3%80%81%E4%BA%8B%E5%8A%A1%E6%8E%A7%E5%88%B6"><span class="toc-number">1.5.</span> <span class="toc-text">五、事务控制</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#5-1-%E4%BA%8B%E5%8A%A1%E5%9F%BA%E7%A1%80"><span class="toc-number">1.5.1.</span> <span class="toc-text">5.1 事务基础</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5-2-%E4%BA%8B%E5%8A%A1%E6%93%8D%E4%BD%9C"><span class="toc-number">1.5.2.</span> <span class="toc-text">5.2 事务操作</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5-3-%E4%BF%9D%E5%AD%98%E7%82%B9%EF%BC%88SAVEPOINT%EF%BC%89"><span class="toc-number">1.5.3.</span> <span class="toc-text">5.3 保存点（SAVEPOINT）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5-4-%E4%BA%8B%E5%8A%A1%E9%9A%94%E7%A6%BB%E7%BA%A7%E5%88%AB"><span class="toc-number">1.5.4.</span> <span class="toc-text">5.4 事务隔离级别</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5-5-%E9%94%81%E6%9C%BA%E5%88%B6"><span class="toc-number">1.5.5.</span> <span class="toc-text">5.5 锁机制</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%85%AD%E3%80%81%E5%AE%9E%E6%88%98%E6%A1%88%E4%BE%8B"><span class="toc-number">1.6.</span> <span class="toc-text">六、实战案例</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#6-1-%E5%88%9B%E5%BB%BA%E5%BA%94%E7%94%A8%E6%95%B0%E6%8D%AE%E5%BA%93%E5%92%8C%E7%94%A8%E6%88%B7"><span class="toc-number">1.6.1.</span> <span class="toc-text">6.1 创建应用数据库和用户</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#6-2-%E9%93%B6%E8%A1%8C%E8%BD%AC%E8%B4%A6%E4%BA%8B%E5%8A%A1"><span class="toc-number">1.6.2.</span> <span class="toc-text">6.2 银行转账事务</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#6-3-%E4%BD%BF%E7%94%A8%E4%B9%90%E8%A7%82%E9%94%81"><span class="toc-number">1.6.3.</span> <span class="toc-text">6.3 使用乐观锁</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%83%E3%80%81%E5%AE%89%E5%85%A8%E7%AE%A1%E7%90%86%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5"><span class="toc-number">1.7.</span> <span class="toc-text">七、安全管理最佳实践</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#7-1-%E5%AF%86%E7%A0%81%E5%AE%89%E5%85%A8"><span class="toc-number">1.7.1.</span> <span class="toc-text">7.1 密码安全</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#7-2-%E6%9C%80%E5%B0%8F%E6%9D%83%E9%99%90%E5%8E%9F%E5%88%99"><span class="toc-number">1.7.2.</span> <span class="toc-text">7.2 最小权限原则</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#7-3-%E9%99%90%E5%88%B6%E4%B8%BB%E6%9C%BA%E8%AE%BF%E9%97%AE"><span class="toc-number">1.7.3.</span> <span class="toc-text">7.3 限制主机访问</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#7-4-%E5%AE%9A%E6%9C%9F%E6%B8%85%E7%90%86%E6%97%A0%E7%94%A8%E7%94%A8%E6%88%B7"><span class="toc-number">1.7.4.</span> <span class="toc-text">7.4 定期清理无用用户</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#7-5-%E5%AE%A1%E8%AE%A1%E5%92%8C%E7%9B%91%E6%8E%A7"><span class="toc-number">1.7.5.</span> <span class="toc-text">7.5 审计和监控</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%85%AB%E3%80%81%E5%B0%8F%E7%BB%93"><span class="toc-number">1.8.</span> <span class="toc-text">八、小结</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%9F%A5%E8%AF%86%E7%82%B9%E5%9B%9E%E9%A1%BE"><span class="toc-number">1.8.1.</span> <span class="toc-text">知识点回顾</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#DCL-%E5%91%BD%E4%BB%A4%E9%80%9F%E6%9F%A5%E8%A1%A8"><span class="toc-number">1.8.2.</span> <span class="toc-text">DCL 命令速查表</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AE%89%E5%85%A8%E5%BB%BA%E8%AE%AE"><span class="toc-number">1.8.3.</span> <span class="toc-text">安全建议</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#MySQL-%E5%9F%BA%E7%A1%80%E6%95%99%E7%A8%8B%E7%B3%BB%E5%88%97%E6%80%BB%E7%BB%93"><span class="toc-number">1.9.</span> <span class="toc-text">MySQL 基础教程系列总结</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%B3%BB%E5%88%97%E6%96%87%E7%AB%A0%E5%9B%9E%E9%A1%BE"><span class="toc-number">1.9.1.</span> <span class="toc-text">系列文章回顾</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AD%A6%E4%B9%A0%E5%BB%BA%E8%AE%AE"><span class="toc-number">1.9.2.</span> <span class="toc-text">学习建议</span></a></li></ol></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/02/23/MySQL%20%E8%BF%9B%E9%98%B6%E6%95%99%E7%A8%8B%EF%BC%88%E4%BA%94%EF%BC%89%E5%9F%BA%E7%A1%80%E7%AF%87%E6%80%BB%E7%BB%93/" title="MySQL 进阶教程（五）基础篇总结">MySQL 进阶教程（五）基础篇总结</a><time datetime="2026-02-23T11:00:00.000Z" title="发表于 2026-02-23 19:00:00">2026-02-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/02/23/MySQL%20%E8%BF%9B%E9%98%B6%E6%95%99%E7%A8%8B%EF%BC%88%E5%9B%9B%EF%BC%89%E4%BA%8B%E5%8A%A1%E8%AF%A6%E8%A7%A3/" title="MySQL 进阶教程（四）事务详解">MySQL 进阶教程（四）事务详解</a><time datetime="2026-02-23T10:00:00.000Z" title="发表于 2026-02-23 18:00:00">2026-02-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/02/23/MySQL%20%E8%BF%9B%E9%98%B6%E6%95%99%E7%A8%8B%EF%BC%88%E4%B8%89%EF%BC%89%E5%A4%9A%E8%A1%A8%E6%9F%A5%E8%AF%A2%E8%AF%A6%E8%A7%A3/" title="MySQL 进阶教程（三）多表查询详解">MySQL 进阶教程（三）多表查询详解</a><time datetime="2026-02-23T09:00:00.000Z" title="发表于 2026-02-23 17:00:00">2026-02-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/02/23/MySQL%20%E8%BF%9B%E9%98%B6%E6%95%99%E7%A8%8B%EF%BC%88%E4%BA%8C%EF%BC%89%E6%95%B0%E6%8D%AE%E5%BA%93%E7%BA%A6%E6%9D%9F%E8%AF%A6%E8%A7%A3/" title="MySQL 进阶教程（二）数据库约束详解">MySQL 进阶教程（二）数据库约束详解</a><time datetime="2026-02-23T08:00:00.000Z" title="发表于 2026-02-23 16:00:00">2026-02-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/02/23/MySQL%20%E8%BF%9B%E9%98%B6%E6%95%99%E7%A8%8B%EF%BC%88%E4%B8%80%EF%BC%89%E5%B8%B8%E7%94%A8%E5%87%BD%E6%95%B0%E8%AF%A6%E8%A7%A3/" title="MySQL 进阶教程（一）常用函数详解">MySQL 进阶教程（一）常用函数详解</a><time datetime="2026-02-23T07:00:00.000Z" title="发表于 2026-02-23 15:00:00">2026-02-23</time></div></div></div></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2025 - 2026 By 过拟合的炸鱼薯条</span><span class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 8.1.1</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.5.4</a></span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=5.5.4"></script><script src="/js/main.js?v=5.5.4"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><i class="fas fa-spinner fa-pulse" id="loading-status" hidden="hidden"></i><button class="search-close-button"><i class="fas fa-times"></i></button></nav><div class="text-center" id="loading-database"><i class="fas fa-spinner fa-pulse"></i><span>  数据加载中</span></div><div class="local-search-input"><input placeholder="搜索..." type="text"/></div><hr/><div id="local-search-results"></div><div class="ais-Pagination" id="local-search-pagination" style="display:none;"><ul class="ais-Pagination-list"></ul></div><div id="local-search-stats"></div></div><div id="search-mask"></div><script src="/js/search/local-search.js?v=5.5.4"></script></div></div></body></html>
