@@ -1,0 +1,471 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>MySQL 进阶教程 06-01 存储引擎详解 | 过拟合的炸鱼薯条</title><meta name="author" content="过拟合的炸鱼薯条"><meta name="copyright" content="过拟合的炸鱼薯条"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="MySQL 进阶教程 06-01 存储引擎详解存储引擎是 MySQL 的核心组件之一，决定了数据的存储方式和访问特性。本文将详细介绍 MySQL 的存储引擎架构和常用引擎的特点。 一、存储引擎概述1.1 什么是存储引擎？存储引擎（Storage Engine） 是 MySQL 中负责数据存储、提取和管理的底层组件。MySQL 采用插件式存储引擎架构，可以根据需求选择不同的引擎。 123456789">
+<meta property="og:type" content="article">
+<meta property="og:title" content="MySQL 进阶教程 06-01 存储引擎详解">
+<meta property="og:url" content="https://brian-lin-c.github.io/2026/02/24/MySQL%20%E8%BF%9B%E9%98%B6%E6%95%99%E7%A8%8B%2006-01%20%E5%AD%98%E5%82%A8%E5%BC%95%E6%93%8E%E8%AF%A6%E8%A7%A3/index.html">
+<meta property="og:site_name" content="过拟合的炸鱼薯条">
+<meta property="og:description" content="MySQL 进阶教程 06-01 存储引擎详解存储引擎是 MySQL 的核心组件之一，决定了数据的存储方式和访问特性。本文将详细介绍 MySQL 的存储引擎架构和常用引擎的特点。 一、存储引擎概述1.1 什么是存储引擎？存储引擎（Storage Engine） 是 MySQL 中负责数据存储、提取和管理的底层组件。MySQL 采用插件式存储引擎架构，可以根据需求选择不同的引擎。 123456789">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://brian-lin-c.github.io/img/%E5%A4%B4%E5%83%8F.jpg">
+<meta property="article:published_time" content="2026-02-24T02:00:00.000Z">
+<meta property="article:modified_time" content="2026-02-24T10:36:02.663Z">
+<meta property="article:author" content="过拟合的炸鱼薯条">
+<meta property="article:tag" content="InnoDB">
+<meta property="article:tag" content="MyISAM">
+<meta property="article:tag" content="MySQL">
+<meta property="article:tag" content="存储引擎">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://brian-lin-c.github.io/img/%E5%A4%B4%E5%83%8F.jpg"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "MySQL 进阶教程 06-01 存储引擎详解",
+  "url": "https://brian-lin-c.github.io/2026/02/24/MySQL%20%E8%BF%9B%E9%98%B6%E6%95%99%E7%A8%8B%2006-01%20%E5%AD%98%E5%82%A8%E5%BC%95%E6%93%8E%E8%AF%A6%E8%A7%A3/",
+  "image": "https://brian-lin-c.github.io/img/%E5%A4%B4%E5%83%8F.jpg",
+  "datePublished": "2026-02-24T02:00:00.000Z",
+  "dateModified": "2026-02-24T10:36:02.663Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "过拟合的炸鱼薯条",
+      "url": "https://brian-lin-c.github.io"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://brian-lin-c.github.io/2026/02/24/MySQL%20%E8%BF%9B%E9%98%B6%E6%95%99%E7%A8%8B%2006-01%20%E5%AD%98%E5%82%A8%E5%BC%95%E6%93%8E%E8%AF%A6%E8%A7%A3/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=5.5.4"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.1.0/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        if (!ttl) return
+        const expiry = Date.now() + ttl * 86400000
+        localStorage.setItem(key, JSON.stringify({ value, expiry }))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return undefined
+        const { value, expiry } = JSON.parse(itemStr)
+        if (Date.now() > expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return value
+      }
+    }
+
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        Object.entries(attr).forEach(([key, val]) => script.setAttribute(key, val))
+        script.onload = script.onreadystatechange = () => {
+          if (!script.readyState || /loaded|complete/.test(script.readyState)) resolve()
+        }
+        script.onerror = reject
+        document.head.appendChild(script)
+      }),
+      getCSS: (url, id) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onload = link.onreadystatechange = () => {
+          if (!link.readyState || /loaded|complete/.test(link.readyState)) resolve()
+        }
+        link.onerror = reject
+        document.head.appendChild(link)
+      }),
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"/search.xml","preload":true,"top_n_per_article":1,"unescape":false,"pagination":{"enable":false,"hitsPerPage":8},"languages":{"hits_empty":"未找到符合您查询的内容：${query}","hits_stats":"共找到 ${hits} 篇文章"}},
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.13.0/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'MySQL 进阶教程 06-01 存储引擎详解',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><meta name="generator" content="Hexo 8.1.1"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/img/%E5%A4%B4%E5%83%8F.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">68</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">157</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">9</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user"></i><span> 关于</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">过拟合的炸鱼薯条</span></a><a class="nav-page-title" href="/"><span class="site-name">MySQL 进阶教程 06-01 存储引擎详解</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div id="search-button"><span class="site-page social-icon search"><i class="fas fa-search fa-fw"></i><span> 搜索</span></span></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user"></i><span> 关于</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">MySQL 进阶教程 06-01 存储引擎详解</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2026-02-24T02:00:00.000Z" title="发表于 2026-02-24 10:00:00">2026-02-24</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-02-24T10:36:02.663Z" title="更新于 2026-02-24 18:36:02">2026-02-24</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/MySQL-%E8%BF%9B%E9%98%B6%E6%95%99%E7%A8%8B/">MySQL 进阶教程</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-wordcount"><i class="far fa-file-word fa-fw post-meta-icon"></i><span class="post-meta-label">总字数:</span><span class="word-count">1.7k</span><span class="post-meta-separator">|</span><i class="far fa-clock fa-fw post-meta-icon"></i><span class="post-meta-label">阅读时长:</span><span>6分钟</span></span><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><h1 id="MySQL-进阶教程-06-01-存储引擎详解"><a href="#MySQL-进阶教程-06-01-存储引擎详解" class="headerlink" title="MySQL 进阶教程 06-01 存储引擎详解"></a>MySQL 进阶教程 06-01 存储引擎详解</h1><p>存储引擎是 MySQL 的核心组件之一，决定了数据的存储方式和访问特性。本文将详细介绍 MySQL 的存储引擎架构和常用引擎的特点。</p>
+<h2 id="一、存储引擎概述"><a href="#一、存储引擎概述" class="headerlink" title="一、存储引擎概述"></a>一、存储引擎概述</h2><h3 id="1-1-什么是存储引擎？"><a href="#1-1-什么是存储引擎？" class="headerlink" title="1.1 什么是存储引擎？"></a>1.1 什么是存储引擎？</h3><p><strong>存储引擎（Storage Engine）</strong> 是 MySQL 中负责数据存储、提取和管理的底层组件。MySQL 采用插件式存储引擎架构，可以根据需求选择不同的引擎。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">MySQL 架构简图：</span><br><span class="line">┌─────────────────────────────────────┐</span><br><span class="line">│         SQL 接口（查询解析）          │</span><br><span class="line">├─────────────────────────────────────┤</span><br><span class="line">│         查询优化器                   │</span><br><span class="line">├─────────────────────────────────────┤</span><br><span class="line">│     存储引擎层（插件式架构）           │</span><br><span class="line">│  ┌─────────┬─────────┬─────────┐    │</span><br><span class="line">│  │ InnoDB  │ MyISAM  │ Memory  │    │</span><br><span class="line">│  └─────────┴─────────┴─────────┘    │</span><br><span class="line">└─────────────────────────────────────┘</span><br></pre></td></tr></table></figure>
+
+<h3 id="1-2-存储引擎的作用"><a href="#1-2-存储引擎的作用" class="headerlink" title="1.2 存储引擎的作用"></a>1.2 存储引擎的作用</h3><ul>
+<li><strong>数据存储</strong>：决定数据如何在磁盘上组织</li>
+<li><strong>索引管理</strong>：提供不同的索引结构</li>
+<li><strong>事务支持</strong>：决定是否支持事务</li>
+<li><strong>锁机制</strong>：提供不同粒度的锁</li>
+<li><strong>缓存管理</strong>：决定数据和索引的缓存策略</li>
+</ul>
+<h2 id="二、MySQL-体系结构"><a href="#二、MySQL-体系结构" class="headerlink" title="二、MySQL 体系结构"></a>二、MySQL 体系结构</h2><h3 id="2-1-三层架构"><a href="#2-1-三层架构" class="headerlink" title="2.1 三层架构"></a>2.1 三层架构</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">┌─────────────────────────────────────┐</span><br><span class="line">│   连接层：连接处理、授权认证、安全    │</span><br><span class="line">├─────────────────────────────────────┤</span><br><span class="line">│   SQL 层：SQL 接口、解析器、优化器     │</span><br><span class="line">│        缓存、内置函数、存储过程等      │</span><br><span class="line">├─────────────────────────────────────┤</span><br><span class="line">│   引擎层：存储引擎（负责数据存取）     │</span><br><span class="line">└─────────────────────────────────────┘</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-2-存储引擎层特点"><a href="#2-2-存储引擎层特点" class="headerlink" title="2.2 存储引擎层特点"></a>2.2 存储引擎层特点</h3><ol>
+<li><strong>插件式设计</strong>：可以动态加载&#x2F;卸载存储引擎</li>
+<li><strong>独立管理</strong>：每个引擎独立管理自己的数据和索引</li>
+<li><strong>统一接口</strong>：所有引擎通过统一接口与 SQL 层交互</li>
+</ol>
+<h2 id="三、查看存储引擎"><a href="#三、查看存储引擎" class="headerlink" title="三、查看存储引擎"></a>三、查看存储引擎</h2><h3 id="3-1-查看所有可用引擎"><a href="#3-1-查看所有可用引擎" class="headerlink" title="3.1 查看所有可用引擎"></a>3.1 查看所有可用引擎</h3><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- 查看所有存储引擎</span></span><br><span class="line"><span class="keyword">SHOW</span> ENGINES;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 结果示例：</span></span><br><span class="line"><span class="comment">-- Engine      | Support  | Comment</span></span><br><span class="line"><span class="comment">-- ------------+----------+----------------------------------</span></span><br><span class="line"><span class="comment">-- InnoDB      | DEFAULT  | Supports transactions, row-level locking, and foreign keys</span></span><br><span class="line"><span class="comment">-- MyISAM      | YES      | MyISAM storage engine</span></span><br><span class="line"><span class="comment">-- Memory      | YES      | Hash based, stored in memory, useful for temporary tables</span></span><br><span class="line"><span class="comment">-- Archive     | YES      | Archive storage engine</span></span><br><span class="line"><span class="comment">-- CSV         | YES      | CSV storage engine</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>Support 列说明</strong>：</p>
+<ul>
+<li><code>DEFAULT</code>：默认引擎</li>
+<li><code>YES</code>：支持</li>
+<li><code>NO</code>：不支持</li>
+<li><code>DISABLED</code>：已禁用</li>
+</ul>
+<h3 id="3-2-查看表的引擎"><a href="#3-2-查看表的引擎" class="headerlink" title="3.2 查看表的引擎"></a>3.2 查看表的引擎</h3><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- 查看表的创建信息（包含引擎）</span></span><br><span class="line"><span class="keyword">SHOW</span> <span class="keyword">CREATE TABLE</span> table_name;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 查看表状态（包含引擎）</span></span><br><span class="line"><span class="keyword">SHOW</span> <span class="keyword">TABLE</span> STATUS <span class="keyword">WHERE</span> Name <span class="operator">=</span> <span class="string">&#x27;table_name&#x27;</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 从 information_schema 查询</span></span><br><span class="line"><span class="keyword">SELECT</span> table_name, engine</span><br><span class="line"><span class="keyword">FROM</span> information_schema.tables</span><br><span class="line"><span class="keyword">WHERE</span> table_schema <span class="operator">=</span> <span class="string">&#x27;your_database&#x27;</span>;</span><br></pre></td></tr></table></figure>
+
+<h3 id="3-3-修改表的引擎"><a href="#3-3-修改表的引擎" class="headerlink" title="3.3 修改表的引擎"></a>3.3 修改表的引擎</h3><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- 修改表的存储引擎</span></span><br><span class="line"><span class="keyword">ALTER TABLE</span> table_name ENGINE <span class="operator">=</span> InnoDB;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 示例：将 MyISAM 表转为 InnoDB</span></span><br><span class="line"><span class="keyword">ALTER TABLE</span> users ENGINE <span class="operator">=</span> InnoDB;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 验证修改</span></span><br><span class="line"><span class="keyword">SHOW</span> <span class="keyword">TABLE</span> STATUS <span class="keyword">WHERE</span> Name <span class="operator">=</span> <span class="string">&#x27;users&#x27;</span>;</span><br></pre></td></tr></table></figure>
+
+<h2 id="四、InnoDB-引擎"><a href="#四、InnoDB-引擎" class="headerlink" title="四、InnoDB 引擎"></a>四、InnoDB 引擎</h2><h3 id="4-1-InnoDB-简介"><a href="#4-1-InnoDB-简介" class="headerlink" title="4.1 InnoDB 简介"></a>4.1 InnoDB 简介</h3><p><strong>InnoDB</strong> 是 MySQL 的默认存储引擎，由 Oracle 公司开发，是事务安全型（transaction-safe）的存储引擎。</p>
+<p><strong>适用场景</strong>：</p>
+<ul>
+<li>需要事务支持的应用</li>
+<li>高并发读写场景</li>
+<li>需要外键约束</li>
+<li>需要行级锁</li>
+</ul>
+<h3 id="4-2-InnoDB-核心特性"><a href="#4-2-InnoDB-核心特性" class="headerlink" title="4.2 InnoDB 核心特性"></a>4.2 InnoDB 核心特性</h3><table>
+<thead>
+<tr>
+<th>特性</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>事务支持</td>
+<td>支持 ACID 事务，提供 COMMIT、ROLLBACK</td>
+</tr>
+<tr>
+<td>行级锁</td>
+<td>支持行级锁，提高并发性能</td>
+</tr>
+<tr>
+<td>外键</td>
+<td>支持外键约束，保证数据一致性</td>
+</tr>
+<tr>
+<td>MVCC</td>
+<td>多版本并发控制，提高读性能</td>
+</tr>
+<tr>
+<td>聚簇索引</td>
+<td>数据和索引存储在一起</td>
+</tr>
+<tr>
+<td>崩溃恢复</td>
+<td>自动崩溃恢复，保证数据完整性</td>
+</tr>
+</tbody></table>
+<h3 id="4-3-InnoDB-配置参数"><a href="#4-3-InnoDB-配置参数" class="headerlink" title="4.3 InnoDB 配置参数"></a>4.3 InnoDB 配置参数</h3><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- 查看 InnoDB 配置</span></span><br><span class="line"><span class="keyword">SHOW</span> VARIABLES <span class="keyword">LIKE</span> <span class="string">&#x27;innodb%&#x27;</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 常用参数：</span></span><br><span class="line"><span class="comment">-- innodb_buffer_pool_size: 缓冲池大小（建议为物理内存的 70-80%）</span></span><br><span class="line"><span class="comment">-- innodb_log_file_size: 日志文件大小</span></span><br><span class="line"><span class="comment">-- innodb_flush_log_at_trx_commit: 日志刷盘策略</span></span><br><span class="line"><span class="comment">-- innodb_file_per_table: 是否每表一个表空间</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="五、MyISAM-引擎"><a href="#五、MyISAM-引擎" class="headerlink" title="五、MyISAM 引擎"></a>五、MyISAM 引擎</h2><h3 id="5-1-MyISAM-简介"><a href="#5-1-MyISAM-简介" class="headerlink" title="5.1 MyISAM 简介"></a>5.1 MyISAM 简介</h3><p><strong>MyISAM</strong> 是 MySQL 5.5 之前的默认存储引擎，由 MySQL AB 开发。</p>
+<p><strong>适用场景</strong>：</p>
+<ul>
+<li>读多写少的场景</li>
+<li>不需要事务支持</li>
+<li>全文索引（5.6 之前只有 MyISAM 支持）</li>
+<li>数据仓库&#x2F;报表系统</li>
+</ul>
+<h3 id="5-2-MyISAM-核心特性"><a href="#5-2-MyISAM-核心特性" class="headerlink" title="5.2 MyISAM 核心特性"></a>5.2 MyISAM 核心特性</h3><table>
+<thead>
+<tr>
+<th>特性</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>不支持事务</td>
+<td>不提供事务支持</td>
+</tr>
+<tr>
+<td>表级锁</td>
+<td>锁粒度为表级，并发性能较差</td>
+</tr>
+<tr>
+<td>不支持外键</td>
+<td>不支持外键约束</td>
+</tr>
+<tr>
+<td>非聚簇索引</td>
+<td>索引和数据分开存储</td>
+</tr>
+<tr>
+<td>COUNT(*) 优化</td>
+<td>保存了表的行数，COUNT(*) 很快</td>
+</tr>
+<tr>
+<td>全文索引</td>
+<td>支持全文索引</td>
+</tr>
+</tbody></table>
+<h3 id="5-3-MyISAM-文件结构"><a href="#5-3-MyISAM-文件结构" class="headerlink" title="5.3 MyISAM 文件结构"></a>5.3 MyISAM 文件结构</h3><p>MyISAM 表由三个文件组成：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">table_name.frm  - 表结构定义</span><br><span class="line">table_name.MYD  - 数据文件（MYData）</span><br><span class="line">table_name.MYI  - 索引文件（MYIndex）</span><br></pre></td></tr></table></figure>
+
+<h2 id="六、Memory-引擎"><a href="#六、Memory-引擎" class="headerlink" title="六、Memory 引擎"></a>六、Memory 引擎</h2><h3 id="6-1-Memory-简介"><a href="#6-1-Memory-简介" class="headerlink" title="6.1 Memory 简介"></a>6.1 Memory 简介</h3><p><strong>Memory</strong> 引擎将数据存储在内存中，适用于临时表或高速缓存场景。</p>
+<p><strong>适用场景</strong>：</p>
+<ul>
+<li>临时表&#x2F;中间结果</li>
+<li>高速缓存</li>
+<li>会话分析</li>
+<li>需要快速访问的数据</li>
+</ul>
+<h3 id="6-2-Memory-特性"><a href="#6-2-Memory-特性" class="headerlink" title="6.2 Memory 特性"></a>6.2 Memory 特性</h3><table>
+<thead>
+<tr>
+<th>特性</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>存储在内存</td>
+<td>数据存储在内存中，速度快</td>
+</tr>
+<tr>
+<td>数据易失</td>
+<td>重启后数据丢失</td>
+</tr>
+<tr>
+<td>表级锁</td>
+<td>锁粒度为表级</td>
+</tr>
+<tr>
+<td>不支持 TEXT&#x2F;BLOB</td>
+<td>不支持大字段类型</td>
+</tr>
+<tr>
+<td>默认 Hash 索引</td>
+<td>只支持 Hash 索引（5.7+ 支持 B-Tree）</td>
+</tr>
+</tbody></table>
+<h3 id="6-3-创建-Memory-表"><a href="#6-3-创建-Memory-表" class="headerlink" title="6.3 创建 Memory 表"></a>6.3 创建 Memory 表</h3><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- 创建 Memory 表</span></span><br><span class="line"><span class="keyword">CREATE TABLE</span> temp_table (</span><br><span class="line">    id <span class="type">INT</span> <span class="keyword">PRIMARY KEY</span>,</span><br><span class="line">    name <span class="type">VARCHAR</span>(<span class="number">50</span>)</span><br><span class="line">) ENGINE <span class="operator">=</span> Memory;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 使用场景：临时存储中间结果</span></span><br><span class="line"><span class="keyword">CREATE</span> TEMPORARY <span class="keyword">TABLE</span> temp_result</span><br><span class="line">ENGINE <span class="operator">=</span> Memory</span><br><span class="line"><span class="keyword">AS</span> <span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> large_table <span class="keyword">WHERE</span> ...;</span><br></pre></td></tr></table></figure>
+
+<h2 id="七、存储引擎对比"><a href="#七、存储引擎对比" class="headerlink" title="七、存储引擎对比"></a>七、存储引擎对比</h2><h3 id="7-1-功能对比"><a href="#7-1-功能对比" class="headerlink" title="7.1 功能对比"></a>7.1 功能对比</h3><table>
+<thead>
+<tr>
+<th>特性</th>
+<th>InnoDB</th>
+<th>MyISAM</th>
+<th>Memory</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>事务支持</td>
+<td>✓</td>
+<td>✗</td>
+<td>✗</td>
+</tr>
+<tr>
+<td>锁粒度</td>
+<td>行级</td>
+<td>表级</td>
+<td>表级</td>
+</tr>
+<tr>
+<td>外键支持</td>
+<td>✓</td>
+<td>✗</td>
+<td>✗</td>
+</tr>
+<tr>
+<td>MVCC</td>
+<td>✓</td>
+<td>✗</td>
+<td>✗</td>
+</tr>
+<tr>
+<td>全文索引</td>
+<td>✓ (5.6+)</td>
+<td>✓</td>
+<td>✗</td>
+</tr>
+<tr>
+<td>数据持久性</td>
+<td>持久</td>
+<td>持久</td>
+<td>易失</td>
+</tr>
+<tr>
+<td>COUNT(*)</td>
+<td>扫描表</td>
+<td>直接读取</td>
+<td>直接读取</td>
+</tr>
+</tbody></table>
+<h3 id="7-2-性能对比"><a href="#7-2-性能对比" class="headerlink" title="7.2 性能对比"></a>7.2 性能对比</h3><table>
+<thead>
+<tr>
+<th>场景</th>
+<th>InnoDB</th>
+<th>MyISAM</th>
+<th>Memory</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>大量 INSERT</td>
+<td>中等</td>
+<td>好</td>
+<td>优秀</td>
+</tr>
+<tr>
+<td>大量 UPDATE</td>
+<td>优秀</td>
+<td>差</td>
+<td>优秀</td>
+</tr>
+<tr>
+<td>大量 DELETE</td>
+<td>优秀</td>
+<td>差</td>
+<td>优秀</td>
+</tr>
+<tr>
+<td>SELECT COUNT(*)</td>
+<td>中等</td>
+<td>优秀</td>
+<td>优秀</td>
+</tr>
+<tr>
+<td>范围查询</td>
+<td>优秀</td>
+<td>中等</td>
+<td>优秀</td>
+</tr>
+<tr>
+<td>点查询</td>
+<td>优秀</td>
+<td>中等</td>
+<td>优秀</td>
+</tr>
+</tbody></table>
+<h2 id="八、存储引擎选择"><a href="#八、存储引擎选择" class="headerlink" title="八、存储引擎选择"></a>八、存储引擎选择</h2><h3 id="8-1-选择建议"><a href="#8-1-选择建议" class="headerlink" title="8.1 选择建议"></a>8.1 选择建议</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">需要事务？</span><br><span class="line">├── 是 → InnoDB</span><br><span class="line">└── 否 → 继续</span><br><span class="line">    ├── 读多写少 + COUNT 频繁？</span><br><span class="line">    │   ├── 是 → MyISAM</span><br><span class="line">    │   └── 否 → 继续</span><br><span class="line">    │</span><br><span class="line">    ├── 临时表/缓存？</span><br><span class="line">    │   ├── 是 → Memory</span><br><span class="line">    │   └── 否 → InnoDB（默认选择）</span><br></pre></td></tr></table></figure>
+
+<h3 id="8-2-实际案例"><a href="#8-2-实际案例" class="headerlink" title="8.2 实际案例"></a>8.2 实际案例</h3><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- 用户表：需要事务和外键</span></span><br><span class="line"><span class="keyword">CREATE TABLE</span> users (</span><br><span class="line">    id <span class="type">INT</span> <span class="keyword">PRIMARY KEY</span> AUTO_INCREMENT,</span><br><span class="line">    username <span class="type">VARCHAR</span>(<span class="number">50</span>) <span class="keyword">NOT NULL</span></span><br><span class="line">) ENGINE<span class="operator">=</span>InnoDB;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 日志表：大量 INSERT，很少 UPDATE</span></span><br><span class="line"><span class="keyword">CREATE TABLE</span> access_log (</span><br><span class="line">    id <span class="type">INT</span> <span class="keyword">PRIMARY KEY</span> AUTO_INCREMENT,</span><br><span class="line">    log_time DATETIME,</span><br><span class="line">    message TEXT</span><br><span class="line">) ENGINE<span class="operator">=</span>InnoDB;  <span class="comment">-- 现代场景建议统一使用 InnoDB</span></span><br><span class="line"></span><br><span class="line"><span class="comment">-- 临时表：存储中间结果</span></span><br><span class="line"><span class="keyword">CREATE</span> TEMPORARY <span class="keyword">TABLE</span> temp_result (</span><br><span class="line">    id <span class="type">INT</span> <span class="keyword">PRIMARY KEY</span></span><br><span class="line">) ENGINE<span class="operator">=</span>Memory;</span><br></pre></td></tr></table></figure>
+
+<h3 id="8-3-最佳实践"><a href="#8-3-最佳实践" class="headerlink" title="8.3 最佳实践"></a>8.3 最佳实践</h3><ol>
+<li><strong>统一使用 InnoDB</strong>：除非有特殊需求，否则建议统一使用 InnoDB</li>
+<li><strong>避免混用引擎</strong>：同一数据库中的表尽量使用相同引擎</li>
+<li><strong>谨慎使用 MyISAM</strong>：MyISAM 在高并发下性能较差</li>
+<li><strong>临时表使用 Memory</strong>：对于临时数据可以使用 Memory 引擎</li>
+</ol>
+<h2 id="九、小结"><a href="#九、小结" class="headerlink" title="九、小结"></a>九、小结</h2><h3 id="核心知识点"><a href="#核心知识点" class="headerlink" title="核心知识点"></a>核心知识点</h3><ol>
+<li><strong>存储引擎架构</strong>：MySQL 采用插件式存储引擎架构</li>
+<li><strong>InnoDB</strong>：默认引擎，支持事务、行级锁、外键</li>
+<li><strong>MyISAM</strong>：读多写少场景，不支持事务</li>
+<li><strong>Memory</strong>：内存存储，适用于临时表</li>
+</ol>
+<h3 id="引擎选择速查"><a href="#引擎选择速查" class="headerlink" title="引擎选择速查"></a>引擎选择速查</h3><table>
+<thead>
+<tr>
+<th>需求</th>
+<th>推荐引擎</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>事务支持</td>
+<td>InnoDB</td>
+</tr>
+<tr>
+<td>高并发写</td>
+<td>InnoDB</td>
+</tr>
+<tr>
+<td>外键约束</td>
+<td>InnoDB</td>
+</tr>
+<tr>
+<td>只读&#x2F;读多写少</td>
+<td>MyISAM</td>
+</tr>
+<tr>
+<td>临时表</td>
+<td>Memory</td>
+</tr>
+</tbody></table>
+<h3 id="下一章预告"><a href="#下一章预告" class="headerlink" title="下一章预告"></a>下一章预告</h3><p>下一篇文章将详细介绍<strong>索引</strong>，包括：</p>
+<ul>
+<li>索引概述</li>
+<li>B-Tree、B+Tree、Hash 索引结构</li>
+<li>索引分类和语法</li>
+<li>性能分析工具</li>
+</ul>
+<hr>
+<p><strong>下一篇</strong>：[MySQL 进阶教程 07-01 索引详解](&#x2F;2026&#x2F;02&#x2F;24&#x2F;MySQL 进阶教程 07-01 索引详解&#x2F;)</p>
+<p><strong>上一篇</strong>：[MySQL 进阶教程 05-01 事务详解](&#x2F;2026&#x2F;02&#x2F;23&#x2F;MySQL 进阶教程 05-01 事务详解&#x2F;)</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://brian-lin-c.github.io">过拟合的炸鱼薯条</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://brian-lin-c.github.io/2026/02/24/MySQL%20%E8%BF%9B%E9%98%B6%E6%95%99%E7%A8%8B%2006-01%20%E5%AD%98%E5%82%A8%E5%BC%95%E6%93%8E%E8%AF%A6%E8%A7%A3/">https://brian-lin-c.github.io/2026/02/24/MySQL%20%E8%BF%9B%E9%98%B6%E6%95%99%E7%A8%8B%2006-01%20%E5%AD%98%E5%82%A8%E5%BC%95%E6%93%8E%E8%AF%A6%E8%A7%A3/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://brian-lin-c.github.io" target="_blank">过拟合的炸鱼薯条</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/MySQL/">MySQL</a><a class="post-meta__tags" href="/tags/%E5%AD%98%E5%82%A8%E5%BC%95%E6%93%8E/">存储引擎</a><a class="post-meta__tags" href="/tags/InnoDB/">InnoDB</a><a class="post-meta__tags" href="/tags/MyISAM/">MyISAM</a></div><div class="post-share"><div class="social-share" data-image="/img/%E5%A4%B4%E5%83%8F.jpg" data-sites="facebook,x,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related" href="/2026/02/24/MySQL%20%E8%BF%9B%E9%98%B6%E6%95%99%E7%A8%8B%2007-01%20%E7%B4%A2%E5%BC%95%E8%AF%A6%E8%A7%A3/" title="MySQL 进阶教程 07-01 索引详解"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">MySQL 进阶教程 07-01 索引详解</div></div><div class="info-2"><div class="info-item-1">MySQL 进阶教程 07-01 索引详解索引是数据库性能优化的核心技术。本文将详细介绍索引的概念、数据结构、分类、创建和使用方法，以及如何使用 EXPLAIN 分析查询性能。 一、索引概述1.1 什么是索引？索引（Index） 是帮助数据库高效获取数据的数据结构。类似于书籍的目录，通过索引可以快速定位到目标数据，而无需扫描整个表。 1234567无索引查询（全表扫描）：数据：[A][B][C][D][E][F][G]...[Z]查找 M：需要遍历 13 次有索引查询：索引：A→1, B→2, C→3, ..., M→13, ..., Z→26查找 M：直接定位，1 次找到  1.2 索引的优缺点优点：  大幅提高查询速度（最主要目的） 加速表连接（JOIN）操作 加速 ORDER BY 和 GROUP BY 实现唯一性约束  缺点：  占用额外存储空间 降低 INSERT、UPDATE、DELETE 速度（需要同时更新索引） 创建和维护需要时间  1.3 索引使用场景   场景 说明    主键&#x2F;外键列 自动创建索引   WHERE 条件列 经常作为查询条件的列   ...</div></div></div></a><a class="pagination-related" href="/2026/02/24/MySQL%20%E8%BF%9B%E9%98%B6%E6%95%99%E7%A8%8B%2004-01%20%E7%AA%97%E5%8F%A3%E5%87%BD%E6%95%B0%E6%A6%82%E8%BF%B0/" title="MySQL 进阶教程 04-01 窗口函数概述"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">MySQL 进阶教程 04-01 窗口函数概述</div></div><div class="info-2"><div class="info-item-1">MySQL 进阶教程 04-01 窗口函数概述窗口函数（Window Function）是 MySQL 8.0+ 引入的强大特性，用于实现复杂的分析查询。本文将详细介绍窗口函数的基本概念、语法结构以及与聚合函数的区别。 一、窗口函数简介1.1 什么是窗口函数？窗口函数 是对一组行（称为”窗口”）执行计算的函数，但与聚合函数不同的是，窗口函数会为每一行返回一个结果，而不是将多行聚合为单个值。 通俗理解：  聚合函数：多行 → 一个结果 窗口函数：多行 → 每行一个结果（基于窗口内数据计算）  1.2 窗口函数的应用场景   场景 说明 示例    排名问题 获取 Top N 记录 每个部门工资最高的 3 名员工   累计计算 累计求和、平均值 累计销售额、移动平均   前后行访问 访问当前行的前后行数据 同比、环比增长   分组内排序 组内排序编号 每笔订单在客户订单中的序号   分桶分析 将数据分成若干组 按成绩分等级、百分位分析   1.3 为什么需要窗口函数？在窗口函数出现之前，实现类似功能通常需要：  自连接 子查询 用户变量 应用层处理  这些方法往往语法复杂、性能较差、...</div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/2026/02/24/MySQL%20%E8%BF%9B%E9%98%B6%E6%95%99%E7%A8%8B%2011-01%20InnoDB%20%E5%AD%98%E5%82%A8%E5%BC%95%E6%93%8E%E6%B7%B1%E5%85%A5/" title="MySQL 进阶教程 11-01 InnoDB 存储引擎深入"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-02-24</div><div class="info-item-2">MySQL 进阶教程 11-01 InnoDB 存储引擎深入</div></div><div class="info-2"><div class="info-item-1">MySQL 进阶教程 11-01 InnoDB 存储引擎深入InnoDB 是 MySQL 的默认存储引擎，也是使用最广泛的引擎。本文将深入探讨 InnoDB 的内部架构、存储结构、事务原理和 MVCC 机制。 一、InnoDB 逻辑存储结构1.1 存储结构层次123456InnoDB 存储结构├── 表空间（Tablespace）│   ├── 段（Segment）│   │   ├── 区（Extent）│   │   │   ├── 页（Page）│   │   │   │   └── 行（Row）  1.2 表空间表空间 是 InnoDB 的最高层存储结构，分为： 12345678-- 系统表空间（shared tablespace）-- 存储：数据字典、undo log、doublewrite buffer、change buffer 等-- 文件：ibdata1, ibdata2...-- 独立表空间（file-per-table tablespace）-- 每个表一个 .ibd 文件-- MySQL 5.6+ 默认开启SHOW VARIABLES LIKE &#x27...</div></div></div></a><a class="pagination-related" href="/2026/02/24/MySQL%20%E8%BF%90%E7%BB%B4%E7%AF%87%2003-03%20%E5%88%86%E5%BA%93%E5%88%86%E8%A1%A8%20MyCat%20%E6%A6%82%E8%BF%B0/" title="MySQL 运维篇 03-03 分库分表 MyCat 概述"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-02-24</div><div class="info-item-2">MySQL 运维篇 03-03 分库分表 MyCat 概述</div></div><div class="info-2"><div class="info-item-1">MySQL 运维篇 03-03 分库分表 MyCat 概述MyCat 是一个开源的数据库中间件，位于应用程序和数据库之间，负责 SQL 解析、路由和结果合并。本文将介绍 MyCat 的基本概念、架构和核心功能。 一、MyCat 介绍1.1 什么是 MyCat？MyCat 是一个基于 Java 开发的数据库中间件，前身是阿里巴巴的 Cobar 项目。 12应用程序 → MyCat → MySQL 集群         (数据库中间件)  核心功能：  SQL 解析和路由 分库分表 读写分离 连接池管理 负载均衡  1.2 MyCat 特点   特点 说明    协议兼容 完全兼容 MySQL 协议   透明分片 应用无需修改代码   多种分片 支持 10+ 种分片规则   读写分离 自动路由读写请求   高可用 支持主从切换   1.3 适用场景   场景 说明    分库分表 单表数据量过大   读写分离 读多写少场景   数据库迁移 平滑迁移数据   多租户 SaaS 应用数据隔离   二、MyCat 架构2.1 整体架构1应用程序 → MyCat → MySQL 集群  核心...</div></div></div></a><a class="pagination-related" href="/2026/02/24/MySQL%20%E8%BF%90%E7%BB%B4%E7%AF%87%2004-04%20MyCat%20%E5%9E%82%E7%9B%B4%E5%88%86%E5%BA%93/" title="MySQL 运维篇 04-04 MyCat 垂直分库"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-02-24</div><div class="info-item-2">MySQL 运维篇 04-04 MyCat 垂直分库</div></div><div class="info-2"><div class="info-item-1">MySQL 运维篇 04-04 MyCat 垂直分库垂直分库是将不同的业务表分布到不同的数据库中。本文将介绍如何使用 MyCat 实现垂直分库。 一、垂直分库介绍1.1 什么是垂直分库垂直分库：按照业务模块将表拆分到不同的数据库中。 1234567原始架构：single_db (users, orders, products, logs, ...)垂直分库后：user_db (users, user_profile, user_login, ...)order_db (orders, order_detail, order_log, ...)product_db (products, category, brand, ...)  1.2 适用场景   场景 说明    业务模块清晰 各模块相对独立   表数量过多 单库表数量超过 100   访问量差异大 热门表和冷门表分离   团队分工 不同团队负责不同模块   1.3 优缺点优点：  业务清晰，便于管理 减少单库压力 便于水平扩展  缺点：  跨库 JOIN 复杂 事务处理困难 增加运维成本  二、环境准备2.1 数据库规划 ...</div></div></div></a><a class="pagination-related" href="/2026/02/24/MySQL%20%E8%BF%9B%E9%98%B6%E6%95%99%E7%A8%8B%2004-04%20LEAD%20LAG%20%E5%89%8D%E5%90%8E%E8%A1%8C%E8%AE%BF%E9%97%AE/" title="MySQL 进阶教程 04-04 LEAD&#x2F;LAG 前后行访问"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-02-24</div><div class="info-item-2">MySQL 进阶教程 04-04 LEAD&#x2F;LAG 前后行访问</div></div><div class="info-2"><div class="info-item-1">MySQL 进阶教程 04-04 LEAD&#x2F;LAG 前后行访问LEAD 和 LAG 函数允许在结果集中访问当前行之前或之后的行数据，无需自连接即可实现前后行对比。本文将详细讲解这两个函数的使用方法，包括同比、环比、差值分析等常见场景。 一、LEAD 和 LAG 函数基础1.1 函数语法1234567891011-- LAG 函数：访问当前行之前第 n 行的数据LAG(col, n, default) OVER (    [PARTITION BY 列名]    ORDER BY 列名)-- LEAD 函数：访问当前行之后第 n 行的数据LEAD(col, n, default) OVER (    [PARTITION BY 列名]    ORDER BY 列名)  参数说明：    参数 说明 默认值    col 要访问的列 -   n 向前&#x2F;后偏移的行数 1   default 超出范围时的默认值 NULL   1.2 测试数据准备1234567891011121314151617181920-- 准备月度销售数据DROP TABLE IF EXISTS...</div></div></div></a><a class="pagination-related" href="/2026/02/23/MySQL%20%E5%9F%BA%E7%A1%80%E6%95%99%E7%A8%8B%EF%BC%88%E4%B8%80%EF%BC%89%E6%95%B0%E6%8D%AE%E5%BA%93%E5%9F%BA%E7%A1%80%E4%B8%8E%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/" title="MySQL 基础教程（一）数据库基础与环境搭建"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-02-23</div><div class="info-item-2">MySQL 基础教程（一）数据库基础与环境搭建</div></div><div class="info-2"><div class="info-item-1">MySQL 基础教程（一）数据库基础与环境搭建欢迎来到 MySQL 基础教程系列的第一篇！在本篇文章中，我们将从零开始了解数据库的基本概念，完成 MySQL 的安装配置，并了解数据模型和 SQL 的分类。 一、数据库相关概念1.1 什么是数据库？数据库（Database） 是按照数据结构来组织、存储和管理数据的仓库。它可以持久化存储数据，并且支持高效的数据访问和管理。 简单来说，数据库就是一个电子化的文件柜，用于存储和管理数据。 1.2 什么是 DBMS？DBMS（Database Management System，数据库管理系统） 是用于创建、管理和维护数据库的软件。 常见的 DBMS 有：  MySQL：开源、轻量、流行，适合中小型项目 Oracle：功能强大、性能优异，适合大型企业 SQL Server：微软出品，与 Windows 生态集成良好 PostgreSQL：开源、功能丰富，支持复杂查询 SQLite：嵌入式数据库，适合移动端和小型应用  1.3 数据库的优势   对比项 文件系统 数据库系统    数据结构 松散，由应用程序定义 结构化，由 DBMS 统一管理...</div></div></div></a><a class="pagination-related" href="/2026/02/24/MySQL%20%E8%BF%9B%E9%98%B6%E6%95%99%E7%A8%8B%2004-03%20%E8%81%9A%E5%90%88%E7%AA%97%E5%8F%A3%E5%87%BD%E6%95%B0/" title="MySQL 进阶教程 04-03 聚合窗口函数"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-02-24</div><div class="info-item-2">MySQL 进阶教程 04-03 聚合窗口函数</div></div><div class="info-2"><div class="info-item-1">MySQL 进阶教程 04-03 聚合窗口函数MySQL 的所有聚合函数（SUM、AVG、COUNT、MAX、MIN）都可以用作窗口函数。本文将详细讲解聚合窗口函数的使用方法，包括累计求和、移动平均、占比计算等常见场景。 一、聚合窗口函数基础1.1 聚合函数 vs 聚合窗口函数12345678910111213141516171819202122232425262728293031323334353637383940-- 准备测试数据DROP TABLE IF EXISTS orders;CREATE TABLE orders (    id INT PRIMARY KEY AUTO_INCREMENT,    order_date DATE NOT NULL,    amount DECIMAL(10, 2) NOT NULL) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;INSERT INTO orders (order_date, amount) VALUES(&#x27;2024-01-01&#x27;, 100),(&#x27;2024-...</div></div></div></a></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/img/%E5%A4%B4%E5%83%8F.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">过拟合的炸鱼薯条</div><div class="author-info-description">好好学习，天天向上</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">68</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">157</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">9</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/Brian-Lin-C"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons"><a class="social-icon" href="https://github.com/Brian-Lin-C" target="_blank" title="Github"><i class="fab fa-github" style="color: #24292e;"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">欢迎来到我的个人博客！</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#MySQL-%E8%BF%9B%E9%98%B6%E6%95%99%E7%A8%8B-06-01-%E5%AD%98%E5%82%A8%E5%BC%95%E6%93%8E%E8%AF%A6%E8%A7%A3"><span class="toc-number">1.</span> <span class="toc-text">MySQL 进阶教程 06-01 存储引擎详解</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%80%E3%80%81%E5%AD%98%E5%82%A8%E5%BC%95%E6%93%8E%E6%A6%82%E8%BF%B0"><span class="toc-number">1.1.</span> <span class="toc-text">一、存储引擎概述</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-1-%E4%BB%80%E4%B9%88%E6%98%AF%E5%AD%98%E5%82%A8%E5%BC%95%E6%93%8E%EF%BC%9F"><span class="toc-number">1.1.1.</span> <span class="toc-text">1.1 什么是存储引擎？</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-2-%E5%AD%98%E5%82%A8%E5%BC%95%E6%93%8E%E7%9A%84%E4%BD%9C%E7%94%A8"><span class="toc-number">1.1.2.</span> <span class="toc-text">1.2 存储引擎的作用</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%8C%E3%80%81MySQL-%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%84"><span class="toc-number">1.2.</span> <span class="toc-text">二、MySQL 体系结构</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#2-1-%E4%B8%89%E5%B1%82%E6%9E%B6%E6%9E%84"><span class="toc-number">1.2.1.</span> <span class="toc-text">2.1 三层架构</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-2-%E5%AD%98%E5%82%A8%E5%BC%95%E6%93%8E%E5%B1%82%E7%89%B9%E7%82%B9"><span class="toc-number">1.2.2.</span> <span class="toc-text">2.2 存储引擎层特点</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%89%E3%80%81%E6%9F%A5%E7%9C%8B%E5%AD%98%E5%82%A8%E5%BC%95%E6%93%8E"><span class="toc-number">1.3.</span> <span class="toc-text">三、查看存储引擎</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#3-1-%E6%9F%A5%E7%9C%8B%E6%89%80%E6%9C%89%E5%8F%AF%E7%94%A8%E5%BC%95%E6%93%8E"><span class="toc-number">1.3.1.</span> <span class="toc-text">3.1 查看所有可用引擎</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-2-%E6%9F%A5%E7%9C%8B%E8%A1%A8%E7%9A%84%E5%BC%95%E6%93%8E"><span class="toc-number">1.3.2.</span> <span class="toc-text">3.2 查看表的引擎</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-3-%E4%BF%AE%E6%94%B9%E8%A1%A8%E7%9A%84%E5%BC%95%E6%93%8E"><span class="toc-number">1.3.3.</span> <span class="toc-text">3.3 修改表的引擎</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9B%9B%E3%80%81InnoDB-%E5%BC%95%E6%93%8E"><span class="toc-number">1.4.</span> <span class="toc-text">四、InnoDB 引擎</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#4-1-InnoDB-%E7%AE%80%E4%BB%8B"><span class="toc-number">1.4.1.</span> <span class="toc-text">4.1 InnoDB 简介</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-2-InnoDB-%E6%A0%B8%E5%BF%83%E7%89%B9%E6%80%A7"><span class="toc-number">1.4.2.</span> <span class="toc-text">4.2 InnoDB 核心特性</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-3-InnoDB-%E9%85%8D%E7%BD%AE%E5%8F%82%E6%95%B0"><span class="toc-number">1.4.3.</span> <span class="toc-text">4.3 InnoDB 配置参数</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%94%E3%80%81MyISAM-%E5%BC%95%E6%93%8E"><span class="toc-number">1.5.</span> <span class="toc-text">五、MyISAM 引擎</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#5-1-MyISAM-%E7%AE%80%E4%BB%8B"><span class="toc-number">1.5.1.</span> <span class="toc-text">5.1 MyISAM 简介</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5-2-MyISAM-%E6%A0%B8%E5%BF%83%E7%89%B9%E6%80%A7"><span class="toc-number">1.5.2.</span> <span class="toc-text">5.2 MyISAM 核心特性</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5-3-MyISAM-%E6%96%87%E4%BB%B6%E7%BB%93%E6%9E%84"><span class="toc-number">1.5.3.</span> <span class="toc-text">5.3 MyISAM 文件结构</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%85%AD%E3%80%81Memory-%E5%BC%95%E6%93%8E"><span class="toc-number">1.6.</span> <span class="toc-text">六、Memory 引擎</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#6-1-Memory-%E7%AE%80%E4%BB%8B"><span class="toc-number">1.6.1.</span> <span class="toc-text">6.1 Memory 简介</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#6-2-Memory-%E7%89%B9%E6%80%A7"><span class="toc-number">1.6.2.</span> <span class="toc-text">6.2 Memory 特性</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#6-3-%E5%88%9B%E5%BB%BA-Memory-%E8%A1%A8"><span class="toc-number">1.6.3.</span> <span class="toc-text">6.3 创建 Memory 表</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%83%E3%80%81%E5%AD%98%E5%82%A8%E5%BC%95%E6%93%8E%E5%AF%B9%E6%AF%94"><span class="toc-number">1.7.</span> <span class="toc-text">七、存储引擎对比</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#7-1-%E5%8A%9F%E8%83%BD%E5%AF%B9%E6%AF%94"><span class="toc-number">1.7.1.</span> <span class="toc-text">7.1 功能对比</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#7-2-%E6%80%A7%E8%83%BD%E5%AF%B9%E6%AF%94"><span class="toc-number">1.7.2.</span> <span class="toc-text">7.2 性能对比</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%85%AB%E3%80%81%E5%AD%98%E5%82%A8%E5%BC%95%E6%93%8E%E9%80%89%E6%8B%A9"><span class="toc-number">1.8.</span> <span class="toc-text">八、存储引擎选择</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#8-1-%E9%80%89%E6%8B%A9%E5%BB%BA%E8%AE%AE"><span class="toc-number">1.8.1.</span> <span class="toc-text">8.1 选择建议</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#8-2-%E5%AE%9E%E9%99%85%E6%A1%88%E4%BE%8B"><span class="toc-number">1.8.2.</span> <span class="toc-text">8.2 实际案例</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#8-3-%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5"><span class="toc-number">1.8.3.</span> <span class="toc-text">8.3 最佳实践</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B9%9D%E3%80%81%E5%B0%8F%E7%BB%93"><span class="toc-number">1.9.</span> <span class="toc-text">九、小结</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%A0%B8%E5%BF%83%E7%9F%A5%E8%AF%86%E7%82%B9"><span class="toc-number">1.9.1.</span> <span class="toc-text">核心知识点</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%BC%95%E6%93%8E%E9%80%89%E6%8B%A9%E9%80%9F%E6%9F%A5"><span class="toc-number">1.9.2.</span> <span class="toc-text">引擎选择速查</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%8B%E4%B8%80%E7%AB%A0%E9%A2%84%E5%91%8A"><span class="toc-number">1.9.3.</span> <span class="toc-text">下一章预告</span></a></li></ol></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/02/24/IDE%20%E5%B7%A5%E5%85%B7%E9%85%8D%E7%BD%AE%EF%BC%9AVS%20Code%20+%20Jupyter%20+%20DataGrip/" title="IDE 工具配置：VS Code + Jupyter + DataGrip">IDE 工具配置：VS Code + Jupyter + DataGrip</a><time datetime="2026-02-24T15:00:00.000Z" title="发表于 2026-02-24 23:00:00">2026-02-24</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/02/24/Git%20%E7%89%88%E6%9C%AC%E6%8E%A7%E5%88%B6%E4%B8%8E%E5%9B%A2%E9%98%9F%E5%8D%8F%E4%BD%9C/" title="Git 版本控制与团队协作">Git 版本控制与团队协作</a><time datetime="2026-02-24T14:00:00.000Z" title="发表于 2026-02-24 22:00:00">2026-02-24</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/02/24/Linux%20%E4%B8%8E%20Shell%EF%BC%88%E4%BA%8C%EF%BC%89Shell%20%E8%84%9A%E6%9C%AC%E7%BC%96%E5%86%99/" title="Linux 与 Shell（二）Shell 脚本编写">Linux 与 Shell（二）Shell 脚本编写</a><time datetime="2026-02-24T13:00:00.000Z" title="发表于 2026-02-24 21:00:00">2026-02-24</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/02/24/%E6%95%B0%E6%8D%AE%E4%BB%93%E5%BA%93%E6%A0%B8%E5%BF%83%E6%A6%82%E5%BF%B5%E8%AF%A6%E8%A7%A3%20-%20%E7%BB%B4%E5%BA%A6%E5%BB%BA%E6%A8%A1%E3%80%81%E6%95%B0%E6%8D%AE%E5%88%86%E5%B1%82%E4%B8%8E%20SCD%20%E5%A4%84%E7%90%86/" title="数据仓库核心概念详解 - 维度建模、数据分层与 SCD 处理">数据仓库核心概念详解 - 维度建模、数据分层与 SCD 处理</a><time datetime="2026-02-24T13:00:00.000Z" title="发表于 2026-02-24 21:00:00">2026-02-24</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/02/24/MySQL%20%E8%BF%90%E7%BB%B4%E7%AF%87%2004-10%20MyCat%20%E7%AE%A1%E7%90%86%E4%B8%8E%E7%9B%91%E6%8E%A7/" title="MySQL 运维篇 04-10 MyCat 管理与监控">MySQL 运维篇 04-10 MyCat 管理与监控</a><time datetime="2026-02-24T12:05:00.000Z" title="发表于 2026-02-24 20:05:00">2026-02-24</time></div></div></div></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2025 - 2026 By 过拟合的炸鱼薯条</span><span class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 8.1.1</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.5.4</a></span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=5.5.4"></script><script src="/js/main.js?v=5.5.4"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><i class="fas fa-spinner fa-pulse" id="loading-status" hidden="hidden"></i><button class="search-close-button"><i class="fas fa-times"></i></button></nav><div class="text-center" id="loading-database"><i class="fas fa-spinner fa-pulse"></i><span>  数据加载中</span></div><div class="local-search-input"><input placeholder="搜索..." type="text"/></div><hr/><div id="local-search-results"></div><div class="ais-Pagination" id="local-search-pagination" style="display:none;"><ul class="ais-Pagination-list"></ul></div><div id="local-search-stats"></div></div><div id="search-mask"></div><script src="/js/search/local-search.js?v=5.5.4"></script></div></div></body></html>

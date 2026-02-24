@@ -1,0 +1,217 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>过拟合的炸鱼薯条 - 一个踏实（缓慢）学习技术的博客</title><meta name="author" content="过拟合的炸鱼薯条"><meta name="copyright" content="过拟合的炸鱼薯条"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="记录学习中的困惑与成长，保持好奇，持续进步">
+<meta property="og:type" content="website">
+<meta property="og:title" content="过拟合的炸鱼薯条">
+<meta property="og:url" content="https://brian-lin-c.github.io/page/6/index.html">
+<meta property="og:site_name" content="过拟合的炸鱼薯条">
+<meta property="og:description" content="记录学习中的困惑与成长，保持好奇，持续进步">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://brian-lin-c.github.io/img/%E5%A4%B4%E5%83%8F.jpg">
+<meta property="article:author" content="过拟合的炸鱼薯条">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://brian-lin-c.github.io/img/%E5%A4%B4%E5%83%8F.jpg"><script type="application/ld+json"></script><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://brian-lin-c.github.io/page/6/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=5.5.4"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.1.0/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        if (!ttl) return
+        const expiry = Date.now() + ttl * 86400000
+        localStorage.setItem(key, JSON.stringify({ value, expiry }))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return undefined
+        const { value, expiry } = JSON.parse(itemStr)
+        if (Date.now() > expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return value
+      }
+    }
+
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        Object.entries(attr).forEach(([key, val]) => script.setAttribute(key, val))
+        script.onload = script.onreadystatechange = () => {
+          if (!script.readyState || /loaded|complete/.test(script.readyState)) resolve()
+        }
+        script.onerror = reject
+        document.head.appendChild(script)
+      }),
+      getCSS: (url, id) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onload = link.onreadystatechange = () => {
+          if (!link.readyState || /loaded|complete/.test(link.readyState)) resolve()
+        }
+        link.onerror = reject
+        document.head.appendChild(link)
+      }),
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"/search.xml","preload":true,"top_n_per_article":1,"unescape":false,"pagination":{"enable":false,"hitsPerPage":8},"languages":{"hits_empty":"未找到符合您查询的内容：${query}","hits_stats":"共找到 ${hits} 篇文章"}},
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.13.0/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '过拟合的炸鱼薯条',
+  isHighlightShrink: false,
+  isToc: false,
+  pageType: 'home'
+}</script><meta name="generator" content="Hexo 8.1.1"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/img/%E5%A4%B4%E5%83%8F.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">68</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">157</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">9</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user"></i><span> 关于</span></a></div></div></div></div><div class="page" id="body-wrap"><header class="full_page" id="page-header" style="background-image: url(/img/%E6%A8%AA%E5%B9%85.jpg);"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">过拟合的炸鱼薯条</span></a></span><div id="menus"><div id="search-button"><span class="site-page social-icon search"><i class="fas fa-search fa-fw"></i><span> 搜索</span></span></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user"></i><span> 关于</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="site-info"><h1 id="site-title">过拟合的炸鱼薯条</h1><div id="site-subtitle"><span id="subtitle"></span></div><div id="site_social_icons"><a class="social-icon" href="https://github.com/Brian-Lin-C" target="_blank" title="Github"><i class="fab fa-github" style="color: #24292e;"></i></a></div></div><div id="scroll-down"><i class="fas fa-angle-down scroll-down-effects"></i></div></header><main class="layout" id="content-inner"><div class="recent-posts nc" id="recent-posts"><div class="recent-post-items"><div class="recent-post-item"><div class="recent-post-info no-cover"><a class="article-title" href="/2026/02/24/MySQL%20%E8%BF%9B%E9%98%B6%E6%95%99%E7%A8%8B%2008-01%20%E7%B4%A2%E5%BC%95%E4%BD%BF%E7%94%A8%E8%A7%84%E5%88%99/" title="MySQL 进阶教程 08-01 索引使用规则">MySQL 进阶教程 08-01 索引使用规则</a><div class="article-meta-wrap"><span class="post-meta-date"><i class="far fa-calendar-alt"></i><span class="article-meta-label">发表于</span><time datetime="2026-02-24T03:00:00.000Z" title="发表于 2026-02-24 11:00:00">2026-02-24</time></span><span class="article-meta"><span class="article-meta-separator">|</span><i class="fas fa-inbox"></i><a class="article-meta__categories" href="/categories/MySQL-%E8%BF%9B%E9%98%B6%E6%95%99%E7%A8%8B/">MySQL 进阶教程</a></span></div><div class="content">MySQL 进阶教程 08-01 索引使用规则创建索引只是第一步，正确使用索引才能发挥其最大价值。本文将详细介绍索引的使用规则、失效场景以及设计原则。 一、验证索引效率1.1 索引效果对比123456789101112131415161718192021222324252627282930-- 准备测试数据DROP TABLE IF EXISTS test_index;CREATE TABLE test_index (    id INT PRIMARY KEY AUTO_INCREMENT,    name VARCHAR(50),    age INT,    email VARCHAR(100),    content TEXT) ENGINE=InnoDB;-- 插入 10 万条测试数据DELIMITER $$CREATE PROCEDURE insert_data()BEGIN    DECLARE i INT DEFAULT 1;    WHILE i &lt;= 100000 DO        INSERT INTO test_index (name, age, ...</div></div></div><div class="recent-post-item"><div class="recent-post-info no-cover"><a class="article-title" href="/2026/02/24/Python%20%E5%9F%BA%E7%A1%80%E6%95%99%E7%A8%8B%EF%BC%88%E4%B8%80%EF%BC%89%E5%9F%BA%E7%A1%80%E8%AF%AD%E6%B3%95%E5%85%A5%E9%97%A8/" title="Python 基础教程（一）基础语法入门">Python 基础教程（一）基础语法入门</a><div class="article-meta-wrap"><span class="post-meta-date"><i class="far fa-calendar-alt"></i><span class="article-meta-label">发表于</span><time datetime="2026-02-24T03:00:00.000Z" title="发表于 2026-02-24 11:00:00">2026-02-24</time></span><span class="article-meta"><span class="article-meta-separator">|</span><i class="fas fa-inbox"></i><a class="article-meta__categories" href="/categories/Python-%E6%95%99%E7%A8%8B/">Python 教程</a></span></div><div class="content">Python 基础教程（一）基础语法入门欢迎来到 Python 基础教程系列！本篇将从零开始介绍 Python 的基础语法，帮助你快速上手 Python 编程。 一、Python 简介1.1 为什么选择 Python？ 语法简洁：代码可读性强，接近自然语言 生态丰富：拥有庞大的第三方库生态系统 应用广泛：Web 开发、数据分析、人工智能、自动化脚本等 跨平台：Windows、Linux、macOS 均可运行 社区活跃：遇到问题容易找到解决方案  1.2 Python 版本选择 提醒自己：务必使用 Python 3.x（推荐 3.8+），Python 2 已停止维护。  二、环境搭建2.1 安装 PythonWindows：  访问 https://www.python.org/downloads/ 下载最新稳定版（如 3.11.x） 安装时勾选 “Add Python to PATH”  验证安装： 123python --version# 或python3 --version  2.2 包管理工具 pip1234567891011121314151617181920212223...</div></div></div><div class="recent-post-item"><div class="recent-post-info no-cover"><a class="article-title" href="/2026/02/24/Markdown%20%E8%AF%AD%E6%B3%95%E6%95%99%E7%A8%8B%E2%80%94%E2%80%94%E5%A6%82%E4%BD%95%E5%86%99%E5%8D%9A%E5%AE%A2/" title="Markdown 语法教程——如何写博客">Markdown 语法教程——如何写博客</a><div class="article-meta-wrap"><span class="post-meta-date"><i class="far fa-calendar-alt"></i><span class="article-meta-label">发表于</span><time datetime="2026-02-24T02:00:00.000Z" title="发表于 2026-02-24 10:00:00">2026-02-24</time></span><span class="article-meta"><span class="article-meta-separator">|</span><i class="fas fa-inbox"></i><a class="article-meta__categories" href="/categories/%E6%8A%80%E6%9C%AF%E6%95%99%E7%A8%8B/">技术教程</a></span></div><div class="content">前言这篇教程是写给我自己的 Markdown 语法备忘录。记录常用的 Markdown 语法和博客配置，方便以后写博客时快速查阅。  提醒自己：写博客不是为了追求完美，而是为了记录和分享。不要等到什么都准备好了才开始，先写起来，在写作中不断完善。  一、Markdown 基础语法1.1 标题使用 # 符号来定义标题： 1234# 一级标题（文章标题，每篇文章只能有一个）## 二级标题（主要章节）### 三级标题（小节）#### 四级标题（细分内容）   提醒自己：  文章标题用一级标题，正文中从二级标题开始 标题层级要清晰，不要跳级使用（比如不要从 ## 直接跳到 ####） 每个大章节用 ##，子内容用 ###   1.2 段落与换行1234这是第一段。段落之间要空一行。这是第二段。行尾加两个空格可以强制换行。这是换行后的内容。   提醒自己：  段落不要太长，3-5 句一段比较合适 代码教程中，解释和代码示例之间要空行，方便阅读   1.3 文本样式   样式 语法 示例    粗体 **文本** 重要内容   斜体 *文本* 强调一下   删除线 ~~文本~~ 过时的内容 ...</div></div></div><div class="recent-post-item"><div class="recent-post-info no-cover"><a class="article-title" href="/2026/02/24/MySQL%20%E8%BF%9B%E9%98%B6%E6%95%99%E7%A8%8B%2004-01%20%E7%AA%97%E5%8F%A3%E5%87%BD%E6%95%B0%E6%A6%82%E8%BF%B0/" title="MySQL 进阶教程 04-01 窗口函数概述">MySQL 进阶教程 04-01 窗口函数概述</a><div class="article-meta-wrap"><span class="post-meta-date"><i class="far fa-calendar-alt"></i><span class="article-meta-label">发表于</span><time datetime="2026-02-24T02:00:00.000Z" title="发表于 2026-02-24 10:00:00">2026-02-24</time></span><span class="article-meta"><span class="article-meta-separator">|</span><i class="fas fa-inbox"></i><a class="article-meta__categories" href="/categories/MySQL-%E8%BF%9B%E9%98%B6%E6%95%99%E7%A8%8B/">MySQL 进阶教程</a></span></div><div class="content">MySQL 进阶教程 04-01 窗口函数概述窗口函数（Window Function）是 MySQL 8.0+ 引入的强大特性，用于实现复杂的分析查询。本文将详细介绍窗口函数的基本概念、语法结构以及与聚合函数的区别。 一、窗口函数简介1.1 什么是窗口函数？窗口函数 是对一组行（称为”窗口”）执行计算的函数，但与聚合函数不同的是，窗口函数会为每一行返回一个结果，而不是将多行聚合为单个值。 通俗理解：  聚合函数：多行 → 一个结果 窗口函数：多行 → 每行一个结果（基于窗口内数据计算）  1.2 窗口函数的应用场景   场景 说明 示例    排名问题 获取 Top N 记录 每个部门工资最高的 3 名员工   累计计算 累计求和、平均值 累计销售额、移动平均   前后行访问 访问当前行的前后行数据 同比、环比增长   分组内排序 组内排序编号 每笔订单在客户订单中的序号   分桶分析 将数据分成若干组 按成绩分等级、百分位分析   1.3 为什么需要窗口函数？在窗口函数出现之前，实现类似功能通常需要：  自连接 子查询 用户变量 应用层处理  这些方法往往语法复杂、性能较差、...</div></div></div><div class="recent-post-item"><div class="recent-post-info no-cover"><a class="article-title" href="/2026/02/24/MySQL%20%E8%BF%9B%E9%98%B6%E6%95%99%E7%A8%8B%2006-01%20%E5%AD%98%E5%82%A8%E5%BC%95%E6%93%8E%E8%AF%A6%E8%A7%A3/" title="MySQL 进阶教程 06-01 存储引擎详解">MySQL 进阶教程 06-01 存储引擎详解</a><div class="article-meta-wrap"><span class="post-meta-date"><i class="far fa-calendar-alt"></i><span class="article-meta-label">发表于</span><time datetime="2026-02-24T02:00:00.000Z" title="发表于 2026-02-24 10:00:00">2026-02-24</time></span><span class="article-meta"><span class="article-meta-separator">|</span><i class="fas fa-inbox"></i><a class="article-meta__categories" href="/categories/MySQL-%E8%BF%9B%E9%98%B6%E6%95%99%E7%A8%8B/">MySQL 进阶教程</a></span></div><div class="content">MySQL 进阶教程 06-01 存储引擎详解存储引擎是 MySQL 的核心组件之一，决定了数据的存储方式和访问特性。本文将详细介绍 MySQL 的存储引擎架构和常用引擎的特点。 一、存储引擎概述1.1 什么是存储引擎？存储引擎（Storage Engine） 是 MySQL 中负责数据存储、提取和管理的底层组件。MySQL 采用插件式存储引擎架构，可以根据需求选择不同的引擎。 1234567891011MySQL 架构简图：┌─────────────────────────────────────┐│         SQL 接口（查询解析）          │├─────────────────────────────────────┤│         查询优化器                   │├─────────────────────────────────────┤│     存储引擎层（插件式架构）           ││  ┌─────────┬─────────┬─────────┐    ││  │ InnoDB  │ MyISAM  │ Mem...</div></div></div><div class="recent-post-item"><div class="recent-post-info no-cover"><a class="article-title" href="/2026/02/24/MySQL%20%E8%BF%9B%E9%98%B6%E6%95%99%E7%A8%8B%2007-01%20%E7%B4%A2%E5%BC%95%E8%AF%A6%E8%A7%A3/" title="MySQL 进阶教程 07-01 索引详解">MySQL 进阶教程 07-01 索引详解</a><div class="article-meta-wrap"><span class="post-meta-date"><i class="far fa-calendar-alt"></i><span class="article-meta-label">发表于</span><time datetime="2026-02-24T02:00:00.000Z" title="发表于 2026-02-24 10:00:00">2026-02-24</time></span><span class="article-meta"><span class="article-meta-separator">|</span><i class="fas fa-inbox"></i><a class="article-meta__categories" href="/categories/MySQL-%E8%BF%9B%E9%98%B6%E6%95%99%E7%A8%8B/">MySQL 进阶教程</a></span></div><div class="content">MySQL 进阶教程 07-01 索引详解索引是数据库性能优化的核心技术。本文将详细介绍索引的概念、数据结构、分类、创建和使用方法，以及如何使用 EXPLAIN 分析查询性能。 一、索引概述1.1 什么是索引？索引（Index） 是帮助数据库高效获取数据的数据结构。类似于书籍的目录，通过索引可以快速定位到目标数据，而无需扫描整个表。 1234567无索引查询（全表扫描）：数据：[A][B][C][D][E][F][G]...[Z]查找 M：需要遍历 13 次有索引查询：索引：A→1, B→2, C→3, ..., M→13, ..., Z→26查找 M：直接定位，1 次找到  1.2 索引的优缺点优点：  大幅提高查询速度（最主要目的） 加速表连接（JOIN）操作 加速 ORDER BY 和 GROUP BY 实现唯一性约束  缺点：  占用额外存储空间 降低 INSERT、UPDATE、DELETE 速度（需要同时更新索引） 创建和维护需要时间  1.3 索引使用场景   场景 说明    主键&#x2F;外键列 自动创建索引   WHERE 条件列 经常作为查询条件的列   ...</div></div></div><div class="recent-post-item"><div class="recent-post-info no-cover"><a class="article-title" href="/2026/02/23/MySQL%20%E8%BF%9B%E9%98%B6%E6%95%99%E7%A8%8B%2015-05%20%E8%BF%9B%E9%98%B6%E7%AF%87%E6%80%BB%E7%BB%93/" title="MySQL 进阶教程 15-05 进阶篇总结">MySQL 进阶教程 15-05 进阶篇总结</a><div class="article-meta-wrap"><span class="post-meta-date"><i class="far fa-calendar-alt"></i><span class="article-meta-label">发表于</span><time datetime="2026-02-23T11:00:00.000Z" title="发表于 2026-02-23 19:00:00">2026-02-23</time></span><span class="article-meta"><span class="article-meta-separator">|</span><i class="fas fa-inbox"></i><a class="article-meta__categories" href="/categories/MySQL-%E8%BF%9B%E9%98%B6%E6%95%99%E7%A8%8B/">MySQL 进阶教程</a></span></div><div class="content">MySQL 进阶教程 15-05 进阶篇总结至此，MySQL 基础篇和进阶教程全部完成！本文将对整个系列进行系统总结，并提供学习路线建议。 一、系列文章回顾基础教程系列   篇目 主题 核心内容    基础（一） 数据库基础与环境搭建 数据库概念、MySQL 安装、数据模型、SQL 分类   基础（二） DDL 数据定义语言 数据库操作、表操作、数据类型、DataGrip   基础（三） DML 数据操作语言 INSERT、UPDATE、DELETE、事务基础   基础（四） DQL 数据查询语言 基础查询、条件查询、聚合函数、分组、排序、分页、连接查询、子查询   基础（五） DCL 数据控制语言 用户管理、权限控制、事务控制   进阶教程系列   篇目 主题 核心内容    进阶（一） 常用函数详解 字符串函数、数值函数、日期函数、流程函数   进阶（二） 数据库约束 主键、外键、唯一、非空、默认、检查约束   进阶（三） 多表查询 表关系、连接查询、联合查询、子查询   进阶（四） 事务 ACID 特性、并发问题、隔离级别、锁机制   二、知识体系思维导图2.1 SQL 语...</div></div></div><div class="recent-post-item"><div class="recent-post-info no-cover"><a class="article-title" href="/2026/02/23/MySQL%20%E8%BF%9B%E9%98%B6%E6%95%99%E7%A8%8B%2005-01%20%E4%BA%8B%E5%8A%A1%E8%AF%A6%E8%A7%A3/" title="MySQL 进阶教程 05-01 事务详解">MySQL 进阶教程 05-01 事务详解</a><div class="article-meta-wrap"><span class="post-meta-date"><i class="far fa-calendar-alt"></i><span class="article-meta-label">发表于</span><time datetime="2026-02-23T10:00:00.000Z" title="发表于 2026-02-23 18:00:00">2026-02-23</time></span><span class="article-meta"><span class="article-meta-separator">|</span><i class="fas fa-inbox"></i><a class="article-meta__categories" href="/categories/MySQL-%E8%BF%9B%E9%98%B6%E6%95%99%E7%A8%8B/">MySQL 进阶教程</a></span></div><div class="content">MySQL 进阶教程 05-01 事务详解事务是数据库管理的核心技术之一，用于保证数据的完整性和一致性。本文将详细讲解事务的概念、ACID 特性、并发问题以及隔离级别。 一、事务简介1.1 什么是事务？事务（Transaction） 是数据库管理系统执行过程中的一个逻辑单位，由一个有限的数据库操作序列构成。这些操作要么全部成功执行，要么全部不执行，是一个不可分割的工作单位。 1.2 事务的特点 原子性：事务是一个不可分割的操作序列 一致性：事务执行前后，数据保持一致 独立性：多个事务并发执行时互不干扰 持久性：事务一旦提交，修改永久保存  1.3 事务的使用场景   场景 说明    银行转账 A 转给 B 钱，A 扣款和 B 收款必须同时成功或失败   订单创建 创建订单、扣减库存、生成物流单必须同时成功   批量操作 批量导入数据，要么全部导入成功，要么全部回滚   数据一致性 更新多个关联表时保持一致性   1.4 不使用事务的问题12345678910-- 不使用事务的转账操作-- 步骤 1：A 账户扣款UPDATE accounts SET balance = bala...</div></div></div><div class="recent-post-item"><div class="recent-post-info no-cover"><a class="article-title" href="/2026/02/23/MySQL%20%E8%BF%9B%E9%98%B6%E6%95%99%E7%A8%8B%2003-01%20%E5%A4%9A%E8%A1%A8%E6%9F%A5%E8%AF%A2%E8%AF%A6%E8%A7%A3/" title="MySQL 进阶教程 03-01 多表查询详解">MySQL 进阶教程 03-01 多表查询详解</a><div class="article-meta-wrap"><span class="post-meta-date"><i class="far fa-calendar-alt"></i><span class="article-meta-label">发表于</span><time datetime="2026-02-23T09:00:00.000Z" title="发表于 2026-02-23 17:00:00">2026-02-23</time></span><span class="article-meta"><span class="article-meta-separator">|</span><i class="fas fa-inbox"></i><a class="article-meta__categories" href="/categories/MySQL-%E8%BF%9B%E9%98%B6%E6%95%99%E7%A8%8B/">MySQL 进阶教程</a></span></div><div class="content">MySQL 进阶教程 03-01 多表查询详解在实际应用中，数据通常分布在多个表中。多表查询是 SQL 中最重要、最实用的技能之一。本文将详细讲解多表关系、连接查询、联合查询和子查询。 一、多表关系介绍1.1 表与表之间的关系数据库中的表不是孤立的，它们之间通过各种关系相互关联。主要有三种关系：    关系类型 说明 示例    一对一（1:1） 一个表的一条记录对应另一个表的一条记录 用户和用户详情   一对多（1:N） 一个表的一条记录对应另一个表的多条记录 部门和员工   多对多（N:M） 一个表的多条记录对应另一个表的多条记录 学生和课程   1.2 一对一关系（1:1）特点：  表 A 的一条记录对应表 B 的一条记录 通常用于拆分大表，提高性能 外键可以放在任意一方  1234567891011121314151617181920-- 用户表CREATE TABLE users (    id INT PRIMARY KEY AUTO_INCREMENT,    username VARCHAR(50) NOT NULL,    password VARCHAR(25...</div></div></div><div class="recent-post-item"><div class="recent-post-info no-cover"><a class="article-title" href="/2026/02/23/MySQL%20%E8%BF%9B%E9%98%B6%E6%95%99%E7%A8%8B%2002-01%20%E6%95%B0%E6%8D%AE%E5%BA%93%E7%BA%A6%E6%9D%9F%E8%AF%A6%E8%A7%A3/" title="MySQL 进阶教程 02-01 数据库约束详解">MySQL 进阶教程 02-01 数据库约束详解</a><div class="article-meta-wrap"><span class="post-meta-date"><i class="far fa-calendar-alt"></i><span class="article-meta-label">发表于</span><time datetime="2026-02-23T08:00:00.000Z" title="发表于 2026-02-23 16:00:00">2026-02-23</time></span><span class="article-meta"><span class="article-meta-separator">|</span><i class="fas fa-inbox"></i><a class="article-meta__categories" href="/categories/MySQL-%E8%BF%9B%E9%98%B6%E6%95%99%E7%A8%8B/">MySQL 进阶教程</a></span></div><div class="content">MySQL 进阶教程 02-01 数据库约束详解数据库约束用于保证数据的完整性、一致性和有效性。本文将详细讲解 MySQL 中的各种约束类型及其使用方法。 一、约束概述1.1 什么是约束？约束（Constraint） 是施加在数据库表上的规则，用于限制可以存储在表中的数据，确保数据的准确性和可靠性。 1.2 约束的作用 保证数据完整性：防止无效或不一致的数据 维护数据一致性：确保相关表之间的数据关系正确 提高数据质量：强制执行业务规则 减少应用层验证：在数据库层面进行数据验证  1.3 约束的分类   约束类型 关键字 说明 列级&#x2F;表级    主键约束 PRIMARY KEY 唯一标识每条记录 两者   外键约束 FOREIGN KEY 建立表与表之间的关系 表级   唯一约束 UNIQUE 列值必须唯一 两者   非空约束 NOT NULL 列值不能为空 列级   默认约束 DEFAULT 列的默认值 列级   检查约束 CHECK 满足指定条件 表级   1.4 约束的定义时机 列级约束：在定义列时指定，直接跟在列名后面 表级约束：在所有列定义完成后，在表末尾指定 ...</div></div></div></div><nav id="pagination"><div class="pagination"><a class="extend prev" rel="prev" href="/page/5/#content-inner"><i class="fas fa-chevron-left fa-fw"></i></a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/5/#content-inner">5</a><span class="page-number current">6</span><a class="page-number" href="/page/7/#content-inner">7</a><a class="extend next" rel="next" href="/page/7/#content-inner"><i class="fas fa-chevron-right fa-fw"></i></a></div></nav></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/img/%E5%A4%B4%E5%83%8F.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">过拟合的炸鱼薯条</div><div class="author-info-description">好好学习，天天向上</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">68</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">157</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">9</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/Brian-Lin-C"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons"><a class="social-icon" href="https://github.com/Brian-Lin-C" target="_blank" title="Github"><i class="fab fa-github" style="color: #24292e;"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">欢迎来到我的个人博客！</div></div><div class="sticky_layout"><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/02/24/IDE%20%E5%B7%A5%E5%85%B7%E9%85%8D%E7%BD%AE%EF%BC%9AVS%20Code%20+%20Jupyter%20+%20DataGrip/" title="IDE 工具配置：VS Code + Jupyter + DataGrip">IDE 工具配置：VS Code + Jupyter + DataGrip</a><time datetime="2026-02-24T15:00:00.000Z" title="发表于 2026-02-24 23:00:00">2026-02-24</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/02/24/Git%20%E7%89%88%E6%9C%AC%E6%8E%A7%E5%88%B6%E4%B8%8E%E5%9B%A2%E9%98%9F%E5%8D%8F%E4%BD%9C/" title="Git 版本控制与团队协作">Git 版本控制与团队协作</a><time datetime="2026-02-24T14:00:00.000Z" title="发表于 2026-02-24 22:00:00">2026-02-24</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/02/24/Linux%20%E4%B8%8E%20Shell%EF%BC%88%E4%BA%8C%EF%BC%89Shell%20%E8%84%9A%E6%9C%AC%E7%BC%96%E5%86%99/" title="Linux 与 Shell（二）Shell 脚本编写">Linux 与 Shell（二）Shell 脚本编写</a><time datetime="2026-02-24T13:00:00.000Z" title="发表于 2026-02-24 21:00:00">2026-02-24</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/02/24/%E6%95%B0%E6%8D%AE%E4%BB%93%E5%BA%93%E6%A0%B8%E5%BF%83%E6%A6%82%E5%BF%B5%E8%AF%A6%E8%A7%A3%20-%20%E7%BB%B4%E5%BA%A6%E5%BB%BA%E6%A8%A1%E3%80%81%E6%95%B0%E6%8D%AE%E5%88%86%E5%B1%82%E4%B8%8E%20SCD%20%E5%A4%84%E7%90%86/" title="数据仓库核心概念详解 - 维度建模、数据分层与 SCD 处理">数据仓库核心概念详解 - 维度建模、数据分层与 SCD 处理</a><time datetime="2026-02-24T13:00:00.000Z" title="发表于 2026-02-24 21:00:00">2026-02-24</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/02/24/MySQL%20%E8%BF%90%E7%BB%B4%E7%AF%87%2004-10%20MyCat%20%E7%AE%A1%E7%90%86%E4%B8%8E%E7%9B%91%E6%8E%A7/" title="MySQL 运维篇 04-10 MyCat 管理与监控">MySQL 运维篇 04-10 MyCat 管理与监控</a><time datetime="2026-02-24T12:05:00.000Z" title="发表于 2026-02-24 20:05:00">2026-02-24</time></div></div></div></div><div class="card-widget card-categories"><div class="item-headline">
+            <i class="fas fa-folder-open"></i>
+            <span>分类</span>
+            <a class="card-more-btn" href="/categories/" title="查看更多">
+      <i class="fas fa-angle-right"></i></a>
+          </div>
+          <ul class="card-category-list" id="aside-cat-list">
+            <li class="card-category-list-item "><a class="card-category-list-link" href="/categories/MySQL-%E5%9F%BA%E7%A1%80%E6%95%99%E7%A8%8B/"><span class="card-category-list-name">MySQL 基础教程</span><span class="card-category-list-count">6</span></a></li><li class="card-category-list-item "><a class="card-category-list-link" href="/categories/MySQL-%E8%BF%90%E7%BB%B4%E7%AF%87/"><span class="card-category-list-name">MySQL 运维篇</span><span class="card-category-list-count">24</span></a></li><li class="card-category-list-item "><a class="card-category-list-link" href="/categories/MySQL-%E8%BF%9B%E9%98%B6%E6%95%99%E7%A8%8B/"><span class="card-category-list-name">MySQL 进阶教程</span><span class="card-category-list-count">22</span></a></li><li class="card-category-list-item "><a class="card-category-list-link" href="/categories/Python-%E6%95%99%E7%A8%8B/"><span class="card-category-list-name">Python 教程</span><span class="card-category-list-count">6</span></a></li><li class="card-category-list-item "><a class="card-category-list-link" href="/categories/Python-%E6%95%B0%E6%8D%AE%E7%A7%91%E5%AD%A6/"><span class="card-category-list-name">Python 数据科学</span><span class="card-category-list-count">3</span></a></li><li class="card-category-list-item "><a class="card-category-list-link" href="/categories/%E6%8A%80%E6%9C%AF%E6%95%99%E7%A8%8B/"><span class="card-category-list-name">技术教程</span><span class="card-category-list-count">1</span></a></li><li class="card-category-list-item "><a class="card-category-list-link" href="/categories/%E6%95%B0%E6%8D%AE%E4%BB%93%E5%BA%93/"><span class="card-category-list-name">数据仓库</span><span class="card-category-list-count">1</span></a></li><li class="card-category-list-item "><a class="card-category-list-link" href="/categories/%E7%94%9F%E6%B4%BB%E9%9A%8F%E7%AC%94/"><span class="card-category-list-name">生活随笔</span><span class="card-category-list-count">1</span></a></li>
+          </ul></div><div class="card-widget card-tags"><div class="item-headline"><i class="fas fa-tags"></i><span>标签</span></div><div class="card-tag-cloud"><a href="/tags/%E4%B8%AA%E4%BA%BA%E7%AC%94%E8%AE%B0/" style="font-size: 1.1em; color: #999">个人笔记</a> <a href="/tags/DataFrame/" style="font-size: 1.23em; color: #999ea6">DataFrame</a> <a href="/tags/%E5%BC%80%E5%A7%8B/" style="font-size: 1.1em; color: #999">开始</a> <a href="/tags/%E6%95%B0%E5%80%BC%E8%AE%A1%E7%AE%97/" style="font-size: 1.1em; color: #999">数值计算</a> <a href="/tags/requests/" style="font-size: 1.1em; color: #999">requests</a> <a href="/tags/%E6%95%B0%E6%8D%AE%E6%9F%A5%E8%AF%A2/" style="font-size: 1.23em; color: #999ea6">数据查询</a> <a href="/tags/%E5%9E%82%E7%9B%B4%E5%88%86%E5%BA%93/" style="font-size: 1.23em; color: #999ea6">垂直分库</a> <a href="/tags/%E5%87%BD%E6%95%B0/" style="font-size: 1.1em; color: #999">函数</a> <a href="/tags/%E6%9F%A5%E8%AF%A2%E6%97%A5%E5%BF%97/" style="font-size: 1.1em; color: #999">查询日志</a> <a href="/tags/TopN/" style="font-size: 1.1em; color: #999">TopN</a> <a href="/tags/%E5%AE%89%E8%A3%85%E9%85%8D%E7%BD%AE/" style="font-size: 1.1em; color: #999">安装配置</a> <a href="/tags/MyCat/" style="font-size: 1.5em; color: #99a9bf">MyCat</a> <a href="/tags/%E5%88%86%E5%BA%93%E5%88%86%E8%A1%A8/" style="font-size: 1.37em; color: #99a4b2">分库分表</a> <a href="/tags/DENSE-RANK/" style="font-size: 1.1em; color: #999">DENSE_RANK</a> <a href="/tags/SQL-%E4%BC%98%E5%8C%96/" style="font-size: 1.1em; color: #999">SQL 优化</a> <a href="/tags/%E6%B5%8B%E8%AF%95/" style="font-size: 1.23em; color: #999ea6">测试</a> <a href="/tags/%E5%9B%A2%E9%98%9F%E5%8D%8F%E4%BD%9C/" style="font-size: 1.1em; color: #999">团队协作</a> <a href="/tags/SQL-%E5%88%86%E6%9E%90/" style="font-size: 1.1em; color: #999">SQL 分析</a> <a href="/tags/%E5%A4%8D%E5%88%B6%E6%B5%8B%E8%AF%95/" style="font-size: 1.1em; color: #999">复制测试</a> <a href="/tags/ACID/" style="font-size: 1.1em; color: #999">ACID</a> <a href="/tags/scalability/" style="font-size: 1.1em; color: #999">scalability</a> <a href="/tags/%E8%BF%90%E7%BB%B4/" style="font-size: 1.37em; color: #99a4b2">运维</a> <a href="/tags/%E4%BB%8E%E5%BA%93%E9%85%8D%E7%BD%AE/" style="font-size: 1.1em; color: #999">从库配置</a> <a href="/tags/ROW-NUMBER/" style="font-size: 1.1em; color: #999">ROW_NUMBER</a> <a href="/tags/%E9%AB%98%E5%8F%AF%E7%94%A8/" style="font-size: 1.1em; color: #999">高可用</a> <a href="/tags/Pandas/" style="font-size: 1.1em; color: #999">Pandas</a> <a href="/tags/SCD/" style="font-size: 1.1em; color: #999">SCD</a> <a href="/tags/%E5%A4%8D%E5%88%B6/" style="font-size: 1.1em; color: #999">复制</a> <a href="/tags/%E5%AD%98%E5%82%A8%E5%BC%95%E6%93%8E/" style="font-size: 1.23em; color: #999ea6">存储引擎</a> <a href="/tags/%E8%B0%83%E8%AF%95/" style="font-size: 1.1em; color: #999">调试</a> <a href="/tags/%E7%B3%BB%E7%BB%9F%E6%95%B0%E6%8D%AE%E5%BA%93/" style="font-size: 1.1em; color: #999">系统数据库</a> <a href="/tags/%E9%94%81%E6%9C%BA%E5%88%B6/" style="font-size: 1.1em; color: #999">锁机制</a> <a href="/tags/OVER/" style="font-size: 1.1em; color: #999">OVER</a> <a href="/tags/%E8%A7%A6%E5%8F%91%E5%99%A8/" style="font-size: 1.1em; color: #999">触发器</a> <a href="/tags/%E7%AE%A1%E7%90%86/" style="font-size: 1.1em; color: #999">管理</a> <a href="/tags/ROWS/" style="font-size: 1.1em; color: #999">ROWS</a> <a href="/tags/%E7%B3%BB%E7%BB%9F%E7%AE%A1%E7%90%86/" style="font-size: 1.1em; color: #999">系统管理</a> <a href="/tags/MVCC/" style="font-size: 1.1em; color: #999">MVCC</a> <a href="/tags/%E6%85%A2%E6%9F%A5%E8%AF%A2/" style="font-size: 1.1em; color: #999">慢查询</a> <a href="/tags/PyArrow/" style="font-size: 1.1em; color: #999">PyArrow</a></div></div><div class="card-widget card-archives">
+    <div class="item-headline">
+      <i class="fas fa-archive"></i>
+      <span>归档</span>
+      
+    </div>
+  
+    <ul class="card-archive-list">
+      
+        <li class="card-archive-list-item">
+          <a class="card-archive-list-link" href="/archives/2026/02/">
+            <span class="card-archive-list-date">
+              二月 2026
+            </span>
+            <span class="card-archive-list-count">68</span>
+          </a>
+        </li>
+      
+    </ul>
+  </div><div class="card-widget card-webinfo"><div class="item-headline"><i class="fas fa-chart-line"></i><span>网站信息</span></div><div class="webinfo"><div class="webinfo-item"><div class="item-name">文章数目 :</div><div class="item-count">68</div></div><div class="webinfo-item"><div class="item-name">本站总字数 :</div><div class="item-count">156.1k</div></div><div class="webinfo-item"><div class="item-name">本站访客数 :</div><div class="item-count" id="busuanzi_value_site_uv"><i class="fa-solid fa-spinner fa-spin"></i></div></div><div class="webinfo-item"><div class="item-name">本站总浏览量 :</div><div class="item-count" id="busuanzi_value_site_pv"><i class="fa-solid fa-spinner fa-spin"></i></div></div><div class="webinfo-item"><div class="item-name">最后更新时间 :</div><div class="item-count" id="last-push-date" data-lastPushDate="2026-02-24T12:35:19.608Z"><i class="fa-solid fa-spinner fa-spin"></i></div></div></div></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2025 - 2026 By 过拟合的炸鱼薯条</span><span class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 8.1.1</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.5.4</a></span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=5.5.4"></script><script src="/js/main.js?v=5.5.4"></script><div class="js-pjax"><script>window.typedJSFn = {
+  init: str => {
+    window.typed = new Typed('#subtitle', Object.assign({
+      strings: str,
+      startDelay: 300,
+      typeSpeed: 150,
+      loop: true,
+      backSpeed: 50,
+    }, null))
+  },
+  run: subtitleType => {
+    if (true) {
+      if (typeof Typed === 'function') {
+        subtitleType()
+      } else {
+        btf.getScript('https://cdn.jsdelivr.net/npm/typed.js@3.0.0/dist/typed.umd.min.js').then(subtitleType)
+      }
+    } else {
+      subtitleType()
+    }
+  },
+  processSubtitle: (content, extraContents = []) => {
+    if (true) {
+      const sub = ["嗨，欢迎来到我的小房间 ~","我是过拟合的炸鱼薯条","一个踏实（缓慢）学习技术的博客","保持好奇，持续学习"].slice()
+
+      if (extraContents.length > 0) {
+        sub.unshift(...extraContents)
+      }
+
+      if (typeof content === 'string') {
+        sub.unshift(content)
+      } else if (Array.isArray(content)) {
+        sub.unshift(...content)
+      }
+
+      sub.length > 0 && typedJSFn.init(sub)
+    } else {
+      document.getElementById('subtitle').textContent = typeof content === 'string' ? content :
+        (Array.isArray(content) && content.length > 0 ? content[0] : '')
+    }
+  }
+}
+btf.addGlobalFn('pjaxSendOnce', () => { typed.destroy() }, 'typedDestroy')
+</script><script>function subtitleType () {
+  typedJSFn.processSubtitle(["嗨，欢迎来到我的小房间 ~","我是过拟合的炸鱼薯条","一个踏实（缓慢）学习技术的博客","保持好奇，持续学习"])
+}
+typedJSFn.run(subtitleType)</script></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><i class="fas fa-spinner fa-pulse" id="loading-status" hidden="hidden"></i><button class="search-close-button"><i class="fas fa-times"></i></button></nav><div class="text-center" id="loading-database"><i class="fas fa-spinner fa-pulse"></i><span>  数据加载中</span></div><div class="local-search-input"><input placeholder="搜索..." type="text"/></div><hr/><div id="local-search-results"></div><div class="ais-Pagination" id="local-search-pagination" style="display:none;"><ul class="ais-Pagination-list"></ul></div><div id="local-search-stats"></div></div><div id="search-mask"></div><script src="/js/search/local-search.js?v=5.5.4"></script></div></div></body></html>

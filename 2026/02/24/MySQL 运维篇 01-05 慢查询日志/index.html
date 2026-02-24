@@ -1,0 +1,479 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>MySQL 运维篇 01-05 慢查询日志 | 过拟合的炸鱼薯条</title><meta name="author" content="过拟合的炸鱼薯条"><meta name="copyright" content="过拟合的炸鱼薯条"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="MySQL 运维篇 01-05 慢查询日志慢查询日志（Slow Query Log）是 MySQL 性能优化的重要工具，用于记录执行时间超过指定阈值的 SQL 语句。通过分析慢查询日志，可以发现和优化性能瓶颈。 一、慢查询日志介绍1.1 什么是慢查询日志？慢查询日志记录执行时间超过指定阈值的 SQL 语句： 12345慢查询日志记录内容：├── 执行时间超过 long_query_time 的 S">
+<meta property="og:type" content="article">
+<meta property="og:title" content="MySQL 运维篇 01-05 慢查询日志">
+<meta property="og:url" content="https://brian-lin-c.github.io/2026/02/24/MySQL%20%E8%BF%90%E7%BB%B4%E7%AF%87%2001-05%20%E6%85%A2%E6%9F%A5%E8%AF%A2%E6%97%A5%E5%BF%97/index.html">
+<meta property="og:site_name" content="过拟合的炸鱼薯条">
+<meta property="og:description" content="MySQL 运维篇 01-05 慢查询日志慢查询日志（Slow Query Log）是 MySQL 性能优化的重要工具，用于记录执行时间超过指定阈值的 SQL 语句。通过分析慢查询日志，可以发现和优化性能瓶颈。 一、慢查询日志介绍1.1 什么是慢查询日志？慢查询日志记录执行时间超过指定阈值的 SQL 语句： 12345慢查询日志记录内容：├── 执行时间超过 long_query_time 的 S">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://brian-lin-c.github.io/img/%E5%A4%B4%E5%83%8F.jpg">
+<meta property="article:published_time" content="2026-02-24T10:20:00.000Z">
+<meta property="article:modified_time" content="2026-02-24T11:08:10.483Z">
+<meta property="article:author" content="过拟合的炸鱼薯条">
+<meta property="article:tag" content="MySQL">
+<meta property="article:tag" content="SQL 分析">
+<meta property="article:tag" content="性能优化">
+<meta property="article:tag" content="慢查询日志">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://brian-lin-c.github.io/img/%E5%A4%B4%E5%83%8F.jpg"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "MySQL 运维篇 01-05 慢查询日志",
+  "url": "https://brian-lin-c.github.io/2026/02/24/MySQL%20%E8%BF%90%E7%BB%B4%E7%AF%87%2001-05%20%E6%85%A2%E6%9F%A5%E8%AF%A2%E6%97%A5%E5%BF%97/",
+  "image": "https://brian-lin-c.github.io/img/%E5%A4%B4%E5%83%8F.jpg",
+  "datePublished": "2026-02-24T10:20:00.000Z",
+  "dateModified": "2026-02-24T11:08:10.483Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "过拟合的炸鱼薯条",
+      "url": "https://brian-lin-c.github.io"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://brian-lin-c.github.io/2026/02/24/MySQL%20%E8%BF%90%E7%BB%B4%E7%AF%87%2001-05%20%E6%85%A2%E6%9F%A5%E8%AF%A2%E6%97%A5%E5%BF%97/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=5.5.4"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.1.0/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        if (!ttl) return
+        const expiry = Date.now() + ttl * 86400000
+        localStorage.setItem(key, JSON.stringify({ value, expiry }))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return undefined
+        const { value, expiry } = JSON.parse(itemStr)
+        if (Date.now() > expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return value
+      }
+    }
+
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        Object.entries(attr).forEach(([key, val]) => script.setAttribute(key, val))
+        script.onload = script.onreadystatechange = () => {
+          if (!script.readyState || /loaded|complete/.test(script.readyState)) resolve()
+        }
+        script.onerror = reject
+        document.head.appendChild(script)
+      }),
+      getCSS: (url, id) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onload = link.onreadystatechange = () => {
+          if (!link.readyState || /loaded|complete/.test(link.readyState)) resolve()
+        }
+        link.onerror = reject
+        document.head.appendChild(link)
+      }),
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"/search.xml","preload":true,"top_n_per_article":1,"unescape":false,"pagination":{"enable":false,"hitsPerPage":8},"languages":{"hits_empty":"未找到符合您查询的内容：${query}","hits_stats":"共找到 ${hits} 篇文章"}},
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.13.0/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'MySQL 运维篇 01-05 慢查询日志',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><meta name="generator" content="Hexo 8.1.1"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/img/%E5%A4%B4%E5%83%8F.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">68</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">157</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">9</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user"></i><span> 关于</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">过拟合的炸鱼薯条</span></a><a class="nav-page-title" href="/"><span class="site-name">MySQL 运维篇 01-05 慢查询日志</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div id="search-button"><span class="site-page social-icon search"><i class="fas fa-search fa-fw"></i><span> 搜索</span></span></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user"></i><span> 关于</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">MySQL 运维篇 01-05 慢查询日志</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2026-02-24T10:20:00.000Z" title="发表于 2026-02-24 18:20:00">2026-02-24</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-02-24T11:08:10.483Z" title="更新于 2026-02-24 19:08:10">2026-02-24</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/MySQL-%E8%BF%90%E7%BB%B4%E7%AF%87/">MySQL 运维篇</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-wordcount"><i class="far fa-file-word fa-fw post-meta-icon"></i><span class="post-meta-label">总字数:</span><span class="word-count">2.9k</span><span class="post-meta-separator">|</span><i class="far fa-clock fa-fw post-meta-icon"></i><span class="post-meta-label">阅读时长:</span><span>13分钟</span></span><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><h1 id="MySQL-运维篇-01-05-慢查询日志"><a href="#MySQL-运维篇-01-05-慢查询日志" class="headerlink" title="MySQL 运维篇 01-05 慢查询日志"></a>MySQL 运维篇 01-05 慢查询日志</h1><p>慢查询日志（Slow Query Log）是 MySQL 性能优化的重要工具，用于记录执行时间超过指定阈值的 SQL 语句。通过分析慢查询日志，可以发现和优化性能瓶颈。</p>
+<h2 id="一、慢查询日志介绍"><a href="#一、慢查询日志介绍" class="headerlink" title="一、慢查询日志介绍"></a>一、慢查询日志介绍</h2><h3 id="1-1-什么是慢查询日志？"><a href="#1-1-什么是慢查询日志？" class="headerlink" title="1.1 什么是慢查询日志？"></a>1.1 什么是慢查询日志？</h3><p><strong>慢查询日志</strong>记录执行时间超过指定阈值的 SQL 语句：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">慢查询日志记录内容：</span><br><span class="line">├── 执行时间超过 long_query_time 的 SQL</span><br><span class="line">├── 未使用索引的查询（可选）</span><br><span class="line">├── 不使用索引的 JOIN（可选）</span><br><span class="line">└── 包含：执行时间、锁定时间、发送行数、扫描行数</span><br></pre></td></tr></table></figure>
+
+<h3 id="1-2-慢查询的作用"><a href="#1-2-慢查询的作用" class="headerlink" title="1.2 慢查询的作用"></a>1.2 慢查询的作用</h3><table>
+<thead>
+<tr>
+<th>作用</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>性能瓶颈定位</td>
+<td>找到执行慢的 SQL</td>
+</tr>
+<tr>
+<td>索引优化依据</td>
+<td>发现需要索引的字段</td>
+</tr>
+<tr>
+<td>SQL 优化参考</td>
+<td>分析低效的 SQL 写法</td>
+</tr>
+<tr>
+<td>性能监控</td>
+<td>定期分析性能趋势</td>
+</tr>
+</tbody></table>
+<h3 id="1-3-与进阶篇的区别"><a href="#1-3-与进阶篇的区别" class="headerlink" title="1.3 与进阶篇的区别"></a>1.3 与进阶篇的区别</h3><table>
+<thead>
+<tr>
+<th>内容</th>
+<th>进阶篇（09-08）</th>
+<th>运维篇（01-05）</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>重点</td>
+<td>基础使用和案例</td>
+<td>深入配置和分析</td>
+</tr>
+<tr>
+<td>开启方法</td>
+<td>基础命令</td>
+<td>详细参数配置</td>
+</tr>
+<tr>
+<td>分析工具</td>
+<td>简单介绍</td>
+<td>详细使用</td>
+</tr>
+<tr>
+<td>实战案例</td>
+<td>单个案例</td>
+<td>多种场景</td>
+</tr>
+</tbody></table>
+<h2 id="二、慢查询日志配置"><a href="#二、慢查询日志配置" class="headerlink" title="二、慢查询日志配置"></a>二、慢查询日志配置</h2><h3 id="2-1-基本配置参数"><a href="#2-1-基本配置参数" class="headerlink" title="2.1 基本配置参数"></a>2.1 基本配置参数</h3><figure class="highlight ini"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="section">[mysqld]</span></span><br><span class="line"><span class="comment"># 开启慢查询日志</span></span><br><span class="line"><span class="attr">slow_query_log</span> = <span class="number">1</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 日志文件路径</span></span><br><span class="line"><span class="attr">slow_query_log_file</span> = /var/log/mysql/slow.log</span><br><span class="line"></span><br><span class="line"><span class="comment"># 慢查询阈值（秒）</span></span><br><span class="line"><span class="attr">long_query_time</span> = <span class="number">2</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 记录未使用索引的查询</span></span><br><span class="line"><span class="attr">log_queries_not_using_indexes</span> = <span class="number">1</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 记录未使用索引的 JOIN</span></span><br><span class="line"><span class="attr">log_queries_not_using_indexes</span> = <span class="number">1</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 管理员执行的 SQL 也记录（MySQL 5.6+）</span></span><br><span class="line"><span class="attr">log_slow_admin_statements</span> = <span class="number">1</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 记录慢查询到系统表（可选）</span></span><br><span class="line"><span class="attr">log_output</span> = FILE,TABLE</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-2-配置参数详解"><a href="#2-2-配置参数详解" class="headerlink" title="2.2 配置参数详解"></a>2.2 配置参数详解</h3><p><strong>slow_query_log</strong>：</p>
+<ul>
+<li><code>0</code> &#x3D; 关闭（默认）</li>
+<li><code>1</code> &#x3D; 开启</li>
+</ul>
+<p><strong>slow_query_log_file</strong>：</p>
+<ul>
+<li>指定日志文件路径</li>
+<li>默认路径因操作系统而异</li>
+</ul>
+<p><strong>long_query_time</strong>：</p>
+<ul>
+<li>慢查询阈值（秒）</li>
+<li>默认 10 秒</li>
+<li>建议生产环境设为 1-2 秒</li>
+<li>可以设置为小数，如 0.1</li>
+</ul>
+<p><strong>log_queries_not_using_indexes</strong>：</p>
+<ul>
+<li><code>0</code> &#x3D; 不记录（默认）</li>
+<li><code>1</code> &#x3D; 记录未使用索引的查询</li>
+</ul>
+<p><strong>log_slow_admin_statements</strong>：</p>
+<ul>
+<li><code>0</code> &#x3D; 不记录（默认）</li>
+<li><code>1</code> &#x3D; 记录管理员执行的慢 SQL</li>
+</ul>
+<p><strong>log_output</strong>：</p>
+<ul>
+<li><code>FILE</code>：输出到文件</li>
+<li><code>TABLE</code>：输出到 mysql.slow_log 表</li>
+<li><code>FILE,TABLE</code>：同时输出</li>
+</ul>
+<h3 id="2-3-动态配置"><a href="#2-3-动态配置" class="headerlink" title="2.3 动态配置"></a>2.3 动态配置</h3><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- 临时开启慢查询日志</span></span><br><span class="line"><span class="keyword">SET</span> <span class="keyword">GLOBAL</span> slow_query_log <span class="operator">=</span> <span class="string">&#x27;ON&#x27;</span>;</span><br><span class="line"><span class="keyword">SET</span> <span class="keyword">GLOBAL</span> long_query_time <span class="operator">=</span> <span class="number">2</span>;</span><br><span class="line"><span class="keyword">SET</span> <span class="keyword">GLOBAL</span> slow_query_log_file <span class="operator">=</span> <span class="string">&#x27;/var/log/mysql/slow.log&#x27;</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 查看配置</span></span><br><span class="line"><span class="keyword">SHOW</span> VARIABLES <span class="keyword">LIKE</span> <span class="string">&#x27;slow_query%&#x27;</span>;</span><br><span class="line"><span class="keyword">SHOW</span> VARIABLES <span class="keyword">LIKE</span> <span class="string">&#x27;long_query_time&#x27;</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 临时关闭</span></span><br><span class="line"><span class="keyword">SET</span> <span class="keyword">GLOBAL</span> slow_query_log <span class="operator">=</span> <span class="string">&#x27;OFF&#x27;</span>;</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-4-MySQL-5-7-新增参数"><a href="#2-4-MySQL-5-7-新增参数" class="headerlink" title="2.4 MySQL 5.7+ 新增参数"></a>2.4 MySQL 5.7+ 新增参数</h3><figure class="highlight ini"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="section">[mysqld]</span></span><br><span class="line"><span class="comment"># 记录执行时间（MySQL 5.7+）</span></span><br><span class="line"><span class="attr">log_slow_slave_statements</span> = <span class="number">1</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 最小检查行数（MySQL 5.7+）</span></span><br><span class="line"><span class="comment"># 只有扫描行数超过此值才记录</span></span><br><span class="line"><span class="attr">min_examined_row_limit</span> = <span class="number">1000</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 跳过管理命令（MySQL 5.6+）</span></span><br><span class="line"><span class="comment"># log_slow_admin_statements = 0</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="2-5-完整配置示例"><a href="#2-5-完整配置示例" class="headerlink" title="2.5 完整配置示例"></a>2.5 完整配置示例</h3><figure class="highlight ini"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="section">[mysqld]</span></span><br><span class="line"><span class="comment"># 生产环境推荐配置</span></span><br><span class="line"><span class="attr">slow_query_log</span> = <span class="number">1</span></span><br><span class="line"><span class="attr">slow_query_log_file</span> = /var/log/mysql/slow.log</span><br><span class="line"><span class="attr">long_query_time</span> = <span class="number">2</span></span><br><span class="line"><span class="attr">log_queries_not_using_indexes</span> = <span class="number">1</span></span><br><span class="line"><span class="attr">log_slow_admin_statements</span> = <span class="number">1</span></span><br><span class="line"><span class="attr">min_examined_row_limit</span> = <span class="number">1000</span></span><br><span class="line"><span class="attr">log_output</span> = FILE</span><br></pre></td></tr></table></figure>
+
+<h2 id="三、查看慢查询日志"><a href="#三、查看慢查询日志" class="headerlink" title="三、查看慢查询日志"></a>三、查看慢查询日志</h2><h3 id="3-1-查看配置"><a href="#3-1-查看配置" class="headerlink" title="3.1 查看配置"></a>3.1 查看配置</h3><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- 查看慢查询配置</span></span><br><span class="line"><span class="keyword">SHOW</span> VARIABLES <span class="keyword">LIKE</span> <span class="string">&#x27;slow_query%&#x27;</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 查看阈值</span></span><br><span class="line"><span class="keyword">SHOW</span> VARIABLES <span class="keyword">LIKE</span> <span class="string">&#x27;long_query_time&#x27;</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 查看是否记录无索引查询</span></span><br><span class="line"><span class="keyword">SHOW</span> VARIABLES <span class="keyword">LIKE</span> <span class="string">&#x27;log_queries_not_using_indexes&#x27;</span>;</span><br></pre></td></tr></table></figure>
+
+<h3 id="3-2-慢查询日志格式"><a href="#3-2-慢查询日志格式" class="headerlink" title="3.2 慢查询日志格式"></a>3.2 慢查询日志格式</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"># Time: 2024-02-24T10:30:45.123456Z</span><br><span class="line"># User@Host: root[root] @ localhost []  Id:    12345</span><br><span class="line"># Query_time: 2.345678  Lock_time: 0.000123  Rows_sent: 1000  Rows_examined: 100000</span><br><span class="line"># Threads: 1</span><br><span class="line">SET timestamp=1708772445;</span><br><span class="line">SELECT * FROM employees WHERE dept_id = 1;</span><br></pre></td></tr></table></figure>
+
+<p><strong>字段说明</strong>：</p>
+<table>
+<thead>
+<tr>
+<th>字段</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Time</td>
+<td>执行时间</td>
+</tr>
+<tr>
+<td>User@Host</td>
+<td>用户和主机</td>
+</tr>
+<tr>
+<td>Query_time</td>
+<td>查询执行时间（秒）</td>
+</tr>
+<tr>
+<td>Lock_time</td>
+<td>等待锁的时间（秒）</td>
+</tr>
+<tr>
+<td>Rows_sent</td>
+<td>发送的行数</td>
+</tr>
+<tr>
+<td>Rows_examined</td>
+<td>扫描的行数</td>
+</tr>
+<tr>
+<td>Threads</td>
+<td>使用的线程数</td>
+</tr>
+</tbody></table>
+<h3 id="3-3-命令行查看"><a href="#3-3-命令行查看" class="headerlink" title="3.3 命令行查看"></a>3.3 命令行查看</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 查看最新慢查询</span></span><br><span class="line"><span class="built_in">tail</span> -100 /var/log/mysql/slow.log</span><br><span class="line"></span><br><span class="line"><span class="comment"># 实时跟踪</span></span><br><span class="line"><span class="built_in">tail</span> -f /var/log/mysql/slow.log</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看慢查询数量</span></span><br><span class="line">grep -c <span class="string">&quot;Query_time&quot;</span> /var/log/mysql/slow.log</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看最慢的查询</span></span><br><span class="line">grep <span class="string">&quot;Query_time&quot;</span> /var/log/mysql/slow.log | <span class="built_in">sort</span> -rn | <span class="built_in">head</span> -20</span><br></pre></td></tr></table></figure>
+
+<h3 id="3-4-表方式查看"><a href="#3-4-表方式查看" class="headerlink" title="3.4 表方式查看"></a>3.4 表方式查看</h3><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- 输出到表配置</span></span><br><span class="line"><span class="keyword">SET</span> <span class="keyword">GLOBAL</span> log_output <span class="operator">=</span> <span class="string">&#x27;TABLE&#x27;</span>;</span><br><span class="line"><span class="keyword">SET</span> <span class="keyword">GLOBAL</span> slow_query_log <span class="operator">=</span> <span class="string">&#x27;ON&#x27;</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 查看慢查询</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> mysql.slow_log</span><br><span class="line"><span class="keyword">ORDER</span> <span class="keyword">BY</span> start_time <span class="keyword">DESC</span></span><br><span class="line">LIMIT <span class="number">100</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 查看最慢的 SQL</span></span><br><span class="line"><span class="keyword">SELECT</span></span><br><span class="line">    start_time,</span><br><span class="line">    user_host,</span><br><span class="line">    query_time,</span><br><span class="line">    lock_time,</span><br><span class="line">    rows_sent,</span><br><span class="line">    rows_examined,</span><br><span class="line">    sql_text</span><br><span class="line"><span class="keyword">FROM</span> mysql.slow_log</span><br><span class="line"><span class="keyword">ORDER</span> <span class="keyword">BY</span> query_time <span class="keyword">DESC</span></span><br><span class="line">LIMIT <span class="number">20</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 清空慢查询日志</span></span><br><span class="line"><span class="keyword">TRUNCATE</span> <span class="keyword">TABLE</span> mysql.slow_log;</span><br></pre></td></tr></table></figure>
+
+<h2 id="四、分析工具"><a href="#四、分析工具" class="headerlink" title="四、分析工具"></a>四、分析工具</h2><h3 id="4-1-mysqldumpslow"><a href="#4-1-mysqldumpslow" class="headerlink" title="4.1 mysqldumpslow"></a>4.1 mysqldumpslow</h3><p>MySQL 自带的慢查询分析工具。</p>
+<p><strong>基本用法</strong>：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 按执行时间排序，显示前 10 条</span></span><br><span class="line">mysqldumpslow -s t -t 10 /var/log/mysql/slow.log</span><br><span class="line"></span><br><span class="line"><span class="comment"># 按锁定时间排序</span></span><br><span class="line">mysqldumpslow -s l -t 10 /var/log/mysql/slow.log</span><br><span class="line"></span><br><span class="line"><span class="comment"># 按扫描行数排序</span></span><br><span class="line">mysqldumpslow -s r -t 10 /var/log/mysql/slow.log</span><br><span class="line"></span><br><span class="line"><span class="comment"># 按返回记录数排序</span></span><br><span class="line">mysqldumpslow -s c -t 10 /var/log/mysql/slow.log</span><br><span class="line"></span><br><span class="line"><span class="comment"># 只显示 SELECT 语句</span></span><br><span class="line">mysqldumpslow -s t -t 10 -g <span class="string">&quot;SELECT&quot;</span> /var/log/mysql/slow.log</span><br><span class="line"></span><br><span class="line"><span class="comment"># 忽略数字差异（将数字替换为 N）</span></span><br><span class="line">mysqldumpslow -s t -t 10 -a /var/log/mysql/slow.log</span><br><span class="line"></span><br><span class="line"><span class="comment"># 详细模式</span></span><br><span class="line">mysqldumpslow -s t -t 10 -v /var/log/mysql/slow.log</span><br></pre></td></tr></table></figure>
+
+<p><strong>常用参数</strong>：</p>
+<table>
+<thead>
+<tr>
+<th>参数</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>-s</td>
+<td>排序方式（t&#x3D;时间，l&#x3D;锁定，r&#x3D;行数，c&#x3D;计数）</td>
+</tr>
+<tr>
+<td>-t</td>
+<td>显示前 N 条</td>
+</tr>
+<tr>
+<td>-g</td>
+<td>正则匹配 SQL</td>
+</tr>
+<tr>
+<td>-a</td>
+<td>不将数字简化为 N</td>
+</tr>
+<tr>
+<td>-v</td>
+<td>详细模式</td>
+</tr>
+<tr>
+<td>-r</td>
+<td>反转排序</td>
+</tr>
+<tr>
+<td>-d</td>
+<td>调试模式</td>
+</tr>
+</tbody></table>
+<h3 id="4-2-pt-query-digest"><a href="#4-2-pt-query-digest" class="headerlink" title="4.2 pt-query-digest"></a>4.2 pt-query-digest</h3><p>Percona Toolkit 中的强大分析工具（推荐）。</p>
+<p><strong>安装</strong>：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># Ubuntu/Debian</span></span><br><span class="line">apt-get install percona-toolkit</span><br><span class="line"></span><br><span class="line"><span class="comment"># CentOS/RHEL</span></span><br><span class="line">yum install percona-toolkit</span><br><span class="line"></span><br><span class="line"><span class="comment"># 或下载独立脚本</span></span><br><span class="line">wget https://raw.githubusercontent.com/percona/percona-toolkit/main/bin/pt-query-digest</span><br><span class="line"><span class="built_in">chmod</span> +x pt-query-digest</span><br></pre></td></tr></table></figure>
+
+<p><strong>基本用法</strong>：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 分析慢查询日志</span></span><br><span class="line">pt-query-digest /var/log/mysql/slow.log</span><br><span class="line"></span><br><span class="line"><span class="comment"># 分析最近 1 小时的日志</span></span><br><span class="line">pt-query-digest --since=1h /var/log/mysql/slow.log</span><br><span class="line"></span><br><span class="line"><span class="comment"># 分析特定时间的日志</span></span><br><span class="line">pt-query-digest --since=<span class="string">&quot;2024-02-24 10:00:00&quot;</span> \</span><br><span class="line">                --<span class="keyword">until</span>=<span class="string">&quot;2024-02-24 12:00:00&quot;</span> \</span><br><span class="line">                /var/log/mysql/slow.log</span><br><span class="line"></span><br><span class="line"><span class="comment"># 只分析 SELECT 语句</span></span><br><span class="line">pt-query-digest --filter=<span class="string">&#x27;m-&gt;&#123;Sql&#125; =~ m/^SELECT/&#x27;</span> /var/log/mysql/slow.log</span><br><span class="line"></span><br><span class="line"><span class="comment"># 按用户分组</span></span><br><span class="line">pt-query-digest --group-by username /var/log/mysql/slow.log</span><br><span class="line"></span><br><span class="line"><span class="comment"># 输出到文件</span></span><br><span class="line">pt-query-digest /var/log/mysql/slow.log &gt; /tmp/slow_analysis.txt</span><br></pre></td></tr></table></figure>
+
+<p><strong>输出示例</strong>：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"># Query 1: 15% of total (0.5s)</span><br><span class="line"># Rank: 1  Count: 100  Time: 0.05s  Lock: 0.001s  Rows: 1000  1000</span><br><span class="line"># User: root, Host: localhost</span><br><span class="line"># Database: your_database</span><br><span class="line"># Tables: employees</span><br><span class="line">SELECT * FROM employees WHERE dept_id = 1;</span><br><span class="line"></span><br><span class="line"># Query 2: 10% of total (0.3s)</span><br><span class="line"># Rank: 2  Count: 50  Time: 0.06s  Lock: 0.002s  Rows: 500  5000</span><br><span class="line"># User: root, Host: localhost</span><br><span class="line"># Database: your_database</span><br><span class="line"># Tables: orders</span><br><span class="line">SELECT * FROM orders WHERE user_id = 123;</span><br></pre></td></tr></table></figure>
+
+<h3 id="4-3-自定义分析脚本"><a href="#4-3-自定义分析脚本" class="headerlink" title="4.3 自定义分析脚本"></a>4.3 自定义分析脚本</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#!/usr/bin/env python3</span></span><br><span class="line"><span class="comment"># analyze_slow_log.py</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> re</span><br><span class="line"><span class="keyword">from</span> collections <span class="keyword">import</span> defaultdict</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">parse_slow_log</span>(<span class="params">filename</span>):</span><br><span class="line">    queries = defaultdict(<span class="built_in">list</span>)</span><br><span class="line">    current_query = &#123;&#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">with</span> <span class="built_in">open</span>(filename, <span class="string">&#x27;r&#x27;</span>) <span class="keyword">as</span> f:</span><br><span class="line">        <span class="keyword">for</span> line <span class="keyword">in</span> f:</span><br><span class="line">            <span class="keyword">if</span> line.startswith(<span class="string">&#x27;# Time:&#x27;</span>):</span><br><span class="line">                current_query[<span class="string">&#x27;time&#x27;</span>] = line.split(<span class="string">&#x27;: &#x27;</span>, <span class="number">1</span>)[<span class="number">1</span>].strip()</span><br><span class="line">            <span class="keyword">elif</span> line.startswith(<span class="string">&#x27;# Query_time:&#x27;</span>):</span><br><span class="line">                <span class="keyword">match</span> = re.search(<span class="string">r&#x27;Query_time: ([\d.]+)&#x27;</span>, line)</span><br><span class="line">                <span class="keyword">if</span> <span class="keyword">match</span>:</span><br><span class="line">                    current_query[<span class="string">&#x27;query_time&#x27;</span>] = <span class="built_in">float</span>(<span class="keyword">match</span>.group(<span class="number">1</span>))</span><br><span class="line">            <span class="keyword">elif</span> line.startswith(<span class="string">&#x27;SELECT&#x27;</span>) <span class="keyword">or</span> line.startswith(<span class="string">&#x27;UPDATE&#x27;</span>) <span class="keyword">or</span> line.startswith(<span class="string">&#x27;INSERT&#x27;</span>) <span class="keyword">or</span> line.startswith(<span class="string">&#x27;DELETE&#x27;</span>):</span><br><span class="line">                current_query[<span class="string">&#x27;sql&#x27;</span>] = line.strip()</span><br><span class="line">                queries[line.strip()].append(current_query.get(<span class="string">&#x27;query_time&#x27;</span>, <span class="number">0</span>))</span><br><span class="line">                current_query = &#123;&#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> queries</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">analyze</span>(<span class="params">filename</span>):</span><br><span class="line">    queries = parse_slow_log(filename)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 按平均执行时间排序</span></span><br><span class="line">    avg_times = []</span><br><span class="line">    <span class="keyword">for</span> sql, times <span class="keyword">in</span> queries.items():</span><br><span class="line">        avg_time = <span class="built_in">sum</span>(times) / <span class="built_in">len</span>(times)</span><br><span class="line">        avg_times.append((sql, avg_time, <span class="built_in">len</span>(times)))</span><br><span class="line"></span><br><span class="line">    avg_times.sort(key=<span class="keyword">lambda</span> x: x[<span class="number">1</span>], reverse=<span class="literal">True</span>)</span><br><span class="line"></span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&quot;慢查询分析（按平均执行时间排序）:&quot;</span>)</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&quot;=&quot;</span> * <span class="number">80</span>)</span><br><span class="line">    <span class="keyword">for</span> sql, avg_time, count <span class="keyword">in</span> avg_times[:<span class="number">20</span>]:</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">f&quot;平均时间：<span class="subst">&#123;avg_time:<span class="number">.4</span>f&#125;</span>s  执行次数：<span class="subst">&#123;count&#125;</span>&quot;</span>)</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">f&quot;SQL: <span class="subst">&#123;sql[:<span class="number">100</span>]&#125;</span>...&quot;</span>)</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">&quot;-&quot;</span> * <span class="number">80</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&#x27;__main__&#x27;</span>:</span><br><span class="line">    <span class="keyword">import</span> sys</span><br><span class="line">    <span class="keyword">if</span> <span class="built_in">len</span>(sys.argv) &gt; <span class="number">1</span>:</span><br><span class="line">        analyze(sys.argv[<span class="number">1</span>])</span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">&quot;Usage: python analyze_slow_log.py &lt;slow_log_file&gt;&quot;</span>)</span><br></pre></td></tr></table></figure>
+
+<h2 id="五、慢查询优化实战"><a href="#五、慢查询优化实战" class="headerlink" title="五、慢查询优化实战"></a>五、慢查询优化实战</h2><h3 id="5-1-全表扫描优化"><a href="#5-1-全表扫描优化" class="headerlink" title="5.1 全表扫描优化"></a>5.1 全表扫描优化</h3><p><strong>慢查询</strong>：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"># Query_time: <span class="number">5.234567</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> orders <span class="keyword">WHERE</span> user_id <span class="operator">=</span> <span class="number">12345</span> <span class="keyword">AND</span> status <span class="operator">=</span> <span class="string">&#x27;PAID&#x27;</span>;</span><br></pre></td></tr></table></figure>
+
+<p><strong>分析</strong>：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 使用 EXPLAIN 分析</span></span><br><span class="line">EXPLAIN SELECT * FROM orders WHERE user_id = 12345 AND status = <span class="string">&#x27;PAID&#x27;</span>;</span><br></pre></td></tr></table></figure>
+
+<p><strong>优化</strong>：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- 创建联合索引</span></span><br><span class="line"><span class="keyword">CREATE</span> INDEX idx_user_status <span class="keyword">ON</span> orders(user_id, status);</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 优化后</span></span><br><span class="line"># Query_time: <span class="number">0.012345</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="5-2-LIKE-搜索优化"><a href="#5-2-LIKE-搜索优化" class="headerlink" title="5.2 LIKE 搜索优化"></a>5.2 LIKE 搜索优化</h3><p><strong>慢查询</strong>：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"># Query_time: <span class="number">3.456789</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> products <span class="keyword">WHERE</span> product_name <span class="keyword">LIKE</span> <span class="string">&#x27;%手机%&#x27;</span>;</span><br></pre></td></tr></table></figure>
+
+<p><strong>优化方案 1：前缀匹配</strong></p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- 改为前缀匹配（可以使用索引）</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> products <span class="keyword">WHERE</span> product_name <span class="keyword">LIKE</span> <span class="string">&#x27;手机%&#x27;</span>;</span><br></pre></td></tr></table></figure>
+
+<p><strong>优化方案 2：全文索引</strong></p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- 添加全文索引</span></span><br><span class="line"><span class="keyword">ALTER TABLE</span> products <span class="keyword">ADD</span> FULLTEXT INDEX ft_name (product_name);</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 使用全文搜索</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> products <span class="keyword">WHERE</span> <span class="keyword">MATCH</span>(product_name) AGAINST(<span class="string">&#x27;手机&#x27;</span>);</span><br></pre></td></tr></table></figure>
+
+<h3 id="5-3-ORDER-BY-优化"><a href="#5-3-ORDER-BY-优化" class="headerlink" title="5.3 ORDER BY 优化"></a>5.3 ORDER BY 优化</h3><p><strong>慢查询</strong>：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"># Query_time: <span class="number">4.567890</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> employees <span class="keyword">ORDER</span> <span class="keyword">BY</span> hire_date <span class="keyword">DESC</span> LIMIT <span class="number">10000</span>, <span class="number">20</span>;</span><br></pre></td></tr></table></figure>
+
+<p><strong>优化</strong>：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- 添加索引</span></span><br><span class="line"><span class="keyword">CREATE</span> INDEX idx_hire_date <span class="keyword">ON</span> employees(hire_date <span class="keyword">DESC</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 或使用延迟关联</span></span><br><span class="line"><span class="keyword">SELECT</span> e.<span class="operator">*</span> <span class="keyword">FROM</span> employees e</span><br><span class="line"><span class="keyword">INNER</span> <span class="keyword">JOIN</span> (</span><br><span class="line">    <span class="keyword">SELECT</span> id <span class="keyword">FROM</span> employees <span class="keyword">ORDER</span> <span class="keyword">BY</span> hire_date <span class="keyword">DESC</span> LIMIT <span class="number">10000</span>, <span class="number">20</span></span><br><span class="line">) t <span class="keyword">ON</span> e.id <span class="operator">=</span> t.id;</span><br></pre></td></tr></table></figure>
+
+<h3 id="5-4-JOIN-优化"><a href="#5-4-JOIN-优化" class="headerlink" title="5.4 JOIN 优化"></a>5.4 JOIN 优化</h3><p><strong>慢查询</strong>：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"># Query_time: <span class="number">8.123456</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> orders o</span><br><span class="line"><span class="keyword">LEFT</span> <span class="keyword">JOIN</span> users u <span class="keyword">ON</span> o.user_id <span class="operator">=</span> u.id</span><br><span class="line"><span class="keyword">WHERE</span> o.create_time <span class="operator">&gt;</span> <span class="string">&#x27;2024-01-01&#x27;</span>;</span><br></pre></td></tr></table></figure>
+
+<p><strong>优化</strong>：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- 确保 JOIN 字段有索引</span></span><br><span class="line"><span class="keyword">CREATE</span> INDEX idx_user_id <span class="keyword">ON</span> orders(user_id);</span><br><span class="line"><span class="keyword">CREATE</span> INDEX idx_id <span class="keyword">ON</span> users(id);</span><br><span class="line"><span class="keyword">CREATE</span> INDEX idx_create_time <span class="keyword">ON</span> orders(create_time);</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 优化 JOIN 顺序</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> users u</span><br><span class="line"><span class="keyword">INNER</span> <span class="keyword">JOIN</span> orders o <span class="keyword">ON</span> u.id <span class="operator">=</span> o.user_id</span><br><span class="line"><span class="keyword">WHERE</span> o.create_time <span class="operator">&gt;</span> <span class="string">&#x27;2024-01-01&#x27;</span>;</span><br></pre></td></tr></table></figure>
+
+<h3 id="5-5-GROUP-BY-优化"><a href="#5-5-GROUP-BY-优化" class="headerlink" title="5.5 GROUP BY 优化"></a>5.5 GROUP BY 优化</h3><p><strong>慢查询</strong>：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"># Query_time: <span class="number">6.789012</span></span><br><span class="line"><span class="keyword">SELECT</span> dept_id, <span class="built_in">AVG</span>(salary) <span class="keyword">FROM</span> employees <span class="keyword">GROUP</span> <span class="keyword">BY</span> dept_id <span class="keyword">ORDER</span> <span class="keyword">BY</span> <span class="built_in">AVG</span>(salary);</span><br></pre></td></tr></table></figure>
+
+<p><strong>优化</strong>：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- 添加索引</span></span><br><span class="line"><span class="keyword">CREATE</span> INDEX idx_dept <span class="keyword">ON</span> employees(dept_id);</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 或使用子查询</span></span><br><span class="line"><span class="keyword">SELECT</span> dept_id, avg_salary <span class="keyword">FROM</span> (</span><br><span class="line">    <span class="keyword">SELECT</span> dept_id, <span class="built_in">AVG</span>(salary) <span class="keyword">AS</span> avg_salary</span><br><span class="line">    <span class="keyword">FROM</span> employees</span><br><span class="line">    <span class="keyword">GROUP</span> <span class="keyword">BY</span> dept_id</span><br><span class="line">) t <span class="keyword">ORDER</span> <span class="keyword">BY</span> avg_salary;</span><br></pre></td></tr></table></figure>
+
+<h2 id="六、自动化监控"><a href="#六、自动化监控" class="headerlink" title="六、自动化监控"></a>六、自动化监控</h2><h3 id="6-1-定时分析脚本"><a href="#6-1-定时分析脚本" class="headerlink" title="6.1 定时分析脚本"></a>6.1 定时分析脚本</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#!/bin/bash</span></span><br><span class="line"><span class="comment"># daily_slow_log_analysis.sh</span></span><br><span class="line"></span><br><span class="line">LOG_FILE=<span class="string">&quot;/var/log/mysql/slow.log&quot;</span></span><br><span class="line">REPORT_FILE=<span class="string">&quot;/var/log/mysql/slow_report_<span class="subst">$(date +%Y%m%d)</span>.txt&quot;</span></span><br><span class="line">ARCHIVE_DIR=<span class="string">&quot;/var/log/mysql/archive&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 创建归档目录</span></span><br><span class="line"><span class="built_in">mkdir</span> -p <span class="variable">$ARCHIVE_DIR</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 分析慢查询</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;慢查询日志分析报告&quot;</span> &gt; <span class="variable">$REPORT_FILE</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;日期：<span class="subst">$(date)</span>&quot;</span> &gt;&gt; <span class="variable">$REPORT_FILE</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;================================&quot;</span> &gt;&gt; <span class="variable">$REPORT_FILE</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;&quot;</span> &gt;&gt; <span class="variable">$REPORT_FILE</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 使用 pt-query-digest 分析</span></span><br><span class="line">pt-query-digest --<span class="built_in">limit</span> 20 <span class="variable">$LOG_FILE</span> &gt;&gt; <span class="variable">$REPORT_FILE</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 归档旧日志</span></span><br><span class="line"><span class="built_in">mv</span> <span class="variable">$LOG_FILE</span> <span class="variable">$ARCHIVE_DIR</span>/slow_$(<span class="built_in">date</span> +%Y%m%d_%H%M%S).<span class="built_in">log</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 刷新慢查询日志</span></span><br><span class="line">mysql -e <span class="string">&quot;FLUSH LOGS;&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 发送报告（需要配置邮件）</span></span><br><span class="line"><span class="comment"># mail -s &quot;慢查询日志分析报告&quot; admin@example.com &lt; $REPORT_FILE</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;分析报告已生成：<span class="variable">$REPORT_FILE</span>&quot;</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="6-2-Cron-定时任务"><a href="#6-2-Cron-定时任务" class="headerlink" title="6.2 Cron 定时任务"></a>6.2 Cron 定时任务</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 每天凌晨 2 点执行分析</span></span><br><span class="line">0 2 * * * /path/to/daily_slow_log_analysis.sh</span><br><span class="line"></span><br><span class="line"><span class="comment"># 每周生成汇总报告</span></span><br><span class="line">0 3 * * 0 /path/to/weekly_slow_log_summary.sh</span><br></pre></td></tr></table></figure>
+
+<h3 id="6-3-监控告警"><a href="#6-3-监控告警" class="headerlink" title="6.3 监控告警"></a>6.3 监控告警</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#!/bin/bash</span></span><br><span class="line"><span class="comment"># slow_log_alert.sh</span></span><br><span class="line"></span><br><span class="line">LOG_FILE=<span class="string">&quot;/var/log/mysql/slow.log&quot;</span></span><br><span class="line">THRESHOLD=100  <span class="comment"># 慢查询数量阈值</span></span><br><span class="line">EMAIL=<span class="string">&quot;admin@example.com&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 统计最近 1 小时的慢查询数量</span></span><br><span class="line">COUNT=$(grep -c <span class="string">&quot;Query_time&quot;</span> <span class="variable">$LOG_FILE</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> [ <span class="variable">$COUNT</span> -gt <span class="variable">$THRESHOLD</span> ]; <span class="keyword">then</span></span><br><span class="line">    <span class="built_in">echo</span> <span class="string">&quot;警告：过去 1 小时内发现 <span class="variable">$COUNT</span> 个慢查询&quot;</span> | mail -s <span class="string">&quot;MySQL 慢查询告警&quot;</span> <span class="variable">$EMAIL</span></span><br><span class="line"></span><br><span class="line">    <span class="comment"># 输出最慢的 10 条</span></span><br><span class="line">    <span class="built_in">echo</span> <span class="string">&quot;最慢的 10 条查询:&quot;</span> | mail -s <span class="string">&quot;MySQL 慢查询告警&quot;</span> <span class="variable">$EMAIL</span></span><br><span class="line">    grep <span class="string">&quot;Query_time&quot;</span> <span class="variable">$LOG_FILE</span> | <span class="built_in">sort</span> -rn | <span class="built_in">head</span> -10 | mail -s <span class="string">&quot;MySQL 慢查询告警&quot;</span> <span class="variable">$EMAIL</span></span><br><span class="line"><span class="keyword">fi</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="七、最佳实践"><a href="#七、最佳实践" class="headerlink" title="七、最佳实践"></a>七、最佳实践</h2><h3 id="7-1-配置建议"><a href="#7-1-配置建议" class="headerlink" title="7.1 配置建议"></a>7.1 配置建议</h3><figure class="highlight ini"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="section">[mysqld]</span></span><br><span class="line"><span class="comment"># 生产环境推荐配置</span></span><br><span class="line"><span class="attr">slow_query_log</span> = <span class="number">1</span></span><br><span class="line"><span class="attr">slow_query_log_file</span> = /var/log/mysql/slow.log</span><br><span class="line"><span class="attr">long_query_time</span> = <span class="number">2</span></span><br><span class="line"><span class="attr">log_queries_not_using_indexes</span> = <span class="number">1</span></span><br><span class="line"><span class="attr">log_output</span> = FILE</span><br><span class="line"><span class="attr">min_examined_row_limit</span> = <span class="number">1000</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="7-2-运维建议"><a href="#7-2-运维建议" class="headerlink" title="7.2 运维建议"></a>7.2 运维建议</h3><table>
+<thead>
+<tr>
+<th>项目</th>
+<th>建议</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>阈值设置</td>
+<td>生产环境 1-2 秒，开发环境 0.5 秒</td>
+</tr>
+<tr>
+<td>日志轮转</td>
+<td>每日轮转，保留 7 天</td>
+</tr>
+<tr>
+<td>分析频率</td>
+<td>每天分析，每周汇总</td>
+</tr>
+<tr>
+<td>告警阈值</td>
+<td>慢查询数量超过 100 条&#x2F;小时</td>
+</tr>
+</tbody></table>
+<h3 id="7-3-优化流程"><a href="#7-3-优化流程" class="headerlink" title="7.3 优化流程"></a>7.3 优化流程</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">1. 开启慢查询日志</span><br><span class="line">2. 收集慢查询（24 小时以上）</span><br><span class="line">3. 使用 pt-query-digest 分析</span><br><span class="line">4. 找出 Top 10 慢查询</span><br><span class="line">5. 使用 EXPLAIN 分析</span><br><span class="line">6. 制定优化方案</span><br><span class="line">7. 测试优化效果</span><br><span class="line">8. 关闭不必要的慢查询记录</span><br></pre></td></tr></table></figure>
+
+<h2 id="八、小结"><a href="#八、小结" class="headerlink" title="八、小结"></a>八、小结</h2><h3 id="核心知识点"><a href="#核心知识点" class="headerlink" title="核心知识点"></a>核心知识点</h3><ol>
+<li><strong>慢查询作用</strong>：发现性能瓶颈，指导 SQL 优化</li>
+<li><strong>关键参数</strong>：long_query_time、log_queries_not_using_indexes</li>
+<li><strong>分析工具</strong>：mysqldumpslow、pt-query-digest</li>
+<li><strong>优化方法</strong>：索引优化、SQL 改写</li>
+</ol>
+<h3 id="常用命令速查"><a href="#常用命令速查" class="headerlink" title="常用命令速查"></a>常用命令速查</h3><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- 开启慢查询日志</span></span><br><span class="line"><span class="keyword">SET</span> <span class="keyword">GLOBAL</span> slow_query_log <span class="operator">=</span> <span class="string">&#x27;ON&#x27;</span>;</span><br><span class="line"><span class="keyword">SET</span> <span class="keyword">GLOBAL</span> long_query_time <span class="operator">=</span> <span class="number">2</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 查看配置</span></span><br><span class="line"><span class="keyword">SHOW</span> VARIABLES <span class="keyword">LIKE</span> <span class="string">&#x27;slow_query%&#x27;</span>;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 使用 mysqldumpslow 分析</span></span><br><span class="line">mysqldumpslow -s t -t 10 /var/log/mysql/slow.log</span><br><span class="line"></span><br><span class="line"><span class="comment"># 使用 pt-query-digest 分析</span></span><br><span class="line">pt-query-digest /var/log/mysql/slow.log</span><br><span class="line"></span><br><span class="line"><span class="comment"># 实时跟踪</span></span><br><span class="line"><span class="built_in">tail</span> -f /var/log/mysql/slow.log</span><br></pre></td></tr></table></figure>
+
+<h3 id="日志篇完结"><a href="#日志篇完结" class="headerlink" title="日志篇完结"></a>日志篇完结</h3><p>至此，日志详解篇的 5 篇文章全部完成！</p>
+<table>
+<thead>
+<tr>
+<th>节号</th>
+<th>主题</th>
+<th>核心内容</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>01-01</td>
+<td>课程介绍</td>
+<td>日志系统概述</td>
+</tr>
+<tr>
+<td>01-02</td>
+<td>错误日志</td>
+<td>故障诊断</td>
+</tr>
+<tr>
+<td>01-03</td>
+<td>二进制日志</td>
+<td>数据恢复、主从复制</td>
+</tr>
+<tr>
+<td>01-04</td>
+<td>查询日志</td>
+<td>调试、审计</td>
+</tr>
+<tr>
+<td>01-05</td>
+<td>慢查询日志</td>
+<td>性能优化</td>
+</tr>
+</tbody></table>
+<hr>
+<p><strong>下一篇</strong>：[MySQL 运维篇 02-01 主从复制概述](&#x2F;2026&#x2F;02&#x2F;24&#x2F;MySQL 运维篇 02-01 主从复制概述&#x2F;)</p>
+<p><strong>上一篇</strong>：[MySQL 运维篇 01-01 日志详解课程介绍](&#x2F;2026&#x2F;02&#x2F;24&#x2F;MySQL 运维篇 01-01 日志详解课程介绍&#x2F;)</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://brian-lin-c.github.io">过拟合的炸鱼薯条</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://brian-lin-c.github.io/2026/02/24/MySQL%20%E8%BF%90%E7%BB%B4%E7%AF%87%2001-05%20%E6%85%A2%E6%9F%A5%E8%AF%A2%E6%97%A5%E5%BF%97/">https://brian-lin-c.github.io/2026/02/24/MySQL%20%E8%BF%90%E7%BB%B4%E7%AF%87%2001-05%20%E6%85%A2%E6%9F%A5%E8%AF%A2%E6%97%A5%E5%BF%97/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://brian-lin-c.github.io" target="_blank">过拟合的炸鱼薯条</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/MySQL/">MySQL</a><a class="post-meta__tags" href="/tags/%E6%85%A2%E6%9F%A5%E8%AF%A2%E6%97%A5%E5%BF%97/">慢查询日志</a><a class="post-meta__tags" href="/tags/%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96/">性能优化</a><a class="post-meta__tags" href="/tags/SQL-%E5%88%86%E6%9E%90/">SQL 分析</a></div><div class="post-share"><div class="social-share" data-image="/img/%E5%A4%B4%E5%83%8F.jpg" data-sites="facebook,x,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related" href="/2026/02/24/MySQL%20%E8%BF%90%E7%BB%B4%E7%AF%87%2002-01%20%E4%B8%BB%E4%BB%8E%E5%A4%8D%E5%88%B6%E6%A6%82%E8%BF%B0/" title="MySQL 运维篇 02-01 主从复制概述"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">MySQL 运维篇 02-01 主从复制概述</div></div><div class="info-2"><div class="info-item-1">MySQL 运维篇 02-01 主从复制概述主从复制（Replication）是 MySQL 高可用架构的基础。本篇将介绍主从复制的概念、原理、应用场景和配置方法。 一、主从复制介绍1.1 什么是主从复制？主从复制是将一台 MySQL 服务器（主库）的数据同步到一台或多台 MySQL 服务器（从库）的技术。 123456主从复制架构：       主库（Master）      /      |      \   从库 1   从库 2   从库 3  (Slave)  (Slave)  (Slave)  1.2 复制术语   术语 说明    主库（Master） 提供数据的 MySQL 服务器，处理写操作   从库（Slave） 复制数据的 MySQL 服务器，处理读操作   主库 binlog 主库记录的变更日志   中继日志（Relay Log） 从库存储的主库 binlog 副本   I&#x2F;O 线程 从库上负责连接主库并获取 binlog 的线程   SQL 线程 从库上负责重放 relay log 的线程   1.3 复制特点   特点 说明    异步复制 ...</div></div></div></a><a class="pagination-related" href="/2026/02/24/MySQL%20%E8%BF%90%E7%BB%B4%E7%AF%87%2001-04%20%E6%9F%A5%E8%AF%A2%E6%97%A5%E5%BF%97/" title="MySQL 运维篇 01-04 查询日志"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">MySQL 运维篇 01-04 查询日志</div></div><div class="info-2"><div class="info-item-1">MySQL 运维篇 01-04 查询日志查询日志（General Query Log，简称 general log）记录 MySQL 服务器接收到的所有客户端请求。虽然性能开销较大，但在特定场景下非常有用。 一、查询日志介绍1.1 什么是查询日志？查询日志记录所有客户端连接和执行的 SQL 语句： 12345查询日志记录内容：├── 客户端连接/断开├── 所有 SQL 请求（SELECT、INSERT、UPDATE、DELETE 等）├── 存储过程调用└── 管理员命令（SET、SHOW 等）  1.2 查询日志 vs 其他日志   特性 查询日志 慢查询日志 二进制日志    记录内容 所有查询 慢查询 数据变更   记录时机 查询开始时 查询结束后 事务提交时   性能影响 高 低 中   使用场景 调试、审计 性能优化 恢复、复制   1.3 使用场景   场景 说明    问题调试 追踪应用执行的 SQL   安全审计 记录用户操作历史   性能分析 分析查询频率和模式   故障排查 定位问题 SQL   二、查询日志配置2.1 基本配置参数1234567891011...</div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/2026/02/24/MySQL%20%E8%BF%9B%E9%98%B6%E6%95%99%E7%A8%8B%2008-01%20%E7%B4%A2%E5%BC%95%E4%BD%BF%E7%94%A8%E8%A7%84%E5%88%99/" title="MySQL 进阶教程 08-01 索引使用规则"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-02-24</div><div class="info-item-2">MySQL 进阶教程 08-01 索引使用规则</div></div><div class="info-2"><div class="info-item-1">MySQL 进阶教程 08-01 索引使用规则创建索引只是第一步，正确使用索引才能发挥其最大价值。本文将详细介绍索引的使用规则、失效场景以及设计原则。 一、验证索引效率1.1 索引效果对比123456789101112131415161718192021222324252627282930-- 准备测试数据DROP TABLE IF EXISTS test_index;CREATE TABLE test_index (    id INT PRIMARY KEY AUTO_INCREMENT,    name VARCHAR(50),    age INT,    email VARCHAR(100),    content TEXT) ENGINE=InnoDB;-- 插入 10 万条测试数据DELIMITER $$CREATE PROCEDURE insert_data()BEGIN    DECLARE i INT DEFAULT 1;    WHILE i &lt;= 100000 DO        INSERT INTO test_index (name, age, ...</div></div></div></a><a class="pagination-related" href="/2026/02/24/MySQL%20%E8%BF%9B%E9%98%B6%E6%95%99%E7%A8%8B%2009-01%20SQL%20%E4%BC%98%E5%8C%96/" title="MySQL 进阶教程 09-01 SQL 优化"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-02-24</div><div class="info-item-2">MySQL 进阶教程 09-01 SQL 优化</div></div><div class="info-2"><div class="info-item-1">MySQL 进阶教程 09-01 SQL 优化SQL 优化是数据库开发的核心技能之一。本文将介绍 SQL 优化的各种技巧，包括插入优化、查询优化、LIMIT 优化、COUNT 优化，以及如何使用 EXPLAIN 分析查询性能。 一、插入数据优化1.1 批量插入123456789101112-- 差：逐条插入（1000 条需要 1000 次网络往返）INSERT INTO users (name, email) VALUES (&#x27;张三&#x27;, &#x27;zhang@example.com&#x27;);INSERT INTO users (name, email) VALUES (&#x27;李四&#x27;, &#x27;li@example.com&#x27;);-- ... 重复 1000 次-- 好：批量插入（1000 条只需 1 次网络往返）INSERT INTO users (name, email) VALUES(&#x27;张三&#x27;, &#x27;zhang@example.com&#x27;),(&#x27;李四&#x27;, &#x27...</div></div></div></a><a class="pagination-related" href="/2026/02/24/MySQL%20%E8%BF%9B%E9%98%B6%E6%95%99%E7%A8%8B%2007-01%20%E7%B4%A2%E5%BC%95%E8%AF%A6%E8%A7%A3/" title="MySQL 进阶教程 07-01 索引详解"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-02-24</div><div class="info-item-2">MySQL 进阶教程 07-01 索引详解</div></div><div class="info-2"><div class="info-item-1">MySQL 进阶教程 07-01 索引详解索引是数据库性能优化的核心技术。本文将详细介绍索引的概念、数据结构、分类、创建和使用方法，以及如何使用 EXPLAIN 分析查询性能。 一、索引概述1.1 什么是索引？索引（Index） 是帮助数据库高效获取数据的数据结构。类似于书籍的目录，通过索引可以快速定位到目标数据，而无需扫描整个表。 1234567无索引查询（全表扫描）：数据：[A][B][C][D][E][F][G]...[Z]查找 M：需要遍历 13 次有索引查询：索引：A→1, B→2, C→3, ..., M→13, ..., Z→26查找 M：直接定位，1 次找到  1.2 索引的优缺点优点：  大幅提高查询速度（最主要目的） 加速表连接（JOIN）操作 加速 ORDER BY 和 GROUP BY 实现唯一性约束  缺点：  占用额外存储空间 降低 INSERT、UPDATE、DELETE 速度（需要同时更新索引） 创建和维护需要时间  1.3 索引使用场景   场景 说明    主键&#x2F;外键列 自动创建索引   WHERE 条件列 经常作为查询条件的列   ...</div></div></div></a><a class="pagination-related" href="/2026/02/24/MySQL%20%E8%BF%9B%E9%98%B6%E6%95%99%E7%A8%8B%2004-01%20%E7%AA%97%E5%8F%A3%E5%87%BD%E6%95%B0%E6%A6%82%E8%BF%B0/" title="MySQL 进阶教程 04-01 窗口函数概述"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-02-24</div><div class="info-item-2">MySQL 进阶教程 04-01 窗口函数概述</div></div><div class="info-2"><div class="info-item-1">MySQL 进阶教程 04-01 窗口函数概述窗口函数（Window Function）是 MySQL 8.0+ 引入的强大特性，用于实现复杂的分析查询。本文将详细介绍窗口函数的基本概念、语法结构以及与聚合函数的区别。 一、窗口函数简介1.1 什么是窗口函数？窗口函数 是对一组行（称为”窗口”）执行计算的函数，但与聚合函数不同的是，窗口函数会为每一行返回一个结果，而不是将多行聚合为单个值。 通俗理解：  聚合函数：多行 → 一个结果 窗口函数：多行 → 每行一个结果（基于窗口内数据计算）  1.2 窗口函数的应用场景   场景 说明 示例    排名问题 获取 Top N 记录 每个部门工资最高的 3 名员工   累计计算 累计求和、平均值 累计销售额、移动平均   前后行访问 访问当前行的前后行数据 同比、环比增长   分组内排序 组内排序编号 每笔订单在客户订单中的序号   分桶分析 将数据分成若干组 按成绩分等级、百分位分析   1.3 为什么需要窗口函数？在窗口函数出现之前，实现类似功能通常需要：  自连接 子查询 用户变量 应用层处理  这些方法往往语法复杂、性能较差、...</div></div></div></a><a class="pagination-related" href="/2026/02/24/MySQL%20%E8%BF%9B%E9%98%B6%E6%95%99%E7%A8%8B%2006-01%20%E5%AD%98%E5%82%A8%E5%BC%95%E6%93%8E%E8%AF%A6%E8%A7%A3/" title="MySQL 进阶教程 06-01 存储引擎详解"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-02-24</div><div class="info-item-2">MySQL 进阶教程 06-01 存储引擎详解</div></div><div class="info-2"><div class="info-item-1">MySQL 进阶教程 06-01 存储引擎详解存储引擎是 MySQL 的核心组件之一，决定了数据的存储方式和访问特性。本文将详细介绍 MySQL 的存储引擎架构和常用引擎的特点。 一、存储引擎概述1.1 什么是存储引擎？存储引擎（Storage Engine） 是 MySQL 中负责数据存储、提取和管理的底层组件。MySQL 采用插件式存储引擎架构，可以根据需求选择不同的引擎。 1234567891011MySQL 架构简图：┌─────────────────────────────────────┐│         SQL 接口（查询解析）          │├─────────────────────────────────────┤│         查询优化器                   │├─────────────────────────────────────┤│     存储引擎层（插件式架构）           ││  ┌─────────┬─────────┬─────────┐    ││  │ InnoDB  │ MyISAM  │ Mem...</div></div></div></a><a class="pagination-related" href="/2026/02/24/MySQL%20%E8%BF%90%E7%BB%B4%E7%AF%87%2004-06%20MyCat%20%E6%B0%B4%E5%B9%B3%E5%88%86%E8%A1%A8/" title="MySQL 运维篇 04-06 MyCat 水平分表"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-02-24</div><div class="info-item-2">MySQL 运维篇 04-06 MyCat 水平分表</div></div><div class="info-2"><div class="info-item-1">MySQL 运维篇 04-06 MyCat 水平分表水平分表是将一个大表的数据按照某种规则分布到多个表中。本文将介绍如何使用 MyCat 实现水平分表。 一、水平分表介绍1.1 什么是水平分表水平分表：将同一个表的数据按照行拆分到多个物理表中。 12345678原始表：orders (1 亿条数据)水平分表后：orders_0000 (250 万条)orders_0001 (250 万条)orders_0002 (250 万条)orders_0003 (250 万条)  1.2 适用场景   场景 说明    单表数据量大 超过 1000 万行   查询性能下降 索引效率低   维护困难 DDL 操作耗时过长   1.3 分片规则   规则 说明 适用场景    取模 id % 分片数 均匀分布   范围 按 ID 或日期范围 历史数据归档   哈希 hash(key) % 分片数 随机分布   二、环境准备2.1 数据库规划12345order_db├── orders_0000├── orders_0001├── orders_0002└── orders_0003  2.2...</div></div></div></a></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/img/%E5%A4%B4%E5%83%8F.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">过拟合的炸鱼薯条</div><div class="author-info-description">好好学习，天天向上</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">68</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">157</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">9</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/Brian-Lin-C"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons"><a class="social-icon" href="https://github.com/Brian-Lin-C" target="_blank" title="Github"><i class="fab fa-github" style="color: #24292e;"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">欢迎来到我的个人博客！</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#MySQL-%E8%BF%90%E7%BB%B4%E7%AF%87-01-05-%E6%85%A2%E6%9F%A5%E8%AF%A2%E6%97%A5%E5%BF%97"><span class="toc-number">1.</span> <span class="toc-text">MySQL 运维篇 01-05 慢查询日志</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%80%E3%80%81%E6%85%A2%E6%9F%A5%E8%AF%A2%E6%97%A5%E5%BF%97%E4%BB%8B%E7%BB%8D"><span class="toc-number">1.1.</span> <span class="toc-text">一、慢查询日志介绍</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-1-%E4%BB%80%E4%B9%88%E6%98%AF%E6%85%A2%E6%9F%A5%E8%AF%A2%E6%97%A5%E5%BF%97%EF%BC%9F"><span class="toc-number">1.1.1.</span> <span class="toc-text">1.1 什么是慢查询日志？</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-2-%E6%85%A2%E6%9F%A5%E8%AF%A2%E7%9A%84%E4%BD%9C%E7%94%A8"><span class="toc-number">1.1.2.</span> <span class="toc-text">1.2 慢查询的作用</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-3-%E4%B8%8E%E8%BF%9B%E9%98%B6%E7%AF%87%E7%9A%84%E5%8C%BA%E5%88%AB"><span class="toc-number">1.1.3.</span> <span class="toc-text">1.3 与进阶篇的区别</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%8C%E3%80%81%E6%85%A2%E6%9F%A5%E8%AF%A2%E6%97%A5%E5%BF%97%E9%85%8D%E7%BD%AE"><span class="toc-number">1.2.</span> <span class="toc-text">二、慢查询日志配置</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#2-1-%E5%9F%BA%E6%9C%AC%E9%85%8D%E7%BD%AE%E5%8F%82%E6%95%B0"><span class="toc-number">1.2.1.</span> <span class="toc-text">2.1 基本配置参数</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-2-%E9%85%8D%E7%BD%AE%E5%8F%82%E6%95%B0%E8%AF%A6%E8%A7%A3"><span class="toc-number">1.2.2.</span> <span class="toc-text">2.2 配置参数详解</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-3-%E5%8A%A8%E6%80%81%E9%85%8D%E7%BD%AE"><span class="toc-number">1.2.3.</span> <span class="toc-text">2.3 动态配置</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-4-MySQL-5-7-%E6%96%B0%E5%A2%9E%E5%8F%82%E6%95%B0"><span class="toc-number">1.2.4.</span> <span class="toc-text">2.4 MySQL 5.7+ 新增参数</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-5-%E5%AE%8C%E6%95%B4%E9%85%8D%E7%BD%AE%E7%A4%BA%E4%BE%8B"><span class="toc-number">1.2.5.</span> <span class="toc-text">2.5 完整配置示例</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%89%E3%80%81%E6%9F%A5%E7%9C%8B%E6%85%A2%E6%9F%A5%E8%AF%A2%E6%97%A5%E5%BF%97"><span class="toc-number">1.3.</span> <span class="toc-text">三、查看慢查询日志</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#3-1-%E6%9F%A5%E7%9C%8B%E9%85%8D%E7%BD%AE"><span class="toc-number">1.3.1.</span> <span class="toc-text">3.1 查看配置</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-2-%E6%85%A2%E6%9F%A5%E8%AF%A2%E6%97%A5%E5%BF%97%E6%A0%BC%E5%BC%8F"><span class="toc-number">1.3.2.</span> <span class="toc-text">3.2 慢查询日志格式</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-3-%E5%91%BD%E4%BB%A4%E8%A1%8C%E6%9F%A5%E7%9C%8B"><span class="toc-number">1.3.3.</span> <span class="toc-text">3.3 命令行查看</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-4-%E8%A1%A8%E6%96%B9%E5%BC%8F%E6%9F%A5%E7%9C%8B"><span class="toc-number">1.3.4.</span> <span class="toc-text">3.4 表方式查看</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9B%9B%E3%80%81%E5%88%86%E6%9E%90%E5%B7%A5%E5%85%B7"><span class="toc-number">1.4.</span> <span class="toc-text">四、分析工具</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#4-1-mysqldumpslow"><span class="toc-number">1.4.1.</span> <span class="toc-text">4.1 mysqldumpslow</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-2-pt-query-digest"><span class="toc-number">1.4.2.</span> <span class="toc-text">4.2 pt-query-digest</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-3-%E8%87%AA%E5%AE%9A%E4%B9%89%E5%88%86%E6%9E%90%E8%84%9A%E6%9C%AC"><span class="toc-number">1.4.3.</span> <span class="toc-text">4.3 自定义分析脚本</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%94%E3%80%81%E6%85%A2%E6%9F%A5%E8%AF%A2%E4%BC%98%E5%8C%96%E5%AE%9E%E6%88%98"><span class="toc-number">1.5.</span> <span class="toc-text">五、慢查询优化实战</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#5-1-%E5%85%A8%E8%A1%A8%E6%89%AB%E6%8F%8F%E4%BC%98%E5%8C%96"><span class="toc-number">1.5.1.</span> <span class="toc-text">5.1 全表扫描优化</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5-2-LIKE-%E6%90%9C%E7%B4%A2%E4%BC%98%E5%8C%96"><span class="toc-number">1.5.2.</span> <span class="toc-text">5.2 LIKE 搜索优化</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5-3-ORDER-BY-%E4%BC%98%E5%8C%96"><span class="toc-number">1.5.3.</span> <span class="toc-text">5.3 ORDER BY 优化</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5-4-JOIN-%E4%BC%98%E5%8C%96"><span class="toc-number">1.5.4.</span> <span class="toc-text">5.4 JOIN 优化</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5-5-GROUP-BY-%E4%BC%98%E5%8C%96"><span class="toc-number">1.5.5.</span> <span class="toc-text">5.5 GROUP BY 优化</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%85%AD%E3%80%81%E8%87%AA%E5%8A%A8%E5%8C%96%E7%9B%91%E6%8E%A7"><span class="toc-number">1.6.</span> <span class="toc-text">六、自动化监控</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#6-1-%E5%AE%9A%E6%97%B6%E5%88%86%E6%9E%90%E8%84%9A%E6%9C%AC"><span class="toc-number">1.6.1.</span> <span class="toc-text">6.1 定时分析脚本</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#6-2-Cron-%E5%AE%9A%E6%97%B6%E4%BB%BB%E5%8A%A1"><span class="toc-number">1.6.2.</span> <span class="toc-text">6.2 Cron 定时任务</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#6-3-%E7%9B%91%E6%8E%A7%E5%91%8A%E8%AD%A6"><span class="toc-number">1.6.3.</span> <span class="toc-text">6.3 监控告警</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%83%E3%80%81%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5"><span class="toc-number">1.7.</span> <span class="toc-text">七、最佳实践</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#7-1-%E9%85%8D%E7%BD%AE%E5%BB%BA%E8%AE%AE"><span class="toc-number">1.7.1.</span> <span class="toc-text">7.1 配置建议</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#7-2-%E8%BF%90%E7%BB%B4%E5%BB%BA%E8%AE%AE"><span class="toc-number">1.7.2.</span> <span class="toc-text">7.2 运维建议</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#7-3-%E4%BC%98%E5%8C%96%E6%B5%81%E7%A8%8B"><span class="toc-number">1.7.3.</span> <span class="toc-text">7.3 优化流程</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%85%AB%E3%80%81%E5%B0%8F%E7%BB%93"><span class="toc-number">1.8.</span> <span class="toc-text">八、小结</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%A0%B8%E5%BF%83%E7%9F%A5%E8%AF%86%E7%82%B9"><span class="toc-number">1.8.1.</span> <span class="toc-text">核心知识点</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4%E9%80%9F%E6%9F%A5"><span class="toc-number">1.8.2.</span> <span class="toc-text">常用命令速查</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%97%A5%E5%BF%97%E7%AF%87%E5%AE%8C%E7%BB%93"><span class="toc-number">1.8.3.</span> <span class="toc-text">日志篇完结</span></a></li></ol></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/02/24/IDE%20%E5%B7%A5%E5%85%B7%E9%85%8D%E7%BD%AE%EF%BC%9AVS%20Code%20+%20Jupyter%20+%20DataGrip/" title="IDE 工具配置：VS Code + Jupyter + DataGrip">IDE 工具配置：VS Code + Jupyter + DataGrip</a><time datetime="2026-02-24T15:00:00.000Z" title="发表于 2026-02-24 23:00:00">2026-02-24</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/02/24/Git%20%E7%89%88%E6%9C%AC%E6%8E%A7%E5%88%B6%E4%B8%8E%E5%9B%A2%E9%98%9F%E5%8D%8F%E4%BD%9C/" title="Git 版本控制与团队协作">Git 版本控制与团队协作</a><time datetime="2026-02-24T14:00:00.000Z" title="发表于 2026-02-24 22:00:00">2026-02-24</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/02/24/Linux%20%E4%B8%8E%20Shell%EF%BC%88%E4%BA%8C%EF%BC%89Shell%20%E8%84%9A%E6%9C%AC%E7%BC%96%E5%86%99/" title="Linux 与 Shell（二）Shell 脚本编写">Linux 与 Shell（二）Shell 脚本编写</a><time datetime="2026-02-24T13:00:00.000Z" title="发表于 2026-02-24 21:00:00">2026-02-24</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/02/24/%E6%95%B0%E6%8D%AE%E4%BB%93%E5%BA%93%E6%A0%B8%E5%BF%83%E6%A6%82%E5%BF%B5%E8%AF%A6%E8%A7%A3%20-%20%E7%BB%B4%E5%BA%A6%E5%BB%BA%E6%A8%A1%E3%80%81%E6%95%B0%E6%8D%AE%E5%88%86%E5%B1%82%E4%B8%8E%20SCD%20%E5%A4%84%E7%90%86/" title="数据仓库核心概念详解 - 维度建模、数据分层与 SCD 处理">数据仓库核心概念详解 - 维度建模、数据分层与 SCD 处理</a><time datetime="2026-02-24T13:00:00.000Z" title="发表于 2026-02-24 21:00:00">2026-02-24</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/02/24/MySQL%20%E8%BF%90%E7%BB%B4%E7%AF%87%2004-10%20MyCat%20%E7%AE%A1%E7%90%86%E4%B8%8E%E7%9B%91%E6%8E%A7/" title="MySQL 运维篇 04-10 MyCat 管理与监控">MySQL 运维篇 04-10 MyCat 管理与监控</a><time datetime="2026-02-24T12:05:00.000Z" title="发表于 2026-02-24 20:05:00">2026-02-24</time></div></div></div></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2025 - 2026 By 过拟合的炸鱼薯条</span><span class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 8.1.1</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.5.4</a></span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=5.5.4"></script><script src="/js/main.js?v=5.5.4"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><i class="fas fa-spinner fa-pulse" id="loading-status" hidden="hidden"></i><button class="search-close-button"><i class="fas fa-times"></i></button></nav><div class="text-center" id="loading-database"><i class="fas fa-spinner fa-pulse"></i><span>  数据加载中</span></div><div class="local-search-input"><input placeholder="搜索..." type="text"/></div><hr/><div id="local-search-results"></div><div class="ais-Pagination" id="local-search-pagination" style="display:none;"><ul class="ais-Pagination-list"></ul></div><div id="local-search-stats"></div></div><div id="search-mask"></div><script src="/js/search/local-search.js?v=5.5.4"></script></div></div></body></html>

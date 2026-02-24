@@ -1,0 +1,554 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>数据仓库核心概念详解 - 维度建模、数据分层与 SCD 处理 | 过拟合的炸鱼薯条</title><meta name="author" content="过拟合的炸鱼薯条"><meta name="copyright" content="过拟合的炸鱼薯条"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="数据仓库核心概念详解 - 维度建模、数据分层与 SCD 处理数据仓库（Data Warehouse）是企业级数据分析的基础设施。本文将详细介绍数据仓库的核心概念，包括维度建模、数据分层架构和缓慢变化维（SCD）处理。 一、数据仓库概述1.1 什么是数据仓库数据仓库是一个面向主题的、集成的、相对稳定的、反映历史变化的数据集合，用于支持管理决策。 12345数据仓库特点：├── 面向主题（Subjec">
+<meta property="og:type" content="article">
+<meta property="og:title" content="数据仓库核心概念详解 - 维度建模、数据分层与 SCD 处理">
+<meta property="og:url" content="https://brian-lin-c.github.io/2026/02/24/%E6%95%B0%E6%8D%AE%E4%BB%93%E5%BA%93%E6%A0%B8%E5%BF%83%E6%A6%82%E5%BF%B5%E8%AF%A6%E8%A7%A3%20-%20%E7%BB%B4%E5%BA%A6%E5%BB%BA%E6%A8%A1%E3%80%81%E6%95%B0%E6%8D%AE%E5%88%86%E5%B1%82%E4%B8%8E%20SCD%20%E5%A4%84%E7%90%86/index.html">
+<meta property="og:site_name" content="过拟合的炸鱼薯条">
+<meta property="og:description" content="数据仓库核心概念详解 - 维度建模、数据分层与 SCD 处理数据仓库（Data Warehouse）是企业级数据分析的基础设施。本文将详细介绍数据仓库的核心概念，包括维度建模、数据分层架构和缓慢变化维（SCD）处理。 一、数据仓库概述1.1 什么是数据仓库数据仓库是一个面向主题的、集成的、相对稳定的、反映历史变化的数据集合，用于支持管理决策。 12345数据仓库特点：├── 面向主题（Subjec">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://brian-lin-c.github.io/img/%E5%A4%B4%E5%83%8F.jpg">
+<meta property="article:published_time" content="2026-02-24T13:00:00.000Z">
+<meta property="article:modified_time" content="2026-02-24T11:51:20.341Z">
+<meta property="article:author" content="过拟合的炸鱼薯条">
+<meta property="article:tag" content="SCD">
+<meta property="article:tag" content="大数据">
+<meta property="article:tag" content="数据仓库">
+<meta property="article:tag" content="数据分层">
+<meta property="article:tag" content="维度建模">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://brian-lin-c.github.io/img/%E5%A4%B4%E5%83%8F.jpg"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "数据仓库核心概念详解 - 维度建模、数据分层与 SCD 处理",
+  "url": "https://brian-lin-c.github.io/2026/02/24/%E6%95%B0%E6%8D%AE%E4%BB%93%E5%BA%93%E6%A0%B8%E5%BF%83%E6%A6%82%E5%BF%B5%E8%AF%A6%E8%A7%A3%20-%20%E7%BB%B4%E5%BA%A6%E5%BB%BA%E6%A8%A1%E3%80%81%E6%95%B0%E6%8D%AE%E5%88%86%E5%B1%82%E4%B8%8E%20SCD%20%E5%A4%84%E7%90%86/",
+  "image": "https://brian-lin-c.github.io/img/%E5%A4%B4%E5%83%8F.jpg",
+  "datePublished": "2026-02-24T13:00:00.000Z",
+  "dateModified": "2026-02-24T11:51:20.341Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "过拟合的炸鱼薯条",
+      "url": "https://brian-lin-c.github.io"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://brian-lin-c.github.io/2026/02/24/%E6%95%B0%E6%8D%AE%E4%BB%93%E5%BA%93%E6%A0%B8%E5%BF%83%E6%A6%82%E5%BF%B5%E8%AF%A6%E8%A7%A3%20-%20%E7%BB%B4%E5%BA%A6%E5%BB%BA%E6%A8%A1%E3%80%81%E6%95%B0%E6%8D%AE%E5%88%86%E5%B1%82%E4%B8%8E%20SCD%20%E5%A4%84%E7%90%86/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=5.5.4"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.1.0/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        if (!ttl) return
+        const expiry = Date.now() + ttl * 86400000
+        localStorage.setItem(key, JSON.stringify({ value, expiry }))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return undefined
+        const { value, expiry } = JSON.parse(itemStr)
+        if (Date.now() > expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return value
+      }
+    }
+
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        Object.entries(attr).forEach(([key, val]) => script.setAttribute(key, val))
+        script.onload = script.onreadystatechange = () => {
+          if (!script.readyState || /loaded|complete/.test(script.readyState)) resolve()
+        }
+        script.onerror = reject
+        document.head.appendChild(script)
+      }),
+      getCSS: (url, id) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onload = link.onreadystatechange = () => {
+          if (!link.readyState || /loaded|complete/.test(link.readyState)) resolve()
+        }
+        link.onerror = reject
+        document.head.appendChild(link)
+      }),
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"/search.xml","preload":true,"top_n_per_article":1,"unescape":false,"pagination":{"enable":false,"hitsPerPage":8},"languages":{"hits_empty":"未找到符合您查询的内容：${query}","hits_stats":"共找到 ${hits} 篇文章"}},
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.13.0/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '数据仓库核心概念详解 - 维度建模、数据分层与 SCD 处理',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><meta name="generator" content="Hexo 8.1.1"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/img/%E5%A4%B4%E5%83%8F.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">68</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">157</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">9</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user"></i><span> 关于</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">过拟合的炸鱼薯条</span></a><a class="nav-page-title" href="/"><span class="site-name">数据仓库核心概念详解 - 维度建模、数据分层与 SCD 处理</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div id="search-button"><span class="site-page social-icon search"><i class="fas fa-search fa-fw"></i><span> 搜索</span></span></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user"></i><span> 关于</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">数据仓库核心概念详解 - 维度建模、数据分层与 SCD 处理</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2026-02-24T13:00:00.000Z" title="发表于 2026-02-24 21:00:00">2026-02-24</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-02-24T11:51:20.341Z" title="更新于 2026-02-24 19:51:20">2026-02-24</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E6%95%B0%E6%8D%AE%E4%BB%93%E5%BA%93/">数据仓库</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-wordcount"><i class="far fa-file-word fa-fw post-meta-icon"></i><span class="post-meta-label">总字数:</span><span class="word-count">3k</span><span class="post-meta-separator">|</span><i class="far fa-clock fa-fw post-meta-icon"></i><span class="post-meta-label">阅读时长:</span><span>10分钟</span></span><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><h1 id="数据仓库核心概念详解-维度建模、数据分层与-SCD-处理"><a href="#数据仓库核心概念详解-维度建模、数据分层与-SCD-处理" class="headerlink" title="数据仓库核心概念详解 - 维度建模、数据分层与 SCD 处理"></a>数据仓库核心概念详解 - 维度建模、数据分层与 SCD 处理</h1><p>数据仓库（Data Warehouse）是企业级数据分析的基础设施。本文将详细介绍数据仓库的核心概念，包括维度建模、数据分层架构和缓慢变化维（SCD）处理。</p>
+<h2 id="一、数据仓库概述"><a href="#一、数据仓库概述" class="headerlink" title="一、数据仓库概述"></a>一、数据仓库概述</h2><h3 id="1-1-什么是数据仓库"><a href="#1-1-什么是数据仓库" class="headerlink" title="1.1 什么是数据仓库"></a>1.1 什么是数据仓库</h3><p><strong>数据仓库</strong>是一个面向主题的、集成的、相对稳定的、反映历史变化的数据集合，用于支持管理决策。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">数据仓库特点：</span><br><span class="line">├── 面向主题（Subject-Oriented）</span><br><span class="line">├── 集成性（Integrated）</span><br><span class="line">├── 稳定性（Non-Volatile）</span><br><span class="line">└── 时变性（Time-Variant）</span><br></pre></td></tr></table></figure>
+
+<h3 id="1-2-数据仓库-vs-操作型数据库"><a href="#1-2-数据仓库-vs-操作型数据库" class="headerlink" title="1.2 数据仓库 vs 操作型数据库"></a>1.2 数据仓库 vs 操作型数据库</h3><table>
+<thead>
+<tr>
+<th>特性</th>
+<th>操作型数据库 (OLTP)</th>
+<th>数据仓库 (OLAP)</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>用途</td>
+<td>日常业务操作</td>
+<td>分析决策</td>
+</tr>
+<tr>
+<td>数据</td>
+<td>当前数据</td>
+<td>历史数据</td>
+</tr>
+<tr>
+<td>操作</td>
+<td>增删改为主</td>
+<td>查询为主</td>
+</tr>
+<tr>
+<td>设计</td>
+<td>范式化（3NF）</td>
+<td>维度建模</td>
+</tr>
+<tr>
+<td>性能</td>
+<td>事务响应时间</td>
+<td>查询吞吐量</td>
+</tr>
+</tbody></table>
+<h3 id="1-3-数据仓库架构图"><a href="#1-3-数据仓库架构图" class="headerlink" title="1.3 数据仓库架构图"></a>1.3 数据仓库架构图</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line">┌─────────────────────────────────────────────────────────────┐</span><br><span class="line">│                      数据应用层                               │</span><br><span class="line">│   ┌─────────┐  ┌─────────┐  ┌─────────┐  ┌─────────┐       │</span><br><span class="line">│   │ BI 报表  │  │ 即席查询│  │ 数据大屏│  │ 机器学习│       │</span><br><span class="line">│   └────┬────┘  └────┬────┘  └────┬────┘  └────┬────┘       │</span><br><span class="line">└────────┼────────────┼────────────┼────────────┼─────────────┘</span><br><span class="line">         │            │            │            │</span><br><span class="line">┌────────▼────────────────────────────────────────────────────┐</span><br><span class="line">│                    ADS 应用数据层                              │</span><br><span class="line">│         面向应用的数据集市，按主题组织数据                       │</span><br><span class="line">└─────────────────────────────────────────────────────────────┘</span><br><span class="line">                              │</span><br><span class="line">┌─────────────────────────────▼───────────────────────────────┐</span><br><span class="line">│                    DWS 汇总数据层                              │</span><br><span class="line">│         轻度汇总，构建宽表和聚合指标                           │</span><br><span class="line">└─────────────────────────────────────────────────────────────┘</span><br><span class="line">                              │</span><br><span class="line">┌─────────────────────────────▼───────────────────────────────┐</span><br><span class="line">│                    DWD 明细数据层                              │</span><br><span class="line">│         清洗、标准化、维度关联，保持业务过程明细                  │</span><br><span class="line">└─────────────────────────────────────────────────────────────┘</span><br><span class="line">                              │</span><br><span class="line">┌─────────────────────────────▼───────────────────────────────┐</span><br><span class="line">│                    ODS 操作数据存储层                           │</span><br><span class="line">│         原始数据，与源系统保持一致                             │</span><br><span class="line">└─────────────────────────────────────────────────────────────┘</span><br><span class="line">                              │</span><br><span class="line">         ┌──────────────────┼──────────────────┐</span><br><span class="line">         ▼                  ▼                  ▼</span><br><span class="line">┌─────────────┐   ┌─────────────┐   ┌─────────────┐</span><br><span class="line">│  业务数据库  │   │   日志文件   │   │  外部数据源  │</span><br><span class="line">└─────────────┘   └─────────────┘   └─────────────┘</span><br></pre></td></tr></table></figure>
+
+<h2 id="二、维度建模"><a href="#二、维度建模" class="headerlink" title="二、维度建模"></a>二、维度建模</h2><h3 id="2-1-什么是维度建模"><a href="#2-1-什么是维度建模" class="headerlink" title="2.1 什么是维度建模"></a>2.1 什么是维度建模</h3><p><strong>维度建模</strong>是数据仓库的一种设计方法，由 Ralph Kimball 提出，以事实表为核心，维度表为上下文。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">维度建模核心：</span><br><span class="line">├── 事实表（Fact Table）</span><br><span class="line">└── 维度表（Dimension Table）</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-2-事实表"><a href="#2-2-事实表" class="headerlink" title="2.2 事实表"></a>2.2 事实表</h3><p><strong>事实表</strong>存储业务过程的度量值（数值型），通常是可加的。</p>
+<p><strong>事实表结构</strong>：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">┌─────────────────────────────────────────────────┐</span><br><span class="line">│              事实表：fact_order                  │</span><br><span class="line">├─────────────────────────────────────────────────┤</span><br><span class="line">│  order_id (FK)     │ 订单 ID（外键）              │</span><br><span class="line">│  user_id (FK)      │ 用户 ID（外键）              │</span><br><span class="line">│  product_id (FK)   │ 商品 ID（外键）              │</span><br><span class="line">│  date_id (FK)      │ 日期 ID（外键）              │</span><br><span class="line">│  ──────────────────┼──────────────────────────  │</span><br><span class="line">│  amount            │ 订单金额（度量值）            │</span><br><span class="line">│  quantity          │ 商品数量（度量值）            │</span><br><span class="line">│  discount          │ 折扣金额（度量值）            │</span><br><span class="line">└─────────────────────────────────────────────────┘</span><br></pre></td></tr></table></figure>
+
+<p><strong>事实表特点</strong>：</p>
+<table>
+<thead>
+<tr>
+<th>特点</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>包含外键</td>
+<td>关联维度表</td>
+</tr>
+<tr>
+<td>包含度量值</td>
+<td>可加的数值</td>
+</tr>
+<tr>
+<td>数据量大</td>
+<td>通常百万到亿级</td>
+</tr>
+<tr>
+<td>行数增长快</td>
+<td>随业务增长</td>
+</tr>
+</tbody></table>
+<p><strong>事实表类型</strong>：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">1. 事务事实表：记录业务事件（订单、支付）</span><br><span class="line">2. 周期快照事实表：定期状态（每日库存）</span><br><span class="line">3. 累积快照事实表：流程进度（订单→发货→签收）</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-3-维度表"><a href="#2-3-维度表" class="headerlink" title="2.3 维度表"></a>2.3 维度表</h3><p><strong>维度表</strong>存储业务实体的描述性属性，用于查询过滤和分组。</p>
+<p><strong>维度表结构</strong>：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">┌─────────────────────────────────────────────────┐</span><br><span class="line">│            维度表：dim_user                       │</span><br><span class="line">├─────────────────────────────────────────────────┤</span><br><span class="line">│  user_id (PK)      │ 用户 ID（主键）             │</span><br><span class="line">│  username          │ 用户名                     │</span><br><span class="line">│  gender            │ 性别                       │</span><br><span class="line">│  age_range         │ 年龄段                     │</span><br><span class="line">│  city              │ 城市                       │</span><br><span class="line">│  province          │ 省份                       │</span><br><span class="line">│  register_date     │ 注册日期                   │</span><br><span class="line">│  user_level        │ 用户等级                   │</span><br><span class="line">└─────────────────────────────────────────────────┘</span><br></pre></td></tr></table></figure>
+
+<p><strong>维度表特点</strong>：</p>
+<table>
+<thead>
+<tr>
+<th>特点</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>描述性属性</td>
+<td>文本为主</td>
+</tr>
+<tr>
+<td>数据量小</td>
+<td>通常万级以内</td>
+</tr>
+<tr>
+<td>行数稳定</td>
+<td>变化较慢</td>
+</tr>
+<tr>
+<td>宽表</td>
+<td>字段较多</td>
+</tr>
+</tbody></table>
+<h3 id="2-4-星型模型"><a href="#2-4-星型模型" class="headerlink" title="2.4 星型模型"></a>2.4 星型模型</h3><p><strong>星型模型</strong>是最简单的维度模型，事实表在中心，维度表围绕四周。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">                    ┌─────────────┐</span><br><span class="line">                    │ dim_date    │</span><br><span class="line">                    │ (日期维度)   │</span><br><span class="line">                    └──────┬──────┘</span><br><span class="line">                           │</span><br><span class="line">┌─────────────┐            │            ┌─────────────┐</span><br><span class="line">│ dim_product │────────────┼────────────│  dim_user   │</span><br><span class="line">│ (商品维度)   │            │            │ (用户维度)   │</span><br><span class="line">└─────────────┘            │            └─────────────┘</span><br><span class="line">                           │</span><br><span class="line">                    ┌──────▼──────┐</span><br><span class="line">                    │ fact_order  │</span><br><span class="line">                    │ (订单事实表) │</span><br><span class="line">                    └──────┬──────┘</span><br><span class="line">                           │</span><br><span class="line">                    ┌──────▼──────┐</span><br><span class="line">                    │ dim_store   │</span><br><span class="line">                    │ (门店维度)   │</span><br><span class="line">                    └─────────────┘</span><br></pre></td></tr></table></figure>
+
+<p><strong>星型模型特点</strong>：</p>
+<table>
+<thead>
+<tr>
+<th>优点</th>
+<th>缺点</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>结构简单</td>
+<td>数据冗余</td>
+</tr>
+<tr>
+<td>查询效率高</td>
+<td>维护成本高</td>
+</tr>
+<tr>
+<td>易于理解</td>
+<td>维度表较大</td>
+</tr>
+</tbody></table>
+<h3 id="2-5-雪花模型"><a href="#2-5-雪花模型" class="headerlink" title="2.5 雪花模型"></a>2.5 雪花模型</h3><p><strong>雪花模型</strong>是星型模型的扩展，维度表可以进一步规范化。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">                    ┌─────────────┐</span><br><span class="line">                    │ dim_date    │</span><br><span class="line">                    └──────┬──────┘</span><br><span class="line">                           │</span><br><span class="line">┌─────────────┐     ┌──────▼──────┐     ┌─────────────┐</span><br><span class="line">│ dim_product │────►│ fact_order  │◄────│  dim_user   │</span><br><span class="line">└──────┬──────┘     └──────┬──────┘     └──────┬──────┘</span><br><span class="line">       │                   │                   │</span><br><span class="line">       │            ┌──────▼──────┐            │</span><br><span class="line">       │            │ dim_store   │            │</span><br><span class="line">       │            └──────┬──────┘            │</span><br><span class="line">       │                   │                   │</span><br><span class="line">       ▼                   ▼                   ▼</span><br><span class="line">┌─────────────┐     ┌─────────────┐     ┌─────────────┐</span><br><span class="line">│dim_category │     │  dim_city   │     │ dim_province│</span><br><span class="line">└─────────────┘     └─────────────┘     └─────────────┘</span><br></pre></td></tr></table></figure>
+
+<p><strong>雪花模型特点</strong>：</p>
+<table>
+<thead>
+<tr>
+<th>优点</th>
+<th>缺点</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>减少冗余</td>
+<td>查询复杂</td>
+</tr>
+<tr>
+<td>易于维护</td>
+<td>JOIN 较多</td>
+</tr>
+<tr>
+<td>维度表小</td>
+<td>性能较低</td>
+</tr>
+</tbody></table>
+<h3 id="2-6-星型模型-vs-雪花模型"><a href="#2-6-星型模型-vs-雪花模型" class="headerlink" title="2.6 星型模型 vs 雪花模型"></a>2.6 星型模型 vs 雪花模型</h3><table>
+<thead>
+<tr>
+<th>对比项</th>
+<th>星型模型</th>
+<th>雪花模型</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>规范化</td>
+<td>维度表不规范化</td>
+<td>维度表规范化</td>
+</tr>
+<tr>
+<td>数据冗余</td>
+<td>高</td>
+<td>低</td>
+</tr>
+<tr>
+<td>查询复杂度</td>
+<td>低</td>
+<td>高</td>
+</tr>
+<tr>
+<td>查询性能</td>
+<td>高</td>
+<td>低</td>
+</tr>
+<tr>
+<td>适用场景</td>
+<td>数据仓库</td>
+<td>数据集市</td>
+</tr>
+</tbody></table>
+<p><strong>推荐</strong>：数据仓库优先使用星型模型，查询性能更重要。</p>
+<h2 id="三、数据分层架构"><a href="#三、数据分层架构" class="headerlink" title="三、数据分层架构"></a>三、数据分层架构</h2><h3 id="3-1-为什么需要数据分层"><a href="#3-1-为什么需要数据分层" class="headerlink" title="3.1 为什么需要数据分层"></a>3.1 为什么需要数据分层</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">问题：</span><br><span class="line">├── 避免重复计算</span><br><span class="line">├── 统一数据口径</span><br><span class="line">├── 简化复杂任务</span><br><span class="line">├── 便于问题排查</span><br><span class="line">└── 隔离系统影响</span><br></pre></td></tr></table></figure>
+
+<h3 id="3-2-完整数据分层架构"><a href="#3-2-完整数据分层架构" class="headerlink" title="3.2 完整数据分层架构"></a>3.2 完整数据分层架构</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line">┌─────────────────────────────────────────────────────────────┐</span><br><span class="line">│                     应用层                                   │</span><br><span class="line">│   ┌─────────┐  ┌─────────┐  ┌─────────┐  ┌─────────┐       │</span><br><span class="line">│   │ BI 报表  │  │  画像   │  │  推荐   │  │  风控   │       │</span><br><span class="line">│   └────┬────┘  └────┬────┘  └────┬────┘  └────┬────┘       │</span><br><span class="line">└───────┼────────────┼────────────┼────────────┼─────────────┘</span><br><span class="line">        │            │            │            │</span><br><span class="line">┌───────▼────────────▼────────────▼────────────▼─────────────┐</span><br><span class="line">│              ADS 应用数据层 (Application Data Service)        │</span><br><span class="line">│   面向具体应用的数据集市，按主题组织                           │</span><br><span class="line">│   例：用户行为分析表、商品销售汇总表                           │</span><br><span class="line">└─────────────────────────────────────────────────────────────┘</span><br><span class="line">                              │</span><br><span class="line">┌─────────────────────────────▼───────────────────────────────┐</span><br><span class="line">│              DWS 汇总数据层 (Data Warehouse Service)          │</span><br><span class="line">│   轻度汇总，构建宽表和聚合指标                                 │</span><br><span class="line">│   例：用户日汇总表、商品日汇总表                               │</span><br><span class="line">└─────────────────────────────────────────────────────────────┘</span><br><span class="line">                              │</span><br><span class="line">┌─────────────────────────────▼───────────────────────────────┐</span><br><span class="line">│              DWD 明细数据层 (Data Warehouse Detail)           │</span><br><span class="line">│   清洗、标准化、维度关联，保持业务过程明细                       │</span><br><span class="line">│   例：订单事实表、支付事实表                                   │</span><br><span class="line">└─────────────────────────────────────────────────────────────┘</span><br><span class="line">                              │</span><br><span class="line">┌─────────────────────────────▼───────────────────────────────┐</span><br><span class="line">│              ODS 操作数据存储层 (Operational Data Store)      │</span><br><span class="line">│   原始数据，与源系统保持一致，只做简单清洗                     │</span><br><span class="line">│   例：ods_order_raw（订单原始表）                             │</span><br><span class="line">└─────────────────────────────────────────────────────────────┘</span><br><span class="line">                              │</span><br><span class="line">         ┌──────────────────┼──────────────────┐</span><br><span class="line">         ▼                  ▼                  ▼</span><br><span class="line">┌─────────────┐   ┌─────────────┐   ┌─────────────┐</span><br><span class="line">│  MySQL 订单  │   │  Nginx 日志  │   │  第三方 API  │</span><br><span class="line">└─────────────┘   └─────────────┘   └─────────────┘</span><br></pre></td></tr></table></figure>
+
+<h3 id="3-3-各层详细说明"><a href="#3-3-各层详细说明" class="headerlink" title="3.3 各层详细说明"></a>3.3 各层详细说明</h3><h4 id="ODS-层（操作数据存储）"><a href="#ODS-层（操作数据存储）" class="headerlink" title="ODS 层（操作数据存储）"></a>ODS 层（操作数据存储）</h4><p><strong>职责</strong>：</p>
+<ul>
+<li>存储原始数据</li>
+<li>与源系统保持一致</li>
+<li>简单清洗（去重、空值处理）</li>
+</ul>
+<p><strong>表命名规范</strong>：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">ods_&#123;业务域&#125;_&#123;表名&#125;_&#123;更新策略&#125;</span><br><span class="line">例：</span><br><span class="line">- ods_order_info_di（日增量）</span><br><span class="line">- ods_user_info_df（日全量）</span><br><span class="line">- ods_product_info_df（日全量）</span><br></pre></td></tr></table></figure>
+
+<p><strong>示例表结构</strong>：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- 订单原始表</span></span><br><span class="line"><span class="keyword">CREATE TABLE</span> ods_order_info_di (</span><br><span class="line">    order_id          <span class="type">BIGINT</span>,</span><br><span class="line">    user_id           <span class="type">BIGINT</span>,</span><br><span class="line">    product_id        <span class="type">BIGINT</span>,</span><br><span class="line">    order_amount      <span class="type">DECIMAL</span>(<span class="number">10</span>,<span class="number">2</span>),</span><br><span class="line">    order_status      <span class="type">INT</span>,</span><br><span class="line">    create_time       DATETIME,</span><br><span class="line">    update_time       DATETIME,</span><br><span class="line">    etl_time          DATETIME,</span><br><span class="line">    dt                STRING  <span class="comment">-- 分区字段</span></span><br><span class="line">) PARTITIONED <span class="keyword">BY</span> (dt STRING);</span><br></pre></td></tr></table></figure>
+
+<h4 id="DWD-层（明细数据层）"><a href="#DWD-层（明细数据层）" class="headerlink" title="DWD 层（明细数据层）"></a>DWD 层（明细数据层）</h4><p><strong>职责</strong>：</p>
+<ul>
+<li>数据清洗和标准化</li>
+<li>维度退化（将维度表字段冗余到事实表）</li>
+<li>事实表构建</li>
+</ul>
+<p><strong>表命名规范</strong>：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">dwd_&#123;业务域&#125;_&#123;事实/维度&#125;_&#123;表名&#125;</span><br><span class="line">例：</span><br><span class="line">- dwd_trade_order_fact（交易域订单事实表）</span><br><span class="line">- dwd_user_info_dim（用户维度表）</span><br></pre></td></tr></table></figure>
+
+<p><strong>示例表结构</strong>：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- 订单事实表（维度退化后）</span></span><br><span class="line"><span class="keyword">CREATE TABLE</span> dwd_trade_order_fact (</span><br><span class="line">    order_id          <span class="type">BIGINT</span>,</span><br><span class="line">    user_id           <span class="type">BIGINT</span>,</span><br><span class="line">    username          STRING,   <span class="comment">-- 退化维度</span></span><br><span class="line">    user_level        STRING,   <span class="comment">-- 退化维度</span></span><br><span class="line">    product_id        <span class="type">BIGINT</span>,</span><br><span class="line">    product_name      STRING,   <span class="comment">-- 退化维度</span></span><br><span class="line">    category_id       <span class="type">BIGINT</span>,</span><br><span class="line">    city_id           <span class="type">BIGINT</span>,</span><br><span class="line">    province_id       <span class="type">BIGINT</span>,</span><br><span class="line">    order_amount      <span class="type">DECIMAL</span>(<span class="number">10</span>,<span class="number">2</span>),</span><br><span class="line">    pay_amount        <span class="type">DECIMAL</span>(<span class="number">10</span>,<span class="number">2</span>),</span><br><span class="line">    discount_amount   <span class="type">DECIMAL</span>(<span class="number">10</span>,<span class="number">2</span>),</span><br><span class="line">    order_status      <span class="type">INT</span>,</span><br><span class="line">    create_time       DATETIME,</span><br><span class="line">    pay_time          DATETIME,</span><br><span class="line">    dt                STRING</span><br><span class="line">) PARTITIONED <span class="keyword">BY</span> (dt STRING);</span><br></pre></td></tr></table></figure>
+
+<h4 id="DWS-层（汇总数据层）"><a href="#DWS-层（汇总数据层）" class="headerlink" title="DWS 层（汇总数据层）"></a>DWS 层（汇总数据层）</h4><p><strong>职责</strong>：</p>
+<ul>
+<li>轻度汇总</li>
+<li>构建宽表</li>
+<li>聚合指标计算</li>
+</ul>
+<p><strong>表命名规范</strong>：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">dws_&#123;业务域&#125;_&#123;粒度&#125;_&#123;聚合范围&#125;</span><br><span class="line">例：</span><br><span class="line">- dws_user_order_1d（用户订单日汇总）</span><br><span class="line">- dws_product_sale_1d（商品销售日汇总）</span><br><span class="line">- dws_category_stat_7d（类目统计近 7 天）</span><br></pre></td></tr></table></figure>
+
+<p><strong>示例表结构</strong>：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- 用户订单日汇总宽表</span></span><br><span class="line"><span class="keyword">CREATE TABLE</span> dws_user_order_1d (</span><br><span class="line">    user_id           <span class="type">BIGINT</span>,</span><br><span class="line">    username          STRING,</span><br><span class="line">    user_level        STRING,</span><br><span class="line">    city_id           <span class="type">BIGINT</span>,</span><br><span class="line">    order_count       <span class="type">BIGINT</span>,      <span class="comment">-- 下单次数</span></span><br><span class="line">    pay_order_count   <span class="type">BIGINT</span>,      <span class="comment">-- 支付订单数</span></span><br><span class="line">    total_amount      <span class="type">DECIMAL</span>(<span class="number">10</span>,<span class="number">2</span>), <span class="comment">-- 总金额</span></span><br><span class="line">    avg_order_value   <span class="type">DECIMAL</span>(<span class="number">10</span>,<span class="number">2</span>), <span class="comment">-- 客单价</span></span><br><span class="line">    dt                STRING</span><br><span class="line">) PARTITIONED <span class="keyword">BY</span> (dt STRING);</span><br></pre></td></tr></table></figure>
+
+<h4 id="ADS-层（应用数据层）"><a href="#ADS-层（应用数据层）" class="headerlink" title="ADS 层（应用数据层）"></a>ADS 层（应用数据层）</h4><p><strong>职责</strong>：</p>
+<ul>
+<li>面向具体应用</li>
+<li>结果数据输出</li>
+<li>对接 BI 报表</li>
+</ul>
+<p><strong>表命名规范</strong>：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">ads_&#123;应用/报表名&#125;_&#123;指标&#125;</span><br><span class="line">例：</span><br><span class="line">- ads_dashboard_gmv_daily（大屏 GMV 日数据）</span><br><span class="line">- ads_user_retention_rate（用户留存率）</span><br></pre></td></tr></table></figure>
+
+<p><strong>示例表结构</strong>：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- 大屏 GMV 日数据</span></span><br><span class="line"><span class="keyword">CREATE TABLE</span> ads_dashboard_gmv_daily (</span><br><span class="line">    stat_date         <span class="type">DATE</span>,</span><br><span class="line">    gmv               <span class="type">DECIMAL</span>(<span class="number">18</span>,<span class="number">2</span>),</span><br><span class="line">    gmv_growth_rate   <span class="type">DECIMAL</span>(<span class="number">10</span>,<span class="number">4</span>),</span><br><span class="line">    order_count       <span class="type">BIGINT</span>,</span><br><span class="line">    user_count        <span class="type">BIGINT</span>,</span><br><span class="line">    avg_order_value   <span class="type">DECIMAL</span>(<span class="number">10</span>,<span class="number">2</span>),</span><br><span class="line">    dt                STRING</span><br><span class="line">) PARTITIONED <span class="keyword">BY</span> (dt STRING);</span><br></pre></td></tr></table></figure>
+
+<h3 id="3-4-数据流向示意图"><a href="#3-4-数据流向示意图" class="headerlink" title="3.4 数据流向示意图"></a>3.4 数据流向示意图</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line">数据流转示例：电商订单分析</span><br><span class="line"></span><br><span class="line">┌─────────────┐</span><br><span class="line">│  MySQL 订单库 │</span><br><span class="line">└──────┬──────┘</span><br><span class="line">       │ ETL 同步</span><br><span class="line">       ▼</span><br><span class="line">┌─────────────────────────────────────┐</span><br><span class="line">│ ODS: ods_order_info_di              │</span><br><span class="line">│ - 原始订单数据                        │</span><br><span class="line">│ - 与 MySQL 保持一致                   │</span><br><span class="line">└──────┬──────────────────────────────┘</span><br><span class="line">       │ 清洗 + 维度退化</span><br><span class="line">       │ JOIN dim_user, dim_product</span><br><span class="line">       ▼</span><br><span class="line">┌─────────────────────────────────────┐</span><br><span class="line">│ DWD: dwd_trade_order_fact           │</span><br><span class="line">│ - 清洗后的订单事实表                  │</span><br><span class="line">│ - 用户和商品维度已退化                 │</span><br><span class="line">└──────┬──────────────────────────────┘</span><br><span class="line">       │ 轻度汇总</span><br><span class="line">       │ GROUP BY user_id, date</span><br><span class="line">       ▼</span><br><span class="line">┌─────────────────────────────────────┐</span><br><span class="line">│ DWS: dws_user_order_1d              │</span><br><span class="line">│ - 用户订单日汇总                      │</span><br><span class="line">│ - 每个用户每天的聚合指标               │</span><br><span class="line">└──────┬──────────────────────────────┘</span><br><span class="line">       │ 应用需求</span><br><span class="line">       │ 计算 GMV、转化率等</span><br><span class="line">       ▼</span><br><span class="line">┌─────────────────────────────────────┐</span><br><span class="line">│ ADS: ads_dashboard_gmv_daily        │</span><br><span class="line">│ - 大屏展示数据                        │</span><br><span class="line">│ - 直接对接可视化系统                  │</span><br><span class="line">└─────────────────────────────────────┘</span><br></pre></td></tr></table></figure>
+
+<h2 id="四、缓慢变化维（SCD）处理"><a href="#四、缓慢变化维（SCD）处理" class="headerlink" title="四、缓慢变化维（SCD）处理"></a>四、缓慢变化维（SCD）处理</h2><h3 id="4-1-什么是缓慢变化维"><a href="#4-1-什么是缓慢变化维" class="headerlink" title="4.1 什么是缓慢变化维"></a>4.1 什么是缓慢变化维</h3><p><strong>缓慢变化维（Slowly Changing Dimension, SCD）</strong>：维度表的属性会随时间缓慢变化，需要记录历史状态。</p>
+<p><strong>典型场景</strong>：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">用户信息变化：</span><br><span class="line">├── 用户等级：普通会员 → 黄金会员 → 钻石会员</span><br><span class="line">├── 所在城市：北京 → 上海</span><br><span class="line">└── 手机号码：138****1111 → 139****2222</span><br><span class="line"></span><br><span class="line">商品信息变化：</span><br><span class="line">├── 商品分类调整</span><br><span class="line">├── 价格变化</span><br><span class="line">└── 供应商变更</span><br></pre></td></tr></table></figure>
+
+<h3 id="4-2-SCD-类型详解"><a href="#4-2-SCD-类型详解" class="headerlink" title="4.2 SCD 类型详解"></a>4.2 SCD 类型详解</h3><h4 id="类型-1：直接覆盖（SCD1）"><a href="#类型-1：直接覆盖（SCD1）" class="headerlink" title="类型 1：直接覆盖（SCD1）"></a>类型 1：直接覆盖（SCD1）</h4><p><strong>处理方式</strong>：直接更新维度表，不保留历史。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">更新前：</span><br><span class="line">┌─────────┬────────┬──────────┐</span><br><span class="line">│ user_id │ city   │ level    │</span><br><span class="line">├─────────┼────────┼──────────┤</span><br><span class="line">│  1001   │ 北京   │ 黄金会员  │</span><br><span class="line">└─────────┴────────┴──────────┘</span><br><span class="line"></span><br><span class="line">更新后（用户从北京搬到上海，等级升为钻石）：</span><br><span class="line">┌─────────┬────────┬──────────┐</span><br><span class="line">│ user_id │ city   │ level    │</span><br><span class="line">├─────────┼────────┼──────────┤</span><br><span class="line">│  1001   │ 上海   │ 钻石会员  │</span><br><span class="line">└─────────┴────────┴──────────┘</span><br><span class="line"></span><br><span class="line">北京→上海，黄金→钻石：历史被覆盖，无法追溯</span><br></pre></td></tr></table></figure>
+
+<p><strong>SQL 实现</strong>：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- 直接 UPDATE</span></span><br><span class="line"><span class="keyword">UPDATE</span> dim_user</span><br><span class="line"><span class="keyword">SET</span> city <span class="operator">=</span> <span class="string">&#x27;上海&#x27;</span>,</span><br><span class="line">    user_level <span class="operator">=</span> <span class="string">&#x27;钻石会员&#x27;</span>,</span><br><span class="line">    update_time <span class="operator">=</span> NOW()</span><br><span class="line"><span class="keyword">WHERE</span> user_id <span class="operator">=</span> <span class="number">1001</span>;</span><br></pre></td></tr></table></figure>
+
+<p><strong>适用场景</strong>：</p>
+<ul>
+<li>不需要历史数据</li>
+<li>数据错误修正</li>
+<li>不重要的属性变化</li>
+</ul>
+<h4 id="类型-2：新增行（SCD2）"><a href="#类型-2：新增行（SCD2）" class="headerlink" title="类型 2：新增行（SCD2）"></a>类型 2：新增行（SCD2）</h4><p><strong>处理方式</strong>：每次变化新增一行，用时间戳区分。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">时间线：</span><br><span class="line">2024-01-01: 用户 1001 注册，城市北京，等级普通会员</span><br><span class="line">2024-03-15: 用户升级到黄金会员</span><br><span class="line">2024-08-20: 用户搬到上海</span><br><span class="line">2024-11-11: 用户升级到钻石会员</span><br><span class="line"></span><br><span class="line">维度表数据：</span><br><span class="line">┌─────────┬────────┬──────────┬────────────┬────────────┬──────────┐</span><br><span class="line">│ user_id │ city   │ level    │ start_date │ end_date   │ is_active│</span><br><span class="line">├─────────┼────────┼──────────┼────────────┼────────────┼──────────┤</span><br><span class="line">│  1001   │ 北京   │ 普通会员  │ 2024-01-01 │ 2024-03-14 │    0     │</span><br><span class="line">│  1001   │ 北京   │ 黄金会员  │ 2024-03-15 │ 2024-08-19 │    0     │</span><br><span class="line">│  1001   │ 上海   │ 黄金会员  │ 2024-08-20 │ 2024-11-10 │    0     │</span><br><span class="line">│  1001   │ 上海   │ 钻石会员  │ 2024-11-11 │ 9999-12-31 │    1     │</span><br><span class="line">└─────────┴────────┴──────────┴────────────┴────────────┴──────────┘</span><br><span class="line">                                                         ↑</span><br><span class="line">                                                  当前有效记录</span><br></pre></td></tr></table></figure>
+
+<p><strong>SQL 实现</strong>：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- 1. 失效旧记录</span></span><br><span class="line"><span class="keyword">UPDATE</span> dim_user</span><br><span class="line"><span class="keyword">SET</span> end_date <span class="operator">=</span> <span class="string">&#x27;2024-11-10&#x27;</span>,</span><br><span class="line">    is_active <span class="operator">=</span> <span class="number">0</span></span><br><span class="line"><span class="keyword">WHERE</span> user_id <span class="operator">=</span> <span class="number">1001</span> <span class="keyword">AND</span> is_active <span class="operator">=</span> <span class="number">1</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 2. 插入新记录</span></span><br><span class="line"><span class="keyword">INSERT INTO</span> dim_user (user_id, city, user_level, start_date, end_date, is_active)</span><br><span class="line"><span class="keyword">VALUES</span> (<span class="number">1001</span>, <span class="string">&#x27;上海&#x27;</span>, <span class="string">&#x27;钻石会员&#x27;</span>, <span class="string">&#x27;2024-11-11&#x27;</span>, <span class="string">&#x27;9999-12-31&#x27;</span>, <span class="number">1</span>);</span><br></pre></td></tr></table></figure>
+
+<p><strong>适用场景</strong>：</p>
+<ul>
+<li>需要完整历史记录</li>
+<li>合规要求</li>
+<li>重要维度属性</li>
+</ul>
+<h4 id="类型-3：新增列（SCD3）"><a href="#类型-3：新增列（SCD3）" class="headerlink" title="类型 3：新增列（SCD3）"></a>类型 3：新增列（SCD3）</h4><p><strong>处理方式</strong>：增加历史列，保留有限历史。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">更新前：</span><br><span class="line">┌─────────┬──────────┬────────────┬──────────┐</span><br><span class="line">│ user_id │ city     │ prev_city  │ level    │</span><br><span class="line">├─────────┼──────────┼────────────┼──────────┤</span><br><span class="line">│  1001   │ 北京     │ NULL       │ 黄金会员  │</span><br><span class="line">└─────────┴──────────┴────────────┴──────────┘</span><br><span class="line"></span><br><span class="line">更新后（用户搬到上海）：</span><br><span class="line">┌─────────┬──────────┬────────────┬──────────┐</span><br><span class="line">│ user_id │ city     │ prev_city  │ level    │</span><br><span class="line">├─────────┼──────────┼────────────┼──────────┤</span><br><span class="line">│  1001   │ 上海     │ 北京       │ 黄金会员  │</span><br><span class="line">└─────────┴──────────┴────────────┴──────────┘</span><br><span class="line"></span><br><span class="line">保留当前值和上一个值，只能追溯一次变化</span><br></pre></td></tr></table></figure>
+
+<p><strong>SQL 实现</strong>：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">UPDATE</span> dim_user</span><br><span class="line"><span class="keyword">SET</span> prev_city <span class="operator">=</span> city,</span><br><span class="line">    city <span class="operator">=</span> <span class="string">&#x27;上海&#x27;</span>,</span><br><span class="line">    update_time <span class="operator">=</span> NOW()</span><br><span class="line"><span class="keyword">WHERE</span> user_id <span class="operator">=</span> <span class="number">1001</span>;</span><br></pre></td></tr></table></figure>
+
+<p><strong>适用场景</strong>：</p>
+<ul>
+<li>只需要保留上一次的变更</li>
+<li>存储空间有限</li>
+</ul>
+<h3 id="4-3-SCD-类型对比"><a href="#4-3-SCD-类型对比" class="headerlink" title="4.3 SCD 类型对比"></a>4.3 SCD 类型对比</h3><table>
+<thead>
+<tr>
+<th>类型</th>
+<th>方式</th>
+<th>历史</th>
+<th>复杂度</th>
+<th>存储</th>
+<th>适用场景</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>SCD1</td>
+<td>覆盖</td>
+<td>无</td>
+<td>低</td>
+<td>最小</td>
+<td>不重要属性</td>
+</tr>
+<tr>
+<td>SCD2</td>
+<td>新增行</td>
+<td>完整</td>
+<td>高</td>
+<td>最大</td>
+<td>重要维度</td>
+</tr>
+<tr>
+<td>SCD3</td>
+<td>新增列</td>
+<td>部分</td>
+<td>中</td>
+<td>中等</td>
+<td>有限历史</td>
+</tr>
+</tbody></table>
+<h3 id="4-4-SCD-处理流程图"><a href="#4-4-SCD-处理流程图" class="headerlink" title="4.4 SCD 处理流程图"></a>4.4 SCD 处理流程图</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line">数据更新流程（SCD2）：</span><br><span class="line"></span><br><span class="line">源系统变更 ──► 检测变化</span><br><span class="line">                    │</span><br><span class="line">                    ▼</span><br><span class="line">            ┌───────────────┐</span><br><span class="line">            │ 是否有变化？   │</span><br><span class="line">            └───────┬───────┘</span><br><span class="line">                    │</span><br><span class="line">           ┌────────┴────────┐</span><br><span class="line">           │                 │</span><br><span class="line">          是                 否</span><br><span class="line">           │                 │</span><br><span class="line">           ▼                 ▼</span><br><span class="line">    ┌─────────────┐    ┌─────────────┐</span><br><span class="line">    │ 失效旧记录   │    │   保持不变   │</span><br><span class="line">    │ end_date    │    │             │</span><br><span class="line">    │ is_active=0 │    │             │</span><br><span class="line">    └──────┬──────┘    └─────────────┘</span><br><span class="line">           │</span><br><span class="line">           ▼</span><br><span class="line">    ┌─────────────┐</span><br><span class="line">    │ 插入新记录   │</span><br><span class="line">    │ start_date  │</span><br><span class="line">    │ end_date=∞  │</span><br><span class="line">    │ is_active=1 │</span><br><span class="line">    └─────────────┘</span><br></pre></td></tr></table></figure>
+
+<h3 id="4-5-实战案例：用户维度-SCD2-处理"><a href="#4-5-实战案例：用户维度-SCD2-处理" class="headerlink" title="4.5 实战案例：用户维度 SCD2 处理"></a>4.5 实战案例：用户维度 SCD2 处理</h3><p><strong>建表语句</strong>：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">CREATE TABLE</span> dim_user_scd2 (</span><br><span class="line">    user_sk         <span class="type">BIGINT</span>,      <span class="comment">-- 代理键（自增）</span></span><br><span class="line">    user_id         <span class="type">BIGINT</span>,      <span class="comment">-- 业务主键</span></span><br><span class="line">    username        STRING,</span><br><span class="line">    city            STRING,</span><br><span class="line">    province        STRING,</span><br><span class="line">    user_level      STRING,</span><br><span class="line">    start_date      <span class="type">DATE</span>,</span><br><span class="line">    end_date        <span class="type">DATE</span>,</span><br><span class="line">    is_active       <span class="type">INT</span>,</span><br><span class="line">    etl_time        <span class="type">TIMESTAMP</span>,</span><br><span class="line">    <span class="keyword">PRIMARY KEY</span> (user_sk)</span><br><span class="line">);</span><br></pre></td></tr></table></figure>
+
+<p><strong>ETL 处理逻辑（伪代码）</strong>：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">process_user_scd2</span>(<span class="params">user_data</span>):</span><br><span class="line">    <span class="comment"># 1. 获取当前有效记录</span></span><br><span class="line">    old_record = db.query(<span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">        SELECT * FROM dim_user_scd2</span></span><br><span class="line"><span class="string">        WHERE user_id = ? AND is_active = 1</span></span><br><span class="line"><span class="string">    &quot;&quot;&quot;</span>, user_data[<span class="string">&#x27;user_id&#x27;</span>])</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 2. 比较是否有变化</span></span><br><span class="line">    <span class="keyword">if</span> old_record[<span class="string">&#x27;city&#x27;</span>] != user_data[<span class="string">&#x27;city&#x27;</span>] <span class="keyword">or</span> \</span><br><span class="line">       old_record[<span class="string">&#x27;user_level&#x27;</span>] != user_data[<span class="string">&#x27;user_level&#x27;</span>]:</span><br><span class="line"></span><br><span class="line">        <span class="comment"># 3. 失效旧记录</span></span><br><span class="line">        db.execute(<span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">            UPDATE dim_user_scd2</span></span><br><span class="line"><span class="string">            SET end_date = ?, is_active = 0</span></span><br><span class="line"><span class="string">            WHERE user_id = ? AND is_active = 1</span></span><br><span class="line"><span class="string">        &quot;&quot;&quot;</span>, today, user_data[<span class="string">&#x27;user_id&#x27;</span>])</span><br><span class="line"></span><br><span class="line">        <span class="comment"># 4. 插入新记录</span></span><br><span class="line">        db.execute(<span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">            INSERT INTO dim_user_scd2</span></span><br><span class="line"><span class="string">            (user_id, username, city, user_level,</span></span><br><span class="line"><span class="string">             start_date, end_date, is_active)</span></span><br><span class="line"><span class="string">            VALUES (?, ?, ?, ?, ?, &#x27;9999-12-31&#x27;, 1)</span></span><br><span class="line"><span class="string">        &quot;&quot;&quot;</span>, user_data[<span class="string">&#x27;user_id&#x27;</span>], user_data[<span class="string">&#x27;username&#x27;</span>],</span><br><span class="line">                   user_data[<span class="string">&#x27;city&#x27;</span>], user_data[<span class="string">&#x27;user_level&#x27;</span>], today)</span><br></pre></td></tr></table></figure>
+
+<h2 id="五、总结"><a href="#五、总结" class="headerlink" title="五、总结"></a>五、总结</h2><h3 id="核心知识点速查"><a href="#核心知识点速查" class="headerlink" title="核心知识点速查"></a>核心知识点速查</h3><table>
+<thead>
+<tr>
+<th>概念</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>事实表</td>
+<td>存储度量值，可加</td>
+</tr>
+<tr>
+<td>维度表</td>
+<td>存储描述属性，用于过滤</td>
+</tr>
+<tr>
+<td>星型模型</td>
+<td>事实表居中，维度表不规范化</td>
+</tr>
+<tr>
+<td>雪花模型</td>
+<td>维度表进一步规范化</td>
+</tr>
+<tr>
+<td>ODS</td>
+<td>原始数据层</td>
+</tr>
+<tr>
+<td>DWD</td>
+<td>明细数据层</td>
+</tr>
+<tr>
+<td>DWS</td>
+<td>汇总数据层</td>
+</tr>
+<tr>
+<td>ADS</td>
+<td>应用数据层</td>
+</tr>
+<tr>
+<td>SCD1</td>
+<td>直接覆盖，无历史</td>
+</tr>
+<tr>
+<td>SCD2</td>
+<td>新增行，完整历史</td>
+</tr>
+<tr>
+<td>SCD3</td>
+<td>新增列，部分历史</td>
+</tr>
+</tbody></table>
+<h3 id="最佳实践"><a href="#最佳实践" class="headerlink" title="最佳实践"></a>最佳实践</h3><ol>
+<li><strong>维度建模</strong>：优先使用星型模型，性能优先</li>
+<li><strong>数据分层</strong>：至少 ODS→DWD→ADS 三层</li>
+<li><strong>SCD 处理</strong>：关键维度使用 SCD2</li>
+<li><strong>命名规范</strong>：统一表命名，便于维护</li>
+</ol>
+<hr>
+<p><strong>参考资料</strong>：</p>
+<ul>
+<li>《数据仓库工具箱：维度建模权威指南》- Ralph Kimball</li>
+<li>《大数据之路：阿里巴巴大数据实践》</li>
+</ul>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://brian-lin-c.github.io">过拟合的炸鱼薯条</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://brian-lin-c.github.io/2026/02/24/%E6%95%B0%E6%8D%AE%E4%BB%93%E5%BA%93%E6%A0%B8%E5%BF%83%E6%A6%82%E5%BF%B5%E8%AF%A6%E8%A7%A3%20-%20%E7%BB%B4%E5%BA%A6%E5%BB%BA%E6%A8%A1%E3%80%81%E6%95%B0%E6%8D%AE%E5%88%86%E5%B1%82%E4%B8%8E%20SCD%20%E5%A4%84%E7%90%86/">https://brian-lin-c.github.io/2026/02/24/%E6%95%B0%E6%8D%AE%E4%BB%93%E5%BA%93%E6%A0%B8%E5%BF%83%E6%A6%82%E5%BF%B5%E8%AF%A6%E8%A7%A3%20-%20%E7%BB%B4%E5%BA%A6%E5%BB%BA%E6%A8%A1%E3%80%81%E6%95%B0%E6%8D%AE%E5%88%86%E5%B1%82%E4%B8%8E%20SCD%20%E5%A4%84%E7%90%86/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://brian-lin-c.github.io" target="_blank">过拟合的炸鱼薯条</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E6%95%B0%E6%8D%AE%E4%BB%93%E5%BA%93/">数据仓库</a><a class="post-meta__tags" href="/tags/%E7%BB%B4%E5%BA%A6%E5%BB%BA%E6%A8%A1/">维度建模</a><a class="post-meta__tags" href="/tags/%E6%95%B0%E6%8D%AE%E5%88%86%E5%B1%82/">数据分层</a><a class="post-meta__tags" href="/tags/SCD/">SCD</a><a class="post-meta__tags" href="/tags/%E5%A4%A7%E6%95%B0%E6%8D%AE/">大数据</a></div><div class="post-share"><div class="social-share" data-image="/img/%E5%A4%B4%E5%83%8F.jpg" data-sites="facebook,x,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related" href="/2026/02/24/Git%20%E7%89%88%E6%9C%AC%E6%8E%A7%E5%88%B6%E4%B8%8E%E5%9B%A2%E9%98%9F%E5%8D%8F%E4%BD%9C/" title="Git 版本控制与团队协作"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">Git 版本控制与团队协作</div></div><div class="info-2"><div class="info-item-1">Git 版本控制与团队协作Git 是现代软件开发中不可或缺的工具。本篇将介绍 Git 的核心概念、常用命令、分支管理和团队协作流程。 一、Git 基础1.1 版本控制简介版本控制系统（VCS） 用于跟踪文件的变化历史，主要类型：    类型 特点 代表    本地 VCS 单用户，单机器 RCS, SCCS   集中式 VCS 单服务器，多客户端 SVN, CVS   分布式 VCS 每人都有完整仓库 Git, Mercurial   1.2 Git 的特点 分布式：每个人都是完整的仓库 分支模型：轻量级分支，快速切换 快照模式：存储快照而非差异 数据校验：SHA-1 校验和保证数据完整性 支持非线性开发：强大的合并能力  1.3 Git 的三个区域12345工作目录 (Working Directory)    ↓ git add暂存区 (Staging Area / Index)    ↓ git commit仓库 (Repository / .git)   工作目录：你看到和编辑的文件 暂存区：准备提交的快照 仓库：永久存储的提交历史  1.4 安装与配置123456789...</div></div></div></a><a class="pagination-related" href="/2026/02/24/Linux%20%E4%B8%8E%20Shell%EF%BC%88%E4%BA%8C%EF%BC%89Shell%20%E8%84%9A%E6%9C%AC%E7%BC%96%E5%86%99/" title="Linux 与 Shell（二）Shell 脚本编写"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">Linux 与 Shell（二）Shell 脚本编写</div></div><div class="info-2"><div class="info-item-1">Linux 与 Shell（二）Shell 脚本编写Shell 脚本是自动化运维和批量处理的神器。本篇将介绍 Shell 脚本的基础语法、实用技巧和实战案例。 一、Shell 脚本基础1.1 第一个脚本123456#!/bin/bash#  第一个 Shell 脚本echo &quot;Hello, World!&quot;echo &quot;当前用户：$(whoami)&quot;echo &quot;当前目录：$(pwd)&quot;  运行脚本： 12345678910#  方式一：添加执行权限chmod +x script.sh./script.sh#  方式二：用 bash 执行bash script.sh#  方式三：用 source 执行（在当前 shell 中）source script.sh. script.sh   提醒自己：  #!/bin/bash 叫 shebang，指定解释器 # 开头的行是注释 脚本文件通常用 .sh 扩展名   1.2 变量123456789101112131415161718192021222324252627282930#!/...</div></div></div></a></nav></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/img/%E5%A4%B4%E5%83%8F.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">过拟合的炸鱼薯条</div><div class="author-info-description">好好学习，天天向上</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">68</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">157</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">9</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/Brian-Lin-C"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons"><a class="social-icon" href="https://github.com/Brian-Lin-C" target="_blank" title="Github"><i class="fab fa-github" style="color: #24292e;"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">欢迎来到我的个人博客！</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%95%B0%E6%8D%AE%E4%BB%93%E5%BA%93%E6%A0%B8%E5%BF%83%E6%A6%82%E5%BF%B5%E8%AF%A6%E8%A7%A3-%E7%BB%B4%E5%BA%A6%E5%BB%BA%E6%A8%A1%E3%80%81%E6%95%B0%E6%8D%AE%E5%88%86%E5%B1%82%E4%B8%8E-SCD-%E5%A4%84%E7%90%86"><span class="toc-number">1.</span> <span class="toc-text">数据仓库核心概念详解 - 维度建模、数据分层与 SCD 处理</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%80%E3%80%81%E6%95%B0%E6%8D%AE%E4%BB%93%E5%BA%93%E6%A6%82%E8%BF%B0"><span class="toc-number">1.1.</span> <span class="toc-text">一、数据仓库概述</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-1-%E4%BB%80%E4%B9%88%E6%98%AF%E6%95%B0%E6%8D%AE%E4%BB%93%E5%BA%93"><span class="toc-number">1.1.1.</span> <span class="toc-text">1.1 什么是数据仓库</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-2-%E6%95%B0%E6%8D%AE%E4%BB%93%E5%BA%93-vs-%E6%93%8D%E4%BD%9C%E5%9E%8B%E6%95%B0%E6%8D%AE%E5%BA%93"><span class="toc-number">1.1.2.</span> <span class="toc-text">1.2 数据仓库 vs 操作型数据库</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-3-%E6%95%B0%E6%8D%AE%E4%BB%93%E5%BA%93%E6%9E%B6%E6%9E%84%E5%9B%BE"><span class="toc-number">1.1.3.</span> <span class="toc-text">1.3 数据仓库架构图</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%8C%E3%80%81%E7%BB%B4%E5%BA%A6%E5%BB%BA%E6%A8%A1"><span class="toc-number">1.2.</span> <span class="toc-text">二、维度建模</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#2-1-%E4%BB%80%E4%B9%88%E6%98%AF%E7%BB%B4%E5%BA%A6%E5%BB%BA%E6%A8%A1"><span class="toc-number">1.2.1.</span> <span class="toc-text">2.1 什么是维度建模</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-2-%E4%BA%8B%E5%AE%9E%E8%A1%A8"><span class="toc-number">1.2.2.</span> <span class="toc-text">2.2 事实表</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-3-%E7%BB%B4%E5%BA%A6%E8%A1%A8"><span class="toc-number">1.2.3.</span> <span class="toc-text">2.3 维度表</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-4-%E6%98%9F%E5%9E%8B%E6%A8%A1%E5%9E%8B"><span class="toc-number">1.2.4.</span> <span class="toc-text">2.4 星型模型</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-5-%E9%9B%AA%E8%8A%B1%E6%A8%A1%E5%9E%8B"><span class="toc-number">1.2.5.</span> <span class="toc-text">2.5 雪花模型</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-6-%E6%98%9F%E5%9E%8B%E6%A8%A1%E5%9E%8B-vs-%E9%9B%AA%E8%8A%B1%E6%A8%A1%E5%9E%8B"><span class="toc-number">1.2.6.</span> <span class="toc-text">2.6 星型模型 vs 雪花模型</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%89%E3%80%81%E6%95%B0%E6%8D%AE%E5%88%86%E5%B1%82%E6%9E%B6%E6%9E%84"><span class="toc-number">1.3.</span> <span class="toc-text">三、数据分层架构</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#3-1-%E4%B8%BA%E4%BB%80%E4%B9%88%E9%9C%80%E8%A6%81%E6%95%B0%E6%8D%AE%E5%88%86%E5%B1%82"><span class="toc-number">1.3.1.</span> <span class="toc-text">3.1 为什么需要数据分层</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-2-%E5%AE%8C%E6%95%B4%E6%95%B0%E6%8D%AE%E5%88%86%E5%B1%82%E6%9E%B6%E6%9E%84"><span class="toc-number">1.3.2.</span> <span class="toc-text">3.2 完整数据分层架构</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-3-%E5%90%84%E5%B1%82%E8%AF%A6%E7%BB%86%E8%AF%B4%E6%98%8E"><span class="toc-number">1.3.3.</span> <span class="toc-text">3.3 各层详细说明</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#ODS-%E5%B1%82%EF%BC%88%E6%93%8D%E4%BD%9C%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8%EF%BC%89"><span class="toc-number">1.3.3.1.</span> <span class="toc-text">ODS 层（操作数据存储）</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#DWD-%E5%B1%82%EF%BC%88%E6%98%8E%E7%BB%86%E6%95%B0%E6%8D%AE%E5%B1%82%EF%BC%89"><span class="toc-number">1.3.3.2.</span> <span class="toc-text">DWD 层（明细数据层）</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#DWS-%E5%B1%82%EF%BC%88%E6%B1%87%E6%80%BB%E6%95%B0%E6%8D%AE%E5%B1%82%EF%BC%89"><span class="toc-number">1.3.3.3.</span> <span class="toc-text">DWS 层（汇总数据层）</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#ADS-%E5%B1%82%EF%BC%88%E5%BA%94%E7%94%A8%E6%95%B0%E6%8D%AE%E5%B1%82%EF%BC%89"><span class="toc-number">1.3.3.4.</span> <span class="toc-text">ADS 层（应用数据层）</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-4-%E6%95%B0%E6%8D%AE%E6%B5%81%E5%90%91%E7%A4%BA%E6%84%8F%E5%9B%BE"><span class="toc-number">1.3.4.</span> <span class="toc-text">3.4 数据流向示意图</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9B%9B%E3%80%81%E7%BC%93%E6%85%A2%E5%8F%98%E5%8C%96%E7%BB%B4%EF%BC%88SCD%EF%BC%89%E5%A4%84%E7%90%86"><span class="toc-number">1.4.</span> <span class="toc-text">四、缓慢变化维（SCD）处理</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#4-1-%E4%BB%80%E4%B9%88%E6%98%AF%E7%BC%93%E6%85%A2%E5%8F%98%E5%8C%96%E7%BB%B4"><span class="toc-number">1.4.1.</span> <span class="toc-text">4.1 什么是缓慢变化维</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-2-SCD-%E7%B1%BB%E5%9E%8B%E8%AF%A6%E8%A7%A3"><span class="toc-number">1.4.2.</span> <span class="toc-text">4.2 SCD 类型详解</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%B1%BB%E5%9E%8B-1%EF%BC%9A%E7%9B%B4%E6%8E%A5%E8%A6%86%E7%9B%96%EF%BC%88SCD1%EF%BC%89"><span class="toc-number">1.4.2.1.</span> <span class="toc-text">类型 1：直接覆盖（SCD1）</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%B1%BB%E5%9E%8B-2%EF%BC%9A%E6%96%B0%E5%A2%9E%E8%A1%8C%EF%BC%88SCD2%EF%BC%89"><span class="toc-number">1.4.2.2.</span> <span class="toc-text">类型 2：新增行（SCD2）</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%B1%BB%E5%9E%8B-3%EF%BC%9A%E6%96%B0%E5%A2%9E%E5%88%97%EF%BC%88SCD3%EF%BC%89"><span class="toc-number">1.4.2.3.</span> <span class="toc-text">类型 3：新增列（SCD3）</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-3-SCD-%E7%B1%BB%E5%9E%8B%E5%AF%B9%E6%AF%94"><span class="toc-number">1.4.3.</span> <span class="toc-text">4.3 SCD 类型对比</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-4-SCD-%E5%A4%84%E7%90%86%E6%B5%81%E7%A8%8B%E5%9B%BE"><span class="toc-number">1.4.4.</span> <span class="toc-text">4.4 SCD 处理流程图</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-5-%E5%AE%9E%E6%88%98%E6%A1%88%E4%BE%8B%EF%BC%9A%E7%94%A8%E6%88%B7%E7%BB%B4%E5%BA%A6-SCD2-%E5%A4%84%E7%90%86"><span class="toc-number">1.4.5.</span> <span class="toc-text">4.5 实战案例：用户维度 SCD2 处理</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%94%E3%80%81%E6%80%BB%E7%BB%93"><span class="toc-number">1.5.</span> <span class="toc-text">五、总结</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%A0%B8%E5%BF%83%E7%9F%A5%E8%AF%86%E7%82%B9%E9%80%9F%E6%9F%A5"><span class="toc-number">1.5.1.</span> <span class="toc-text">核心知识点速查</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5"><span class="toc-number">1.5.2.</span> <span class="toc-text">最佳实践</span></a></li></ol></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/02/24/IDE%20%E5%B7%A5%E5%85%B7%E9%85%8D%E7%BD%AE%EF%BC%9AVS%20Code%20+%20Jupyter%20+%20DataGrip/" title="IDE 工具配置：VS Code + Jupyter + DataGrip">IDE 工具配置：VS Code + Jupyter + DataGrip</a><time datetime="2026-02-24T15:00:00.000Z" title="发表于 2026-02-24 23:00:00">2026-02-24</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/02/24/Git%20%E7%89%88%E6%9C%AC%E6%8E%A7%E5%88%B6%E4%B8%8E%E5%9B%A2%E9%98%9F%E5%8D%8F%E4%BD%9C/" title="Git 版本控制与团队协作">Git 版本控制与团队协作</a><time datetime="2026-02-24T14:00:00.000Z" title="发表于 2026-02-24 22:00:00">2026-02-24</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/02/24/Linux%20%E4%B8%8E%20Shell%EF%BC%88%E4%BA%8C%EF%BC%89Shell%20%E8%84%9A%E6%9C%AC%E7%BC%96%E5%86%99/" title="Linux 与 Shell（二）Shell 脚本编写">Linux 与 Shell（二）Shell 脚本编写</a><time datetime="2026-02-24T13:00:00.000Z" title="发表于 2026-02-24 21:00:00">2026-02-24</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/02/24/%E6%95%B0%E6%8D%AE%E4%BB%93%E5%BA%93%E6%A0%B8%E5%BF%83%E6%A6%82%E5%BF%B5%E8%AF%A6%E8%A7%A3%20-%20%E7%BB%B4%E5%BA%A6%E5%BB%BA%E6%A8%A1%E3%80%81%E6%95%B0%E6%8D%AE%E5%88%86%E5%B1%82%E4%B8%8E%20SCD%20%E5%A4%84%E7%90%86/" title="数据仓库核心概念详解 - 维度建模、数据分层与 SCD 处理">数据仓库核心概念详解 - 维度建模、数据分层与 SCD 处理</a><time datetime="2026-02-24T13:00:00.000Z" title="发表于 2026-02-24 21:00:00">2026-02-24</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/02/24/MySQL%20%E8%BF%90%E7%BB%B4%E7%AF%87%2004-10%20MyCat%20%E7%AE%A1%E7%90%86%E4%B8%8E%E7%9B%91%E6%8E%A7/" title="MySQL 运维篇 04-10 MyCat 管理与监控">MySQL 运维篇 04-10 MyCat 管理与监控</a><time datetime="2026-02-24T12:05:00.000Z" title="发表于 2026-02-24 20:05:00">2026-02-24</time></div></div></div></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2025 - 2026 By 过拟合的炸鱼薯条</span><span class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 8.1.1</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.5.4</a></span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=5.5.4"></script><script src="/js/main.js?v=5.5.4"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><i class="fas fa-spinner fa-pulse" id="loading-status" hidden="hidden"></i><button class="search-close-button"><i class="fas fa-times"></i></button></nav><div class="text-center" id="loading-database"><i class="fas fa-spinner fa-pulse"></i><span>  数据加载中</span></div><div class="local-search-input"><input placeholder="搜索..." type="text"/></div><hr/><div id="local-search-results"></div><div class="ais-Pagination" id="local-search-pagination" style="display:none;"><ul class="ais-Pagination-list"></ul></div><div id="local-search-stats"></div></div><div id="search-mask"></div><script src="/js/search/local-search.js?v=5.5.4"></script></div></div></body></html>

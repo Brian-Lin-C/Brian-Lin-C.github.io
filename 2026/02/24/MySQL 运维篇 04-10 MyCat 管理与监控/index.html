@@ -1,0 +1,324 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>MySQL 运维篇 04-10 MyCat 管理与监控 | 过拟合的炸鱼薯条</title><meta name="author" content="过拟合的炸鱼薯条"><meta name="copyright" content="过拟合的炸鱼薯条"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="MySQL 运维篇 04-10 MyCat 管理与监控本文将介绍 MyCat 的管理命令、监控方法和运维最佳实践。 一、MyCat 管理端口1.1 管理端口MyCat 有两个端口：  8066：MySQL 协议端口（应用连接） 9066：管理端口（运维管理）  1.2 连接管理端口12# 连接管理端口mysql -h 127.0.0.1 -P 9066 -u root -p123456  二、管理">
+<meta property="og:type" content="article">
+<meta property="og:title" content="MySQL 运维篇 04-10 MyCat 管理与监控">
+<meta property="og:url" content="https://brian-lin-c.github.io/2026/02/24/MySQL%20%E8%BF%90%E7%BB%B4%E7%AF%87%2004-10%20MyCat%20%E7%AE%A1%E7%90%86%E4%B8%8E%E7%9B%91%E6%8E%A7/index.html">
+<meta property="og:site_name" content="过拟合的炸鱼薯条">
+<meta property="og:description" content="MySQL 运维篇 04-10 MyCat 管理与监控本文将介绍 MyCat 的管理命令、监控方法和运维最佳实践。 一、MyCat 管理端口1.1 管理端口MyCat 有两个端口：  8066：MySQL 协议端口（应用连接） 9066：管理端口（运维管理）  1.2 连接管理端口12# 连接管理端口mysql -h 127.0.0.1 -P 9066 -u root -p123456  二、管理">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://brian-lin-c.github.io/img/%E5%A4%B4%E5%83%8F.jpg">
+<meta property="article:published_time" content="2026-02-24T12:05:00.000Z">
+<meta property="article:modified_time" content="2026-02-24T11:37:20.104Z">
+<meta property="article:author" content="过拟合的炸鱼薯条">
+<meta property="article:tag" content="MyCat">
+<meta property="article:tag" content="MySQL">
+<meta property="article:tag" content="监控">
+<meta property="article:tag" content="管理">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://brian-lin-c.github.io/img/%E5%A4%B4%E5%83%8F.jpg"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "MySQL 运维篇 04-10 MyCat 管理与监控",
+  "url": "https://brian-lin-c.github.io/2026/02/24/MySQL%20%E8%BF%90%E7%BB%B4%E7%AF%87%2004-10%20MyCat%20%E7%AE%A1%E7%90%86%E4%B8%8E%E7%9B%91%E6%8E%A7/",
+  "image": "https://brian-lin-c.github.io/img/%E5%A4%B4%E5%83%8F.jpg",
+  "datePublished": "2026-02-24T12:05:00.000Z",
+  "dateModified": "2026-02-24T11:37:20.104Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "过拟合的炸鱼薯条",
+      "url": "https://brian-lin-c.github.io"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://brian-lin-c.github.io/2026/02/24/MySQL%20%E8%BF%90%E7%BB%B4%E7%AF%87%2004-10%20MyCat%20%E7%AE%A1%E7%90%86%E4%B8%8E%E7%9B%91%E6%8E%A7/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=5.5.4"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.1.0/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        if (!ttl) return
+        const expiry = Date.now() + ttl * 86400000
+        localStorage.setItem(key, JSON.stringify({ value, expiry }))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return undefined
+        const { value, expiry } = JSON.parse(itemStr)
+        if (Date.now() > expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return value
+      }
+    }
+
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        Object.entries(attr).forEach(([key, val]) => script.setAttribute(key, val))
+        script.onload = script.onreadystatechange = () => {
+          if (!script.readyState || /loaded|complete/.test(script.readyState)) resolve()
+        }
+        script.onerror = reject
+        document.head.appendChild(script)
+      }),
+      getCSS: (url, id) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onload = link.onreadystatechange = () => {
+          if (!link.readyState || /loaded|complete/.test(link.readyState)) resolve()
+        }
+        link.onerror = reject
+        document.head.appendChild(link)
+      }),
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"/search.xml","preload":true,"top_n_per_article":1,"unescape":false,"pagination":{"enable":false,"hitsPerPage":8},"languages":{"hits_empty":"未找到符合您查询的内容：${query}","hits_stats":"共找到 ${hits} 篇文章"}},
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.13.0/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'MySQL 运维篇 04-10 MyCat 管理与监控',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><meta name="generator" content="Hexo 8.1.1"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/img/%E5%A4%B4%E5%83%8F.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">68</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">157</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">9</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user"></i><span> 关于</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">过拟合的炸鱼薯条</span></a><a class="nav-page-title" href="/"><span class="site-name">MySQL 运维篇 04-10 MyCat 管理与监控</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div id="search-button"><span class="site-page social-icon search"><i class="fas fa-search fa-fw"></i><span> 搜索</span></span></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user"></i><span> 关于</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">MySQL 运维篇 04-10 MyCat 管理与监控</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2026-02-24T12:05:00.000Z" title="发表于 2026-02-24 20:05:00">2026-02-24</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-02-24T11:37:20.104Z" title="更新于 2026-02-24 19:37:20">2026-02-24</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/MySQL-%E8%BF%90%E7%BB%B4%E7%AF%87/">MySQL 运维篇</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-wordcount"><i class="far fa-file-word fa-fw post-meta-icon"></i><span class="post-meta-label">总字数:</span><span class="word-count">1.3k</span><span class="post-meta-separator">|</span><i class="far fa-clock fa-fw post-meta-icon"></i><span class="post-meta-label">阅读时长:</span><span>5分钟</span></span><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><h1 id="MySQL-运维篇-04-10-MyCat-管理与监控"><a href="#MySQL-运维篇-04-10-MyCat-管理与监控" class="headerlink" title="MySQL 运维篇 04-10 MyCat 管理与监控"></a>MySQL 运维篇 04-10 MyCat 管理与监控</h1><p>本文将介绍 MyCat 的管理命令、监控方法和运维最佳实践。</p>
+<h2 id="一、MyCat-管理端口"><a href="#一、MyCat-管理端口" class="headerlink" title="一、MyCat 管理端口"></a>一、MyCat 管理端口</h2><h3 id="1-1-管理端口"><a href="#1-1-管理端口" class="headerlink" title="1.1 管理端口"></a>1.1 管理端口</h3><p>MyCat 有两个端口：</p>
+<ul>
+<li><strong>8066</strong>：MySQL 协议端口（应用连接）</li>
+<li><strong>9066</strong>：管理端口（运维管理）</li>
+</ul>
+<h3 id="1-2-连接管理端口"><a href="#1-2-连接管理端口" class="headerlink" title="1.2 连接管理端口"></a>1.2 连接管理端口</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 连接管理端口</span></span><br><span class="line">mysql -h 127.0.0.1 -P 9066 -u root -p123456</span><br></pre></td></tr></table></figure>
+
+<h2 id="二、管理命令"><a href="#二、管理命令" class="headerlink" title="二、管理命令"></a>二、管理命令</h2><h3 id="2-1-查看服务器状态"><a href="#2-1-查看服务器状态" class="headerlink" title="2.1 查看服务器状态"></a>2.1 查看服务器状态</h3><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- 查看服务器信息</span></span><br><span class="line"><span class="keyword">SHOW</span> @<span class="variable">@SERVER</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 输出示例：</span></span><br><span class="line"># <span class="operator">+</span><span class="comment">---------+----------------+----------------+</span></span><br><span class="line"># <span class="operator">|</span> VERSION <span class="operator">|</span> UPTIME         <span class="operator">|</span> USED_HEAP      <span class="operator">|</span></span><br><span class="line"># <span class="operator">+</span><span class="comment">---------+----------------+----------------+</span></span><br><span class="line"># <span class="operator">|</span> <span class="number">2.0</span>     <span class="operator">|</span> <span class="number">123456</span> seconds <span class="operator">|</span> <span class="number">512</span> MB         <span class="operator">|</span></span><br><span class="line"># <span class="operator">+</span><span class="comment">---------+----------------+----------------+</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="2-2-查看数据源状态"><a href="#2-2-查看数据源状态" class="headerlink" title="2.2 查看数据源状态"></a>2.2 查看数据源状态</h3><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- 查看所有数据源</span></span><br><span class="line"><span class="keyword">SHOW</span> @<span class="variable">@DATASOURCE</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 查看指定数据源</span></span><br><span class="line"><span class="keyword">SHOW</span> @<span class="variable">@DATASOURCE</span> <span class="keyword">WHERE</span> NAME <span class="operator">=</span> <span class="string">&#x27;dn0&#x27;</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 输出字段：</span></span><br><span class="line"># NAME, ACTIVE, IDLE, EXECUTE_COUNT, etc.</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-3-查看连接池状态"><a href="#2-3-查看连接池状态" class="headerlink" title="2.3 查看连接池状态"></a>2.3 查看连接池状态</h3><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- 查看连接池</span></span><br><span class="line"><span class="keyword">SHOW</span> @<span class="variable">@CONNECTIONPOOL</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 查看连接池统计</span></span><br><span class="line"><span class="keyword">SHOW</span> @<span class="variable">@CONNECTIONPOOL</span> <span class="keyword">WHERE</span> DATAHOST <span class="operator">=</span> <span class="string">&#x27;host1&#x27;</span>;</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-4-查看-SQL-统计"><a href="#2-4-查看-SQL-统计" class="headerlink" title="2.4 查看 SQL 统计"></a>2.4 查看 SQL 统计</h3><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- 查看所有 SQL 统计</span></span><br><span class="line"><span class="keyword">SHOW</span> @<span class="variable">@SQL</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 查看慢 SQL</span></span><br><span class="line"><span class="keyword">SHOW</span> @<span class="variable">@SLOW</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 查看 SQL 执行频率</span></span><br><span class="line"><span class="keyword">SHOW</span> @<span class="variable">@SQL</span>.<span class="keyword">EXECUTE</span>;</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-5-查看事务"><a href="#2-5-查看事务" class="headerlink" title="2.5 查看事务"></a>2.5 查看事务</h3><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- 查看活跃事务</span></span><br><span class="line"><span class="keyword">SHOW</span> @<span class="variable">@TRANSACTION</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 查看大事务</span></span><br><span class="line"><span class="keyword">SHOW</span> @<span class="variable">@TRANSACTION</span> <span class="keyword">WHERE</span> DURATION <span class="operator">&gt;</span> <span class="number">1000</span>;</span><br></pre></td></tr></table></figure>
+
+<h2 id="三、监控指标"><a href="#三、监控指标" class="headerlink" title="三、监控指标"></a>三、监控指标</h2><h3 id="3-1-性能指标"><a href="#3-1-性能指标" class="headerlink" title="3.1 性能指标"></a>3.1 性能指标</h3><table>
+<thead>
+<tr>
+<th>指标</th>
+<th>说明</th>
+<th>告警阈值</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>QPS</td>
+<td>每秒查询数</td>
+<td>&gt; 10000</td>
+</tr>
+<tr>
+<td>TPS</td>
+<td>每秒事务数</td>
+<td>&gt; 5000</td>
+</tr>
+<tr>
+<td>响应时间</td>
+<td>平均查询响应</td>
+<td>&gt; 100ms</td>
+</tr>
+<tr>
+<td>活跃连接</td>
+<td>当前活跃连接</td>
+<td>&gt; 80% 最大连接</td>
+</tr>
+</tbody></table>
+<h3 id="3-2-连接池指标"><a href="#3-2-连接池指标" class="headerlink" title="3.2 连接池指标"></a>3.2 连接池指标</h3><table>
+<thead>
+<tr>
+<th>指标</th>
+<th>说明</th>
+<th>告警阈值</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>ACTIVE</td>
+<td>活跃连接数</td>
+<td>&gt; 80% 最大</td>
+</tr>
+<tr>
+<td>IDLE</td>
+<td>空闲连接数</td>
+<td>&lt; 最小连接</td>
+</tr>
+<tr>
+<td>WAIT</td>
+<td>等待连接数</td>
+<td>&gt; 0</td>
+</tr>
+</tbody></table>
+<h3 id="3-3-数据源指标"><a href="#3-3-数据源指标" class="headerlink" title="3.3 数据源指标"></a>3.3 数据源指标</h3><table>
+<thead>
+<tr>
+<th>指标</th>
+<th>说明</th>
+<th>告警阈值</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>READ</td>
+<td>读操作次数</td>
+<td>-</td>
+</tr>
+<tr>
+<td>WRITE</td>
+<td>写操作次数</td>
+<td>-</td>
+</tr>
+<tr>
+<td>ERROR</td>
+<td>错误次数</td>
+<td>&gt; 0</td>
+</tr>
+</tbody></table>
+<h2 id="四、监控脚本"><a href="#四、监控脚本" class="headerlink" title="四、监控脚本"></a>四、监控脚本</h2><h3 id="4-1-状态检查脚本"><a href="#4-1-状态检查脚本" class="headerlink" title="4.1 状态检查脚本"></a>4.1 状态检查脚本</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#!/bin/bash</span></span><br><span class="line"><span class="comment"># check_mycat.sh</span></span><br><span class="line"></span><br><span class="line">MYCAT_HOST=<span class="string">&quot;127.0.0.1&quot;</span></span><br><span class="line">MYCAT_PORT=<span class="string">&quot;9066&quot;</span></span><br><span class="line">MYCAT_USER=<span class="string">&quot;root&quot;</span></span><br><span class="line">MYCAT_PASS=<span class="string">&quot;123456&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 检查 MyCat 是否运行</span></span><br><span class="line">mysql -h <span class="variable">$MYCAT_HOST</span> -P <span class="variable">$MYCAT_PORT</span> -u <span class="variable">$MYCAT_USER</span> -p<span class="variable">$MYCAT_PASS</span> -e <span class="string">&quot;SHOW @@SERVER;&quot;</span> &gt; /dev/null 2&gt;&amp;1</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> [ $? -ne 0 ]; <span class="keyword">then</span></span><br><span class="line">    <span class="built_in">echo</span> <span class="string">&quot;ERROR: MyCat is not running&quot;</span></span><br><span class="line">    <span class="built_in">exit</span> 1</span><br><span class="line"><span class="keyword">fi</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 获取数据源状态</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;=== 数据源状态 ===&quot;</span></span><br><span class="line">mysql -h <span class="variable">$MYCAT_HOST</span> -P <span class="variable">$MYCAT_PORT</span> -u <span class="variable">$MYCAT_USER</span> -p<span class="variable">$MYCAT_PASS</span> -e <span class="string">&quot;SHOW @@DATASOURCE;&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 获取连接池状态</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;=== 连接池状态 ===&quot;</span></span><br><span class="line">mysql -h <span class="variable">$MYCAT_HOST</span> -P <span class="variable">$MYCAT_PORT</span> -u <span class="variable">$MYCAT_USER</span> -p<span class="variable">$MYCAT_PASS</span> -e <span class="string">&quot;SHOW @@CONNECTIONPOOL;&quot;</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="4-2-慢查询监控"><a href="#4-2-慢查询监控" class="headerlink" title="4.2 慢查询监控"></a>4.2 慢查询监控</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#!/bin/bash</span></span><br><span class="line"><span class="comment"># slow_query_monitor.sh</span></span><br><span class="line"></span><br><span class="line">MYCAT_HOST=<span class="string">&quot;127.0.0.1&quot;</span></span><br><span class="line">MYCAT_PORT=<span class="string">&quot;9066&quot;</span></span><br><span class="line">MYCAT_USER=<span class="string">&quot;root&quot;</span></span><br><span class="line">MYCAT_PASS=<span class="string">&quot;123456&quot;</span></span><br><span class="line">THRESHOLD=10  <span class="comment"># 慢查询阈值</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 获取慢查询数量</span></span><br><span class="line">SLOW_COUNT=$(mysql -h <span class="variable">$MYCAT_HOST</span> -P <span class="variable">$MYCAT_PORT</span> -u <span class="variable">$MYCAT_USER</span> -p<span class="variable">$MYCAT_PASS</span> -e <span class="string">&quot;SHOW @@SLOW;&quot;</span> | <span class="built_in">wc</span> -l)</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> [ <span class="variable">$SLOW_COUNT</span> -gt <span class="variable">$THRESHOLD</span> ]; <span class="keyword">then</span></span><br><span class="line">    <span class="built_in">echo</span> <span class="string">&quot;WARNING: 发现 <span class="variable">$SLOW_COUNT</span> 个慢查询&quot;</span></span><br><span class="line">    mysql -h <span class="variable">$MYCAT_HOST</span> -P <span class="variable">$MYCAT_PORT</span> -u <span class="variable">$MYCAT_USER</span> -p<span class="variable">$MYCAT_PASS</span> -e <span class="string">&quot;SHOW @@SLOW LIMIT 10;&quot;</span></span><br><span class="line"><span class="keyword">fi</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="五、日志管理"><a href="#五、日志管理" class="headerlink" title="五、日志管理"></a>五、日志管理</h2><h3 id="5-1-日志位置"><a href="#5-1-日志位置" class="headerlink" title="5.1 日志位置"></a>5.1 日志位置</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">/opt/mycat/logs/</span><br><span class="line">├── mycat.log          # 主日志</span><br><span class="line">├── mycat.console      # 控制台日志</span><br><span class="line">└── mycat.dump         # 转储日志</span><br></pre></td></tr></table></figure>
+
+<h3 id="5-2-日志级别"><a href="#5-2-日志级别" class="headerlink" title="5.2 日志级别"></a>5.2 日志级别</h3><p><strong>log4j2.xml</strong>：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">Configuration</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">Appenders</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">RollingFile</span> <span class="attr">name</span>=<span class="string">&quot;RollingFile&quot;</span> <span class="attr">fileName</span>=<span class="string">&quot;logs/mycat.log&quot;</span></span></span><br><span class="line"><span class="tag">                     <span class="attr">filePattern</span>=<span class="string">&quot;logs/mycat-%d&#123;yyyy-MM-dd&#125;-%i.log&quot;</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">PatternLayout</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">Pattern</span>&gt;</span>%d&#123;yyyy-MM-dd HH:mm:ss&#125; %-5p %c&#123;1&#125;:%L - %m%n<span class="tag">&lt;/<span class="name">Pattern</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;/<span class="name">PatternLayout</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">Policies</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">SizeBasedTriggeringPolicy</span> <span class="attr">size</span>=<span class="string">&quot;100MB&quot;</span>/&gt;</span></span><br><span class="line">            <span class="tag">&lt;/<span class="name">Policies</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">RollingFile</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">Appenders</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">Loggers</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">Root</span> <span class="attr">level</span>=<span class="string">&quot;INFO&quot;</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">AppenderRef</span> <span class="attr">ref</span>=<span class="string">&quot;RollingFile&quot;</span>/&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">Root</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">Loggers</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">Configuration</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="5-3-日志分析"><a href="#5-3-日志分析" class="headerlink" title="5.3 日志分析"></a>5.3 日志分析</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 查看错误日志</span></span><br><span class="line">grep -i <span class="string">&quot;error&quot;</span> /opt/mycat/logs/mycat.log | <span class="built_in">tail</span> -100</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看警告日志</span></span><br><span class="line">grep -i <span class="string">&quot;warning&quot;</span> /opt/mycat/logs/mycat.log | <span class="built_in">tail</span> -50</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看启动日志</span></span><br><span class="line">grep -i <span class="string">&quot;started&quot;</span> /opt/mycat/logs/mycat.log</span><br></pre></td></tr></table></figure>
+
+<h2 id="六、性能优化"><a href="#六、性能优化" class="headerlink" title="六、性能优化"></a>六、性能优化</h2><h3 id="6-1-连接池优化"><a href="#6-1-连接池优化" class="headerlink" title="6.1 连接池优化"></a>6.1 连接池优化</h3><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># datasource.yml</span></span><br><span class="line"><span class="attr">dataHosts:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">host1</span></span><br><span class="line">    <span class="attr">type:</span> <span class="string">mysql</span></span><br><span class="line">    <span class="attr">maxCon:</span> <span class="number">1000</span>        <span class="comment"># 最大连接数</span></span><br><span class="line">    <span class="attr">minCon:</span> <span class="number">10</span>          <span class="comment"># 最小连接数</span></span><br><span class="line">    <span class="attr">heartbeat:</span></span><br><span class="line">      <span class="attr">statement:</span> <span class="string">select</span> <span class="string">user()</span></span><br><span class="line">      <span class="attr">timeout:</span> <span class="number">10000</span></span><br><span class="line">      <span class="attr">maxRetryCount:</span> <span class="number">3</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="6-2-查询优化"><a href="#6-2-查询优化" class="headerlink" title="6.2 查询优化"></a>6.2 查询优化</h3><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- 避免全分片扫描</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> orders <span class="keyword">WHERE</span> id <span class="operator">=</span> <span class="number">1</span>;  <span class="comment">-- 好</span></span><br><span class="line"></span><br><span class="line"><span class="comment">-- 减少跨分片 JOIN</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> orders <span class="keyword">WHERE</span> user_id <span class="operator">=</span> <span class="number">100</span>;  <span class="comment">-- 可能全分片扫描</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="6-3-缓存配置"><a href="#6-3-缓存配置" class="headerlink" title="6.3 缓存配置"></a>6.3 缓存配置</h3><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># server.yml</span></span><br><span class="line"><span class="attr">system:</span></span><br><span class="line">  <span class="comment"># 查询缓存</span></span><br><span class="line">  <span class="attr">useSqlStat:</span> <span class="literal">true</span></span><br><span class="line">  <span class="comment"># 结果集缓存</span></span><br><span class="line">  <span class="attr">useGlobleTableCheck:</span> <span class="literal">true</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="七、故障排查"><a href="#七、故障排查" class="headerlink" title="七、故障排查"></a>七、故障排查</h2><h3 id="7-1-MyCat-无法启动"><a href="#7-1-MyCat-无法启动" class="headerlink" title="7.1 MyCat 无法启动"></a>7.1 MyCat 无法启动</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 检查 Java 环境</span></span><br><span class="line">java -version</span><br><span class="line"></span><br><span class="line"><span class="comment"># 检查端口占用</span></span><br><span class="line">netstat -tlnp | grep 8066</span><br><span class="line">netstat -tlnp | grep 9066</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看日志</span></span><br><span class="line"><span class="built_in">cat</span> /opt/mycat/logs/mycat.log</span><br><span class="line"></span><br><span class="line"><span class="comment"># 检查配置文件</span></span><br><span class="line"><span class="built_in">cat</span> /opt/mycat/conf/server.yml</span><br></pre></td></tr></table></figure>
+
+<h3 id="7-2-连接失败"><a href="#7-2-连接失败" class="headerlink" title="7.2 连接失败"></a>7.2 连接失败</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 检查 MyCat 状态</span></span><br><span class="line">bin/mycat status</span><br><span class="line"></span><br><span class="line"><span class="comment"># 检查防火墙</span></span><br><span class="line">firewall-cmd --list-ports</span><br><span class="line"></span><br><span class="line"><span class="comment"># 测试连接</span></span><br><span class="line">telnet 127.0.0.1 8066</span><br></pre></td></tr></table></figure>
+
+<h3 id="7-3-SQL-执行错误"><a href="#7-3-SQL-执行错误" class="headerlink" title="7.3 SQL 执行错误"></a>7.3 SQL 执行错误</h3><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- 查看数据源状态</span></span><br><span class="line"><span class="keyword">SHOW</span> @<span class="variable">@DATASOURCE</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 查看错误信息</span></span><br><span class="line"><span class="keyword">SHOW</span> @<span class="variable">@ERROR</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 查看 SQL 路由</span></span><br><span class="line">EXPLAIN <span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> orders <span class="keyword">WHERE</span> id <span class="operator">=</span> <span class="number">1</span>;</span><br></pre></td></tr></table></figure>
+
+<h2 id="八、备份恢复"><a href="#八、备份恢复" class="headerlink" title="八、备份恢复"></a>八、备份恢复</h2><h3 id="8-1-配置备份"><a href="#8-1-配置备份" class="headerlink" title="8.1 配置备份"></a>8.1 配置备份</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 备份配置文件</span></span><br><span class="line">tar -czf mycat_config_$(<span class="built_in">date</span> +%Y%m%d).tar.gz /opt/mycat/conf/</span><br></pre></td></tr></table></figure>
+
+<h3 id="8-2-数据备份"><a href="#8-2-数据备份" class="headerlink" title="8.2 数据备份"></a>8.2 数据备份</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 使用 mysqldump 备份物理库</span></span><br><span class="line">mysqldump -h 192.168.1.100 -u mycat -p --all-databases &gt; backup.sql</span><br></pre></td></tr></table></figure>
+
+<h2 id="九、小结"><a href="#九、小结" class="headerlink" title="九、小结"></a>九、小结</h2><h3 id="管理命令总结"><a href="#管理命令总结" class="headerlink" title="管理命令总结"></a>管理命令总结</h3><table>
+<thead>
+<tr>
+<th>命令</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>SHOW @@SERVER</td>
+<td>查看服务器状态</td>
+</tr>
+<tr>
+<td>SHOW @@DATASOURCE</td>
+<td>查看数据源状态</td>
+</tr>
+<tr>
+<td>SHOW @@CONNECTIONPOOL</td>
+<td>查看连接池</td>
+</tr>
+<tr>
+<td>SHOW @@SQL</td>
+<td>查看 SQL 统计</td>
+</tr>
+<tr>
+<td>SHOW @@SLOW</td>
+<td>查看慢查询</td>
+</tr>
+</tbody></table>
+<h3 id="监控要点"><a href="#监控要点" class="headerlink" title="监控要点"></a>监控要点</h3><ol>
+<li><strong>定期检查</strong>：服务器状态、数据源状态</li>
+<li><strong>慢查询分析</strong>：定期分析慢查询日志</li>
+<li><strong>连接池监控</strong>：确保连接池健康</li>
+<li><strong>日志管理</strong>：定期查看和分析日志</li>
+</ol>
+<hr>
+<p><strong>下一篇</strong>：[MySQL 运维篇 05-01 分库分表 - 分片规则](&#x2F;2026&#x2F;02&#x2F;24&#x2F;MySQL 运维篇 05-01 分库分表 - 分片规则&#x2F;)</p>
+<p><strong>上一篇</strong>：[MySQL 运维篇 04-09 MyCat 一致性 Hash](&#x2F;2026&#x2F;02&#x2F;24&#x2F;MySQL 运维篇 04-09 MyCat 一致性 Hash&#x2F;)</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://brian-lin-c.github.io">过拟合的炸鱼薯条</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://brian-lin-c.github.io/2026/02/24/MySQL%20%E8%BF%90%E7%BB%B4%E7%AF%87%2004-10%20MyCat%20%E7%AE%A1%E7%90%86%E4%B8%8E%E7%9B%91%E6%8E%A7/">https://brian-lin-c.github.io/2026/02/24/MySQL%20%E8%BF%90%E7%BB%B4%E7%AF%87%2004-10%20MyCat%20%E7%AE%A1%E7%90%86%E4%B8%8E%E7%9B%91%E6%8E%A7/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://brian-lin-c.github.io" target="_blank">过拟合的炸鱼薯条</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/MySQL/">MySQL</a><a class="post-meta__tags" href="/tags/MyCat/">MyCat</a><a class="post-meta__tags" href="/tags/%E7%AE%A1%E7%90%86/">管理</a><a class="post-meta__tags" href="/tags/%E7%9B%91%E6%8E%A7/">监控</a></div><div class="post-share"><div class="social-share" data-image="/img/%E5%A4%B4%E5%83%8F.jpg" data-sites="facebook,x,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related" href="/2026/02/24/Linux%20%E4%B8%8E%20Shell%EF%BC%88%E4%BA%8C%EF%BC%89Shell%20%E8%84%9A%E6%9C%AC%E7%BC%96%E5%86%99/" title="Linux 与 Shell（二）Shell 脚本编写"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">Linux 与 Shell（二）Shell 脚本编写</div></div><div class="info-2"><div class="info-item-1">Linux 与 Shell（二）Shell 脚本编写Shell 脚本是自动化运维和批量处理的神器。本篇将介绍 Shell 脚本的基础语法、实用技巧和实战案例。 一、Shell 脚本基础1.1 第一个脚本123456#!/bin/bash#  第一个 Shell 脚本echo &quot;Hello, World!&quot;echo &quot;当前用户：$(whoami)&quot;echo &quot;当前目录：$(pwd)&quot;  运行脚本： 12345678910#  方式一：添加执行权限chmod +x script.sh./script.sh#  方式二：用 bash 执行bash script.sh#  方式三：用 source 执行（在当前 shell 中）source script.sh. script.sh   提醒自己：  #!/bin/bash 叫 shebang，指定解释器 # 开头的行是注释 脚本文件通常用 .sh 扩展名   1.2 变量123456789101112131415161718192021222324252627282930#!/...</div></div></div></a><a class="pagination-related" href="/2026/02/24/MySQL%20%E8%BF%90%E7%BB%B4%E7%AF%87%2004-09%20MyCat%20%E4%B8%80%E8%87%B4%E6%80%A7%20Hash/" title="MySQL 运维篇 04-09 MyCat 一致性 Hash"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">MySQL 运维篇 04-09 MyCat 一致性 Hash</div></div><div class="info-2"><div class="info-item-1">MySQL 运维篇 04-09 MyCat 一致性 Hash一致性 Hash 是一种分布式哈希技术，可以减少扩容时的数据迁移量。本文将介绍一致性 Hash 的原理和在 MyCat 中的应用。 一、一致性 Hash 介绍1.1 什么是一致性 Hash一致性 Hash：将数据和节点映射到一个哈希环上，数据存储在顺时针方向最近的节点上。 1234567传统 Hash 问题：- 扩容时需要 rehash 所有数据- 数据迁移量大一致性 Hash 优势：- 扩容时只影响相邻节点- 数据迁移量小  1.2 原理123456789101112131415哈希环示意图：          节点 A (hash=100)         /         \        /           \  数据 X            数据 Y (hash=50)        (hash=200)      |             |      |             |  节点 C         节点 B (hash=0)      (hash=300)数据存储规则：- 数据 X (...</div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/2026/02/24/MySQL%20%E8%BF%90%E7%BB%B4%E7%AF%87%2004-08%20MyCat%20%E5%8F%96%E6%A8%A1%E5%88%86%E7%89%87/" title="MySQL 运维篇 04-08 MyCat 取模分片"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-02-24</div><div class="info-item-2">MySQL 运维篇 04-08 MyCat 取模分片</div></div><div class="info-2"><div class="info-item-1">MySQL 运维篇 04-08 MyCat 取模分片取模分片是最常用的分片方式，按照分片键对分片数取模来路由数据。本文将详细介绍取模分片的配置和使用。 一、取模分片介绍1.1 什么是取模分片取模分片：根据分片键对分片数量取模来确定数据存储位置。 12345678公式：分片索引 = 分片键 % 分片数量示例（4 个分片）：id=1 → 1%4=1 → 分片 1id=2 → 2%4=2 → 分片 2id=3 → 3%4=3 → 分片 3id=4 → 4%4=0 → 分片 0id=5 → 5%4=1 → 分片 1  1.2 适用场景   场景 说明    用户订单 按 user_id 取模   用户数据 按用户 ID 取模   均匀分布 需要数据均匀分布   1.3 优缺点优点：  数据分布均匀 算法简单高效 查询效率高  缺点：  扩容困难（需要 rehash） 范围查询效率低  二、基础配置2.1 rule.yml12345678910tableRules:  - name: mod-long    function: mod-long    columns: idfunction...</div></div></div></a><a class="pagination-related" href="/2026/02/24/MySQL%20%E8%BF%90%E7%BB%B4%E7%AF%87%2004-06%20MyCat%20%E6%B0%B4%E5%B9%B3%E5%88%86%E8%A1%A8/" title="MySQL 运维篇 04-06 MyCat 水平分表"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-02-24</div><div class="info-item-2">MySQL 运维篇 04-06 MyCat 水平分表</div></div><div class="info-2"><div class="info-item-1">MySQL 运维篇 04-06 MyCat 水平分表水平分表是将一个大表的数据按照某种规则分布到多个表中。本文将介绍如何使用 MyCat 实现水平分表。 一、水平分表介绍1.1 什么是水平分表水平分表：将同一个表的数据按照行拆分到多个物理表中。 12345678原始表：orders (1 亿条数据)水平分表后：orders_0000 (250 万条)orders_0001 (250 万条)orders_0002 (250 万条)orders_0003 (250 万条)  1.2 适用场景   场景 说明    单表数据量大 超过 1000 万行   查询性能下降 索引效率低   维护困难 DDL 操作耗时过长   1.3 分片规则   规则 说明 适用场景    取模 id % 分片数 均匀分布   范围 按 ID 或日期范围 历史数据归档   哈希 hash(key) % 分片数 随机分布   二、环境准备2.1 数据库规划12345order_db├── orders_0000├── orders_0001├── orders_0002└── orders_0003  2.2...</div></div></div></a><a class="pagination-related" href="/2026/02/24/MySQL%20%E8%BF%90%E7%BB%B4%E7%AF%87%2004-02%20MyCat%20%E6%B5%8B%E8%AF%95/" title="MySQL 运维篇 04-02 MyCat 测试"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-02-24</div><div class="info-item-2">MySQL 运维篇 04-02 MyCat 测试</div></div><div class="info-2"><div class="info-item-1">MySQL 运维篇 04-02 MyCat 测试完成 MyCat 配置后，需要进行全面的测试以验证分库分表功能是否正常。本文将介绍各种测试场景。 一、连接测试1.1 基本连接12# 使用 MySQL 客户端连接 MyCatmysql -h 127.0.0.1 -P 8066 -u root -p123456  1.2 查看数据库1234-- 查看逻辑数据库SHOW DATABASES;-- 输出应该包含 testdb  1.3 查看表123456USE testdb;-- 查看逻辑表SHOW TABLES;-- 输出应该包含 orders  二、CRUD 测试2.1 插入测试123456789101112USE testdb;-- 插入单条记录INSERT INTO orders (id, order_no, user_id, amount, status)VALUES (1, &#x27;ORD001&#x27;, 100, 199.99, 1);-- 插入多条记录INSERT INTO orders (id, order_no, user_id, amount, status...</div></div></div></a><a class="pagination-related" href="/2026/02/24/MySQL%20%E8%BF%90%E7%BB%B4%E7%AF%87%2004-01%20MyCat%20%E5%85%A5%E9%97%A8/" title="MySQL 运维篇 04-01 MyCat 入门"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-02-24</div><div class="info-item-2">MySQL 运维篇 04-01 MyCat 入门</div></div><div class="info-2"><div class="info-item-1">MySQL 运维篇 04-01 MyCat 入门本文是 MyCat 分库分表的入门教程，将介绍如何使用 MyCat 实现简单的分库分表功能。 一、MyCat 简介1.1 什么是 MyCatMyCat 是一个数据库中间件层，位于应用程序和 MySQL 数据库之间，提供分库分表、读写分离等功能。 1应用程序 → MyCat (中间件) → MySQL 集群  1.2 MyCat 功能   功能 说明    分库分表 将数据分布到多个库&#x2F;表中   读写分离 自动将读请求路由到从库   SQL 路由 根据规则路由 SQL 到对应节点   结果合并 合并多个分片的查询结果   连接池 管理数据库连接   1.3 MyCat 版本 MyCat 1.x：经典版本，稳定 MyCat 2.x：重构版本，性能更好  二、快速开始2.1 环境准备软件版本：  MyCat 2.0 MySQL 8.0 JDK 1.8+  服务器：    服务器 IP 角色    server1 192.168.1.100 MyCat + MySQL   2.2 目录结构123456789/opt/mycat/├...</div></div></div></a><a class="pagination-related" href="/2026/02/24/MySQL%20%E8%BF%90%E7%BB%B4%E7%AF%87%2003-04%20MyCat%20%E5%AE%89%E8%A3%85%E4%B8%8E%E9%85%8D%E7%BD%AE/" title="MySQL 运维篇 03-04 MyCat 安装与配置"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-02-24</div><div class="info-item-2">MySQL 运维篇 03-04 MyCat 安装与配置</div></div><div class="info-2"><div class="info-item-1">MySQL 运维篇 03-04 MyCat 安装与配置本文将详细讲解 MyCat 的下载、安装、配置和启动过程，帮助你快速搭建 MyCat 环境。 一、环境准备1.1 系统要求   组件 要求    Java JDK 1.8+   内存 最少 2GB，推荐 4GB+   磁盘 最少 10GB 可用空间   MySQL 5.6+   1.2 环境信息   服务器 IP 地址 角色 软件    server1 192.168.1.100 MyCat + Master MyCat, MySQL   server2 192.168.1.101 Slave MySQL   1.3 安装 JavaLinux (CentOS&#x2F;RHEL)： 12345# 安装 OpenJDK 8yum install -y java-1.8.0-openjdk java-1.8.0-openjdk-devel# 验证安装java -version  Linux (Ubuntu&#x2F;Debian)： 123456# 安装 OpenJDK 8apt-get updateapt-get install...</div></div></div></a><a class="pagination-related" href="/2026/02/24/MySQL%20%E8%BF%90%E7%BB%B4%E7%AF%87%2004-03%20MyCat%20%E9%85%8D%E7%BD%AE%E8%AF%A6%E8%A7%A3/" title="MySQL 运维篇 04-03 MyCat 配置详解"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-02-24</div><div class="info-item-2">MySQL 运维篇 04-03 MyCat 配置详解</div></div><div class="info-2"><div class="info-item-1">MySQL 运维篇 04-03 MyCat 配置详解本文将详细讲解 MyCat 的各个配置文件，包括 server.yml、schema.yml、datasource.yml 和 rule.yml 的完整配置说明。 一、配置文件概述1.1 配置文件位置1234567/opt/mycat/conf/├── server.yml         # 主配置文件├── schema.yml         # Schema 配置├── datasource.yml     # 数据源配置├── rule.yml           # 分片规则配置├── sequence.yml       # 全局序列配置└── log4j2.xml         # 日志配置  1.2 配置加载顺序12341. server.yml (系统配置)2. datasource.yml (数据源)3. schema.yml (Schema 和表)4. rule.yml (分片规则)  二、server.yml 详解2.1 完整配置示例1234567891011121314151617181920212...</div></div></div></a></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/img/%E5%A4%B4%E5%83%8F.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">过拟合的炸鱼薯条</div><div class="author-info-description">好好学习，天天向上</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">68</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">157</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">9</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/Brian-Lin-C"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons"><a class="social-icon" href="https://github.com/Brian-Lin-C" target="_blank" title="Github"><i class="fab fa-github" style="color: #24292e;"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">欢迎来到我的个人博客！</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#MySQL-%E8%BF%90%E7%BB%B4%E7%AF%87-04-10-MyCat-%E7%AE%A1%E7%90%86%E4%B8%8E%E7%9B%91%E6%8E%A7"><span class="toc-number">1.</span> <span class="toc-text">MySQL 运维篇 04-10 MyCat 管理与监控</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%80%E3%80%81MyCat-%E7%AE%A1%E7%90%86%E7%AB%AF%E5%8F%A3"><span class="toc-number">1.1.</span> <span class="toc-text">一、MyCat 管理端口</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-1-%E7%AE%A1%E7%90%86%E7%AB%AF%E5%8F%A3"><span class="toc-number">1.1.1.</span> <span class="toc-text">1.1 管理端口</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-2-%E8%BF%9E%E6%8E%A5%E7%AE%A1%E7%90%86%E7%AB%AF%E5%8F%A3"><span class="toc-number">1.1.2.</span> <span class="toc-text">1.2 连接管理端口</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%8C%E3%80%81%E7%AE%A1%E7%90%86%E5%91%BD%E4%BB%A4"><span class="toc-number">1.2.</span> <span class="toc-text">二、管理命令</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#2-1-%E6%9F%A5%E7%9C%8B%E6%9C%8D%E5%8A%A1%E5%99%A8%E7%8A%B6%E6%80%81"><span class="toc-number">1.2.1.</span> <span class="toc-text">2.1 查看服务器状态</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-2-%E6%9F%A5%E7%9C%8B%E6%95%B0%E6%8D%AE%E6%BA%90%E7%8A%B6%E6%80%81"><span class="toc-number">1.2.2.</span> <span class="toc-text">2.2 查看数据源状态</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-3-%E6%9F%A5%E7%9C%8B%E8%BF%9E%E6%8E%A5%E6%B1%A0%E7%8A%B6%E6%80%81"><span class="toc-number">1.2.3.</span> <span class="toc-text">2.3 查看连接池状态</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-4-%E6%9F%A5%E7%9C%8B-SQL-%E7%BB%9F%E8%AE%A1"><span class="toc-number">1.2.4.</span> <span class="toc-text">2.4 查看 SQL 统计</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-5-%E6%9F%A5%E7%9C%8B%E4%BA%8B%E5%8A%A1"><span class="toc-number">1.2.5.</span> <span class="toc-text">2.5 查看事务</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%89%E3%80%81%E7%9B%91%E6%8E%A7%E6%8C%87%E6%A0%87"><span class="toc-number">1.3.</span> <span class="toc-text">三、监控指标</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#3-1-%E6%80%A7%E8%83%BD%E6%8C%87%E6%A0%87"><span class="toc-number">1.3.1.</span> <span class="toc-text">3.1 性能指标</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-2-%E8%BF%9E%E6%8E%A5%E6%B1%A0%E6%8C%87%E6%A0%87"><span class="toc-number">1.3.2.</span> <span class="toc-text">3.2 连接池指标</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-3-%E6%95%B0%E6%8D%AE%E6%BA%90%E6%8C%87%E6%A0%87"><span class="toc-number">1.3.3.</span> <span class="toc-text">3.3 数据源指标</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9B%9B%E3%80%81%E7%9B%91%E6%8E%A7%E8%84%9A%E6%9C%AC"><span class="toc-number">1.4.</span> <span class="toc-text">四、监控脚本</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#4-1-%E7%8A%B6%E6%80%81%E6%A3%80%E6%9F%A5%E8%84%9A%E6%9C%AC"><span class="toc-number">1.4.1.</span> <span class="toc-text">4.1 状态检查脚本</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-2-%E6%85%A2%E6%9F%A5%E8%AF%A2%E7%9B%91%E6%8E%A7"><span class="toc-number">1.4.2.</span> <span class="toc-text">4.2 慢查询监控</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%94%E3%80%81%E6%97%A5%E5%BF%97%E7%AE%A1%E7%90%86"><span class="toc-number">1.5.</span> <span class="toc-text">五、日志管理</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#5-1-%E6%97%A5%E5%BF%97%E4%BD%8D%E7%BD%AE"><span class="toc-number">1.5.1.</span> <span class="toc-text">5.1 日志位置</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5-2-%E6%97%A5%E5%BF%97%E7%BA%A7%E5%88%AB"><span class="toc-number">1.5.2.</span> <span class="toc-text">5.2 日志级别</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5-3-%E6%97%A5%E5%BF%97%E5%88%86%E6%9E%90"><span class="toc-number">1.5.3.</span> <span class="toc-text">5.3 日志分析</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%85%AD%E3%80%81%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96"><span class="toc-number">1.6.</span> <span class="toc-text">六、性能优化</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#6-1-%E8%BF%9E%E6%8E%A5%E6%B1%A0%E4%BC%98%E5%8C%96"><span class="toc-number">1.6.1.</span> <span class="toc-text">6.1 连接池优化</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#6-2-%E6%9F%A5%E8%AF%A2%E4%BC%98%E5%8C%96"><span class="toc-number">1.6.2.</span> <span class="toc-text">6.2 查询优化</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#6-3-%E7%BC%93%E5%AD%98%E9%85%8D%E7%BD%AE"><span class="toc-number">1.6.3.</span> <span class="toc-text">6.3 缓存配置</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%83%E3%80%81%E6%95%85%E9%9A%9C%E6%8E%92%E6%9F%A5"><span class="toc-number">1.7.</span> <span class="toc-text">七、故障排查</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#7-1-MyCat-%E6%97%A0%E6%B3%95%E5%90%AF%E5%8A%A8"><span class="toc-number">1.7.1.</span> <span class="toc-text">7.1 MyCat 无法启动</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#7-2-%E8%BF%9E%E6%8E%A5%E5%A4%B1%E8%B4%A5"><span class="toc-number">1.7.2.</span> <span class="toc-text">7.2 连接失败</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#7-3-SQL-%E6%89%A7%E8%A1%8C%E9%94%99%E8%AF%AF"><span class="toc-number">1.7.3.</span> <span class="toc-text">7.3 SQL 执行错误</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%85%AB%E3%80%81%E5%A4%87%E4%BB%BD%E6%81%A2%E5%A4%8D"><span class="toc-number">1.8.</span> <span class="toc-text">八、备份恢复</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#8-1-%E9%85%8D%E7%BD%AE%E5%A4%87%E4%BB%BD"><span class="toc-number">1.8.1.</span> <span class="toc-text">8.1 配置备份</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#8-2-%E6%95%B0%E6%8D%AE%E5%A4%87%E4%BB%BD"><span class="toc-number">1.8.2.</span> <span class="toc-text">8.2 数据备份</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B9%9D%E3%80%81%E5%B0%8F%E7%BB%93"><span class="toc-number">1.9.</span> <span class="toc-text">九、小结</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%AE%A1%E7%90%86%E5%91%BD%E4%BB%A4%E6%80%BB%E7%BB%93"><span class="toc-number">1.9.1.</span> <span class="toc-text">管理命令总结</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%9B%91%E6%8E%A7%E8%A6%81%E7%82%B9"><span class="toc-number">1.9.2.</span> <span class="toc-text">监控要点</span></a></li></ol></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/02/24/IDE%20%E5%B7%A5%E5%85%B7%E9%85%8D%E7%BD%AE%EF%BC%9AVS%20Code%20+%20Jupyter%20+%20DataGrip/" title="IDE 工具配置：VS Code + Jupyter + DataGrip">IDE 工具配置：VS Code + Jupyter + DataGrip</a><time datetime="2026-02-24T15:00:00.000Z" title="发表于 2026-02-24 23:00:00">2026-02-24</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/02/24/Git%20%E7%89%88%E6%9C%AC%E6%8E%A7%E5%88%B6%E4%B8%8E%E5%9B%A2%E9%98%9F%E5%8D%8F%E4%BD%9C/" title="Git 版本控制与团队协作">Git 版本控制与团队协作</a><time datetime="2026-02-24T14:00:00.000Z" title="发表于 2026-02-24 22:00:00">2026-02-24</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/02/24/Linux%20%E4%B8%8E%20Shell%EF%BC%88%E4%BA%8C%EF%BC%89Shell%20%E8%84%9A%E6%9C%AC%E7%BC%96%E5%86%99/" title="Linux 与 Shell（二）Shell 脚本编写">Linux 与 Shell（二）Shell 脚本编写</a><time datetime="2026-02-24T13:00:00.000Z" title="发表于 2026-02-24 21:00:00">2026-02-24</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/02/24/%E6%95%B0%E6%8D%AE%E4%BB%93%E5%BA%93%E6%A0%B8%E5%BF%83%E6%A6%82%E5%BF%B5%E8%AF%A6%E8%A7%A3%20-%20%E7%BB%B4%E5%BA%A6%E5%BB%BA%E6%A8%A1%E3%80%81%E6%95%B0%E6%8D%AE%E5%88%86%E5%B1%82%E4%B8%8E%20SCD%20%E5%A4%84%E7%90%86/" title="数据仓库核心概念详解 - 维度建模、数据分层与 SCD 处理">数据仓库核心概念详解 - 维度建模、数据分层与 SCD 处理</a><time datetime="2026-02-24T13:00:00.000Z" title="发表于 2026-02-24 21:00:00">2026-02-24</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/02/24/MySQL%20%E8%BF%90%E7%BB%B4%E7%AF%87%2004-10%20MyCat%20%E7%AE%A1%E7%90%86%E4%B8%8E%E7%9B%91%E6%8E%A7/" title="MySQL 运维篇 04-10 MyCat 管理与监控">MySQL 运维篇 04-10 MyCat 管理与监控</a><time datetime="2026-02-24T12:05:00.000Z" title="发表于 2026-02-24 20:05:00">2026-02-24</time></div></div></div></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2025 - 2026 By 过拟合的炸鱼薯条</span><span class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 8.1.1</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.5.4</a></span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=5.5.4"></script><script src="/js/main.js?v=5.5.4"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><i class="fas fa-spinner fa-pulse" id="loading-status" hidden="hidden"></i><button class="search-close-button"><i class="fas fa-times"></i></button></nav><div class="text-center" id="loading-database"><i class="fas fa-spinner fa-pulse"></i><span>  数据加载中</span></div><div class="local-search-input"><input placeholder="搜索..." type="text"/></div><hr/><div id="local-search-results"></div><div class="ais-Pagination" id="local-search-pagination" style="display:none;"><ul class="ais-Pagination-list"></ul></div><div id="local-search-stats"></div></div><div id="search-mask"></div><script src="/js/search/local-search.js?v=5.5.4"></script></div></div></body></html>

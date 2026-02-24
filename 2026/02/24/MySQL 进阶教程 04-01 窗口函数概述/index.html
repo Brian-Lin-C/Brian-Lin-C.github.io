@@ -1,0 +1,438 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>MySQL 进阶教程 04-01 窗口函数概述 | 过拟合的炸鱼薯条</title><meta name="author" content="过拟合的炸鱼薯条"><meta name="copyright" content="过拟合的炸鱼薯条"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="MySQL 进阶教程 04-01 窗口函数概述窗口函数（Window Function）是 MySQL 8.0+ 引入的强大特性，用于实现复杂的分析查询。本文将详细介绍窗口函数的基本概念、语法结构以及与聚合函数的区别。 一、窗口函数简介1.1 什么是窗口函数？窗口函数 是对一组行（称为”窗口”）执行计算的函数，但与聚合函数不同的是，窗口函数会为每一行返回一个结果，而不是将多行聚合为单个值。 通俗理">
+<meta property="og:type" content="article">
+<meta property="og:title" content="MySQL 进阶教程 04-01 窗口函数概述">
+<meta property="og:url" content="https://brian-lin-c.github.io/2026/02/24/MySQL%20%E8%BF%9B%E9%98%B6%E6%95%99%E7%A8%8B%2004-01%20%E7%AA%97%E5%8F%A3%E5%87%BD%E6%95%B0%E6%A6%82%E8%BF%B0/index.html">
+<meta property="og:site_name" content="过拟合的炸鱼薯条">
+<meta property="og:description" content="MySQL 进阶教程 04-01 窗口函数概述窗口函数（Window Function）是 MySQL 8.0+ 引入的强大特性，用于实现复杂的分析查询。本文将详细介绍窗口函数的基本概念、语法结构以及与聚合函数的区别。 一、窗口函数简介1.1 什么是窗口函数？窗口函数 是对一组行（称为”窗口”）执行计算的函数，但与聚合函数不同的是，窗口函数会为每一行返回一个结果，而不是将多行聚合为单个值。 通俗理">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://brian-lin-c.github.io/img/%E5%A4%B4%E5%83%8F.jpg">
+<meta property="article:published_time" content="2026-02-24T02:00:00.000Z">
+<meta property="article:modified_time" content="2026-02-24T10:08:07.398Z">
+<meta property="article:author" content="过拟合的炸鱼薯条">
+<meta property="article:tag" content="MySQL">
+<meta property="article:tag" content="OVER">
+<meta property="article:tag" content="分析函数">
+<meta property="article:tag" content="窗口函数">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://brian-lin-c.github.io/img/%E5%A4%B4%E5%83%8F.jpg"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "MySQL 进阶教程 04-01 窗口函数概述",
+  "url": "https://brian-lin-c.github.io/2026/02/24/MySQL%20%E8%BF%9B%E9%98%B6%E6%95%99%E7%A8%8B%2004-01%20%E7%AA%97%E5%8F%A3%E5%87%BD%E6%95%B0%E6%A6%82%E8%BF%B0/",
+  "image": "https://brian-lin-c.github.io/img/%E5%A4%B4%E5%83%8F.jpg",
+  "datePublished": "2026-02-24T02:00:00.000Z",
+  "dateModified": "2026-02-24T10:08:07.398Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "过拟合的炸鱼薯条",
+      "url": "https://brian-lin-c.github.io"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://brian-lin-c.github.io/2026/02/24/MySQL%20%E8%BF%9B%E9%98%B6%E6%95%99%E7%A8%8B%2004-01%20%E7%AA%97%E5%8F%A3%E5%87%BD%E6%95%B0%E6%A6%82%E8%BF%B0/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=5.5.4"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.1.0/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        if (!ttl) return
+        const expiry = Date.now() + ttl * 86400000
+        localStorage.setItem(key, JSON.stringify({ value, expiry }))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return undefined
+        const { value, expiry } = JSON.parse(itemStr)
+        if (Date.now() > expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return value
+      }
+    }
+
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        Object.entries(attr).forEach(([key, val]) => script.setAttribute(key, val))
+        script.onload = script.onreadystatechange = () => {
+          if (!script.readyState || /loaded|complete/.test(script.readyState)) resolve()
+        }
+        script.onerror = reject
+        document.head.appendChild(script)
+      }),
+      getCSS: (url, id) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onload = link.onreadystatechange = () => {
+          if (!link.readyState || /loaded|complete/.test(link.readyState)) resolve()
+        }
+        link.onerror = reject
+        document.head.appendChild(link)
+      }),
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"/search.xml","preload":true,"top_n_per_article":1,"unescape":false,"pagination":{"enable":false,"hitsPerPage":8},"languages":{"hits_empty":"未找到符合您查询的内容：${query}","hits_stats":"共找到 ${hits} 篇文章"}},
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.13.0/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'MySQL 进阶教程 04-01 窗口函数概述',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><meta name="generator" content="Hexo 8.1.1"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/img/%E5%A4%B4%E5%83%8F.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">68</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">157</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">9</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user"></i><span> 关于</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">过拟合的炸鱼薯条</span></a><a class="nav-page-title" href="/"><span class="site-name">MySQL 进阶教程 04-01 窗口函数概述</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div id="search-button"><span class="site-page social-icon search"><i class="fas fa-search fa-fw"></i><span> 搜索</span></span></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user"></i><span> 关于</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">MySQL 进阶教程 04-01 窗口函数概述</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2026-02-24T02:00:00.000Z" title="发表于 2026-02-24 10:00:00">2026-02-24</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-02-24T10:08:07.398Z" title="更新于 2026-02-24 18:08:07">2026-02-24</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/MySQL-%E8%BF%9B%E9%98%B6%E6%95%99%E7%A8%8B/">MySQL 进阶教程</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-wordcount"><i class="far fa-file-word fa-fw post-meta-icon"></i><span class="post-meta-label">总字数:</span><span class="word-count">2.3k</span><span class="post-meta-separator">|</span><i class="far fa-clock fa-fw post-meta-icon"></i><span class="post-meta-label">阅读时长:</span><span>9分钟</span></span><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><h1 id="MySQL-进阶教程-04-01-窗口函数概述"><a href="#MySQL-进阶教程-04-01-窗口函数概述" class="headerlink" title="MySQL 进阶教程 04-01 窗口函数概述"></a>MySQL 进阶教程 04-01 窗口函数概述</h1><p>窗口函数（Window Function）是 MySQL 8.0+ 引入的强大特性，用于实现复杂的分析查询。本文将详细介绍窗口函数的基本概念、语法结构以及与聚合函数的区别。</p>
+<h2 id="一、窗口函数简介"><a href="#一、窗口函数简介" class="headerlink" title="一、窗口函数简介"></a>一、窗口函数简介</h2><h3 id="1-1-什么是窗口函数？"><a href="#1-1-什么是窗口函数？" class="headerlink" title="1.1 什么是窗口函数？"></a>1.1 什么是窗口函数？</h3><p><strong>窗口函数</strong> 是对一组行（称为”窗口”）执行计算的函数，但与聚合函数不同的是，窗口函数会为每一行返回一个结果，而不是将多行聚合为单个值。</p>
+<p><strong>通俗理解</strong>：</p>
+<ul>
+<li>聚合函数：多行 → 一个结果</li>
+<li>窗口函数：多行 → 每行一个结果（基于窗口内数据计算）</li>
+</ul>
+<h3 id="1-2-窗口函数的应用场景"><a href="#1-2-窗口函数的应用场景" class="headerlink" title="1.2 窗口函数的应用场景"></a>1.2 窗口函数的应用场景</h3><table>
+<thead>
+<tr>
+<th>场景</th>
+<th>说明</th>
+<th>示例</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>排名问题</td>
+<td>获取 Top N 记录</td>
+<td>每个部门工资最高的 3 名员工</td>
+</tr>
+<tr>
+<td>累计计算</td>
+<td>累计求和、平均值</td>
+<td>累计销售额、移动平均</td>
+</tr>
+<tr>
+<td>前后行访问</td>
+<td>访问当前行的前后行数据</td>
+<td>同比、环比增长</td>
+</tr>
+<tr>
+<td>分组内排序</td>
+<td>组内排序编号</td>
+<td>每笔订单在客户订单中的序号</td>
+</tr>
+<tr>
+<td>分桶分析</td>
+<td>将数据分成若干组</td>
+<td>按成绩分等级、百分位分析</td>
+</tr>
+</tbody></table>
+<h3 id="1-3-为什么需要窗口函数？"><a href="#1-3-为什么需要窗口函数？" class="headerlink" title="1.3 为什么需要窗口函数？"></a>1.3 为什么需要窗口函数？</h3><p>在窗口函数出现之前，实现类似功能通常需要：</p>
+<ul>
+<li>自连接</li>
+<li>子查询</li>
+<li>用户变量</li>
+<li>应用层处理</li>
+</ul>
+<p>这些方法往往<strong>语法复杂、性能较差、可读性低</strong>。窗口函数提供了<strong>更简洁、高效、易读</strong>的解决方案。</p>
+<h2 id="二、窗口函数-vs-聚合函数"><a href="#二、窗口函数-vs-聚合函数" class="headerlink" title="二、窗口函数 vs 聚合函数"></a>二、窗口函数 vs 聚合函数</h2><h3 id="2-1-基本区别"><a href="#2-1-基本区别" class="headerlink" title="2.1 基本区别"></a>2.1 基本区别</h3><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- 准备测试数据</span></span><br><span class="line"><span class="keyword">DROP</span> <span class="keyword">TABLE</span> IF <span class="keyword">EXISTS</span> employees;</span><br><span class="line"><span class="keyword">CREATE TABLE</span> employees (</span><br><span class="line">    id <span class="type">INT</span> <span class="keyword">PRIMARY KEY</span> AUTO_INCREMENT,</span><br><span class="line">    name <span class="type">VARCHAR</span>(<span class="number">50</span>) <span class="keyword">NOT NULL</span>,</span><br><span class="line">    dept_id <span class="type">INT</span> <span class="keyword">NOT NULL</span>,</span><br><span class="line">    salary <span class="type">DECIMAL</span>(<span class="number">10</span>, <span class="number">2</span>) <span class="keyword">NOT NULL</span>,</span><br><span class="line">    hire_date <span class="type">DATE</span></span><br><span class="line">) ENGINE<span class="operator">=</span>InnoDB <span class="keyword">DEFAULT</span> CHARSET<span class="operator">=</span>utf8mb4;</span><br><span class="line"></span><br><span class="line"><span class="keyword">INSERT INTO</span> employees (name, dept_id, salary, hire_date) <span class="keyword">VALUES</span></span><br><span class="line">(<span class="string">&#x27;张三&#x27;</span>, <span class="number">1</span>, <span class="number">8000</span>, <span class="string">&#x27;2022-01-01&#x27;</span>),</span><br><span class="line">(<span class="string">&#x27;李四&#x27;</span>, <span class="number">1</span>, <span class="number">10000</span>, <span class="string">&#x27;2021-06-15&#x27;</span>),</span><br><span class="line">(<span class="string">&#x27;王五&#x27;</span>, <span class="number">1</span>, <span class="number">12000</span>, <span class="string">&#x27;2020-03-20&#x27;</span>),</span><br><span class="line">(<span class="string">&#x27;赵六&#x27;</span>, <span class="number">2</span>, <span class="number">7000</span>, <span class="string">&#x27;2022-03-10&#x27;</span>),</span><br><span class="line">(<span class="string">&#x27;孙七&#x27;</span>, <span class="number">2</span>, <span class="number">9000</span>, <span class="string">&#x27;2021-09-01&#x27;</span>),</span><br><span class="line">(<span class="string">&#x27;周八&#x27;</span>, <span class="number">2</span>, <span class="number">11000</span>, <span class="string">&#x27;2020-12-01&#x27;</span>),</span><br><span class="line">(<span class="string">&#x27;吴九&#x27;</span>, <span class="number">3</span>, <span class="number">6000</span>, <span class="string">&#x27;2023-01-15&#x27;</span>);</span><br></pre></td></tr></table></figure>
+
+<p><strong>聚合函数示例</strong>：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- 聚合函数：按部门分组，返回每个部门的平均工资</span></span><br><span class="line"><span class="keyword">SELECT</span> dept_id, <span class="built_in">AVG</span>(salary) <span class="keyword">AS</span> avg_salary</span><br><span class="line"><span class="keyword">FROM</span> employees</span><br><span class="line"><span class="keyword">GROUP</span> <span class="keyword">BY</span> dept_id;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 结果：每部门一行</span></span><br><span class="line"><span class="comment">-- dept_id | avg_salary</span></span><br><span class="line"><span class="comment">-- --------+-----------</span></span><br><span class="line"><span class="comment">--    1    | 10000.00</span></span><br><span class="line"><span class="comment">--    2    | 9000.00</span></span><br><span class="line"><span class="comment">--    3    | 6000.00</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>窗口函数示例</strong>：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- 窗口函数：返回每个员工的工资，以及其所在部门的平均工资</span></span><br><span class="line"><span class="keyword">SELECT</span></span><br><span class="line">    name,</span><br><span class="line">    dept_id,</span><br><span class="line">    salary,</span><br><span class="line">    <span class="built_in">AVG</span>(salary) <span class="keyword">OVER</span> (<span class="keyword">PARTITION</span> <span class="keyword">BY</span> dept_id) <span class="keyword">AS</span> dept_avg_salary</span><br><span class="line"><span class="keyword">FROM</span> employees;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 结果：每行一个结果，保留原始数据</span></span><br><span class="line"><span class="comment">-- name | dept_id | salary | dept_avg_salary</span></span><br><span class="line"><span class="comment">-- -----+---------+--------+-----------------</span></span><br><span class="line"><span class="comment">-- 张三  |    1    | 8000   | 10000.00</span></span><br><span class="line"><span class="comment">-- 李四  |    1    | 10000  | 10000.00</span></span><br><span class="line"><span class="comment">-- 王五  |    1    | 12000  | 10000.00</span></span><br><span class="line"><span class="comment">-- 赵六  |    2    | 7000   | 9000.00</span></span><br><span class="line"><span class="comment">-- 孙七  |    2    | 9000   | 9000.00</span></span><br><span class="line"><span class="comment">-- 周八  |    2    | 11000  | 9000.00</span></span><br><span class="line"><span class="comment">-- 吴九  |    3    | 6000   | 6000.00</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="2-2-对比总结"><a href="#2-2-对比总结" class="headerlink" title="2.2 对比总结"></a>2.2 对比总结</h3><table>
+<thead>
+<tr>
+<th>对比项</th>
+<th>聚合函数</th>
+<th>窗口函数</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>输入</td>
+<td>多行</td>
+<td>多行（窗口）</td>
+</tr>
+<tr>
+<td>输出</td>
+<td>单行（分组后）</td>
+<td>每行一个结果</td>
+</tr>
+<tr>
+<td>GROUP BY</td>
+<td>必须</td>
+<td>可选（使用 PARTITION BY）</td>
+</tr>
+<tr>
+<td>原始数据</td>
+<td>被聚合</td>
+<td>保留</td>
+</tr>
+<tr>
+<td>应用场景</td>
+<td>统计汇总</td>
+<td>分析计算</td>
+</tr>
+</tbody></table>
+<h2 id="三、窗口函数语法结构"><a href="#三、窗口函数语法结构" class="headerlink" title="三、窗口函数语法结构"></a>三、窗口函数语法结构</h2><h3 id="3-1-基本语法"><a href="#3-1-基本语法" class="headerlink" title="3.1 基本语法"></a>3.1 基本语法</h3><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">窗口函数 <span class="keyword">OVER</span> (</span><br><span class="line">    [<span class="keyword">PARTITION</span> <span class="keyword">BY</span> 列名]</span><br><span class="line">    [<span class="keyword">ORDER</span> <span class="keyword">BY</span> 列名]</span><br><span class="line">    [<span class="keyword">ROWS</span><span class="operator">/</span><span class="keyword">RANGE</span> <span class="keyword">BETWEEN</span> 窗口边界]</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+
+<h3 id="3-2-语法组件详解"><a href="#3-2-语法组件详解" class="headerlink" title="3.2 语法组件详解"></a>3.2 语法组件详解</h3><h4 id="（1）OVER-子句"><a href="#（1）OVER-子句" class="headerlink" title="（1）OVER 子句"></a>（1）OVER 子句</h4><p><strong>OVER 子句</strong> 是窗口函数的标志，没有 OVER 就不是窗口函数。</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- 错误：没有 OVER，AVG 是聚合函数</span></span><br><span class="line"><span class="keyword">SELECT</span> name, salary, <span class="built_in">AVG</span>(salary) <span class="keyword">FROM</span> employees;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 正确：有 OVER，AVG 是窗口函数</span></span><br><span class="line"><span class="keyword">SELECT</span> name, salary, <span class="built_in">AVG</span>(salary) <span class="keyword">OVER</span>() <span class="keyword">FROM</span> employees;</span><br></pre></td></tr></table></figure>
+
+<h4 id="（2）PARTITION-BY-子句"><a href="#（2）PARTITION-BY-子句" class="headerlink" title="（2）PARTITION BY 子句"></a>（2）PARTITION BY 子句</h4><p><strong>PARTITION BY</strong> 将数据划分为多个分区（窗口），函数在每个分区内独立计算。</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- 不分区：整个数据集作为一个窗口</span></span><br><span class="line"><span class="keyword">SELECT</span></span><br><span class="line">    name,</span><br><span class="line">    dept_id,</span><br><span class="line">    salary,</span><br><span class="line">    <span class="built_in">AVG</span>(salary) <span class="keyword">OVER</span>() <span class="keyword">AS</span> company_avg</span><br><span class="line"><span class="keyword">FROM</span> employees;</span><br><span class="line"><span class="comment">-- 所有行显示公司平均工资</span></span><br><span class="line"></span><br><span class="line"><span class="comment">-- 按部门分区：每个部门作为一个窗口</span></span><br><span class="line"><span class="keyword">SELECT</span></span><br><span class="line">    name,</span><br><span class="line">    dept_id,</span><br><span class="line">    salary,</span><br><span class="line">    <span class="built_in">AVG</span>(salary) <span class="keyword">OVER</span>(<span class="keyword">PARTITION</span> <span class="keyword">BY</span> dept_id) <span class="keyword">AS</span> dept_avg</span><br><span class="line"><span class="keyword">FROM</span> employees;</span><br><span class="line"><span class="comment">-- 每行显示该部门的平均工资</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>PARTITION BY vs GROUP BY</strong>：</p>
+<ul>
+<li><code>GROUP BY</code>：分组后，每组返回一行</li>
+<li><code>PARTITION BY</code>：分区后，每行保留，附加计算结果</li>
+</ul>
+<h4 id="（3）ORDER-BY-子句"><a href="#（3）ORDER-BY-子句" class="headerlink" title="（3）ORDER BY 子句"></a>（3）ORDER BY 子句</h4><p><strong>ORDER BY</strong> 在窗口内对数据进行排序，影响排名和累计类函数。</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- 部门内按工资排序</span></span><br><span class="line"><span class="keyword">SELECT</span></span><br><span class="line">    name,</span><br><span class="line">    dept_id,</span><br><span class="line">    salary,</span><br><span class="line">    <span class="built_in">ROW_NUMBER</span>() <span class="keyword">OVER</span>(<span class="keyword">PARTITION</span> <span class="keyword">BY</span> dept_id <span class="keyword">ORDER</span> <span class="keyword">BY</span> salary <span class="keyword">DESC</span>) <span class="keyword">AS</span> rank</span><br><span class="line"><span class="keyword">FROM</span> employees;</span><br></pre></td></tr></table></figure>
+
+<h4 id="（4）窗口边界子句"><a href="#（4）窗口边界子句" class="headerlink" title="（4）窗口边界子句"></a>（4）窗口边界子句</h4><p><strong>ROWS&#x2F;RANGE BETWEEN</strong> 定义窗口的范围（用于累计、移动平均等）。</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- 累计求和：从第一行到当前行</span></span><br><span class="line"><span class="keyword">SELECT</span></span><br><span class="line">    name,</span><br><span class="line">    salary,</span><br><span class="line">    <span class="built_in">SUM</span>(salary) <span class="keyword">OVER</span>(<span class="keyword">ORDER</span> <span class="keyword">BY</span> hire_date <span class="keyword">ROWS</span> <span class="keyword">BETWEEN</span> UNBOUNDED PRECEDING <span class="keyword">AND</span> <span class="keyword">CURRENT</span> <span class="type">ROW</span>) <span class="keyword">AS</span> running_total</span><br><span class="line"><span class="keyword">FROM</span> employees;</span><br></pre></td></tr></table></figure>
+
+<p>窗口边界详细说明见后续章节。</p>
+<h2 id="四、窗口函数分类"><a href="#四、窗口函数分类" class="headerlink" title="四、窗口函数分类"></a>四、窗口函数分类</h2><p>MySQL 窗口函数主要分为以下几类：</p>
+<h3 id="4-1-排名函数"><a href="#4-1-排名函数" class="headerlink" title="4.1 排名函数"></a>4.1 排名函数</h3><table>
+<thead>
+<tr>
+<th>函数</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>ROW_NUMBER()</td>
+<td>连续排名，无重复，不跳过（1,2,3,4…）</td>
+</tr>
+<tr>
+<td>RANK()</td>
+<td>跳跃排名，有重复，跳过（1,2,2,4…）</td>
+</tr>
+<tr>
+<td>DENSE_RANK()</td>
+<td>密集排名，有重复，不跳过（1,2,2,3…）</td>
+</tr>
+<tr>
+<td>NTILE(n)</td>
+<td>将数据分成 n 个桶</td>
+</tr>
+</tbody></table>
+<h3 id="4-2-聚合函数（窗口版）"><a href="#4-2-聚合函数（窗口版）" class="headerlink" title="4.2 聚合函数（窗口版）"></a>4.2 聚合函数（窗口版）</h3><p>MySQL 的所有聚合函数都可以用作窗口函数：</p>
+<table>
+<thead>
+<tr>
+<th>函数</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>SUM() OVER</td>
+<td>窗口求和</td>
+</tr>
+<tr>
+<td>AVG() OVER</td>
+<td>窗口平均</td>
+</tr>
+<tr>
+<td>COUNT() OVER</td>
+<td>窗口计数</td>
+</tr>
+<tr>
+<td>MAX() OVER</td>
+<td>窗口最大值</td>
+</tr>
+<tr>
+<td>MIN() OVER</td>
+<td>窗口最小值</td>
+</tr>
+</tbody></table>
+<h3 id="4-3-分析函数"><a href="#4-3-分析函数" class="headerlink" title="4.3 分析函数"></a>4.3 分析函数</h3><table>
+<thead>
+<tr>
+<th>函数</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>LEAD(col, n)</td>
+<td>访问当前行之后第 n 行的值</td>
+</tr>
+<tr>
+<td>LAG(col, n)</td>
+<td>访问当前行之前第 n 行的值</td>
+</tr>
+<tr>
+<td>FIRST_VALUE(col)</td>
+<td>窗口内第一行的值</td>
+</tr>
+<tr>
+<td>LAST_VALUE(col)</td>
+<td>窗口内最后一行的值</td>
+</tr>
+<tr>
+<td>NTH_VALUE(col, n)</td>
+<td>窗口内第 n 行的值</td>
+</tr>
+</tbody></table>
+<h2 id="五、窗口函数入门示例"><a href="#五、窗口函数入门示例" class="headerlink" title="五、窗口函数入门示例"></a>五、窗口函数入门示例</h2><h3 id="5-1-排名问题"><a href="#5-1-排名问题" class="headerlink" title="5.1 排名问题"></a>5.1 排名问题</h3><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- 问题：获取每个部门内工资排名</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">SELECT</span></span><br><span class="line">    name,</span><br><span class="line">    dept_id,</span><br><span class="line">    salary,</span><br><span class="line">    <span class="built_in">ROW_NUMBER</span>() <span class="keyword">OVER</span>(<span class="keyword">PARTITION</span> <span class="keyword">BY</span> dept_id <span class="keyword">ORDER</span> <span class="keyword">BY</span> salary <span class="keyword">DESC</span>) <span class="keyword">AS</span> row_num,</span><br><span class="line">    <span class="built_in">RANK</span>() <span class="keyword">OVER</span>(<span class="keyword">PARTITION</span> <span class="keyword">BY</span> dept_id <span class="keyword">ORDER</span> <span class="keyword">BY</span> salary <span class="keyword">DESC</span>) <span class="keyword">AS</span> rank,</span><br><span class="line">    <span class="built_in">DENSE_RANK</span>() <span class="keyword">OVER</span>(<span class="keyword">PARTITION</span> <span class="keyword">BY</span> dept_id <span class="keyword">ORDER</span> <span class="keyword">BY</span> salary <span class="keyword">DESC</span>) <span class="keyword">AS</span> dense_rank</span><br><span class="line"><span class="keyword">FROM</span> employees</span><br><span class="line"><span class="keyword">ORDER</span> <span class="keyword">BY</span> dept_id, salary <span class="keyword">DESC</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 结果：</span></span><br><span class="line"><span class="comment">-- name | dept_id | salary | row_num | rank | dense_rank</span></span><br><span class="line"><span class="comment">-- -----+---------+--------+---------+------+-----------</span></span><br><span class="line"><span class="comment">-- 王五  |    1    | 12000  |    1    |   1  |     1</span></span><br><span class="line"><span class="comment">-- 李四  |    1    | 10000  |    2    |   2  |     2</span></span><br><span class="line"><span class="comment">-- 张三  |    1    | 8000   |    3    |   3  |     3</span></span><br><span class="line"><span class="comment">-- 周八  |    2    | 11000  |    1    |   1  |     1</span></span><br><span class="line"><span class="comment">-- 孙七  |    2    | 9000   |    2    |   2  |     2</span></span><br><span class="line"><span class="comment">-- 赵六  |    2    | 7000   |    3    |   3  |     3</span></span><br><span class="line"><span class="comment">-- 吴九  |    3    | 6000   |    1    |   1  |     1</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="5-2-累计求和"><a href="#5-2-累计求和" class="headerlink" title="5.2 累计求和"></a>5.2 累计求和</h3><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- 问题：计算累计工资和</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">SELECT</span></span><br><span class="line">    name,</span><br><span class="line">    hire_date,</span><br><span class="line">    salary,</span><br><span class="line">    <span class="built_in">SUM</span>(salary) <span class="keyword">OVER</span>(<span class="keyword">ORDER</span> <span class="keyword">BY</span> hire_date) <span class="keyword">AS</span> running_total</span><br><span class="line"><span class="keyword">FROM</span> employees</span><br><span class="line"><span class="keyword">ORDER</span> <span class="keyword">BY</span> hire_date;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 结果：</span></span><br><span class="line"><span class="comment">-- name | hire_date  | salary | running_total</span></span><br><span class="line"><span class="comment">-- -----+------------+--------+--------------</span></span><br><span class="line"><span class="comment">-- 王五  | 2020-03-20 | 12000  | 12000</span></span><br><span class="line"><span class="comment">-- 周八  | 2020-12-01 | 11000  | 23000</span></span><br><span class="line"><span class="comment">-- 李四  | 2021-06-15 | 10000  | 33000</span></span><br><span class="line"><span class="comment">-- 孙七  | 2021-09-01 | 9000   | 42000</span></span><br><span class="line"><span class="comment">-- 张三  | 2022-01-01 | 8000   | 50000</span></span><br><span class="line"><span class="comment">-- 赵六  | 2022-03-10 | 7000   | 57000</span></span><br><span class="line"><span class="comment">-- 吴九  | 2023-01-15 | 6000   | 63000</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="5-3-前后行对比"><a href="#5-3-前后行对比" class="headerlink" title="5.3 前后行对比"></a>5.3 前后行对比</h3><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- 问题：计算每个员工与同部门前一位员工的工资差</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">SELECT</span></span><br><span class="line">    name,</span><br><span class="line">    dept_id,</span><br><span class="line">    salary,</span><br><span class="line">    <span class="built_in">LAG</span>(salary) <span class="keyword">OVER</span>(<span class="keyword">PARTITION</span> <span class="keyword">BY</span> dept_id <span class="keyword">ORDER</span> <span class="keyword">BY</span> salary) <span class="keyword">AS</span> prev_salary,</span><br><span class="line">    salary <span class="operator">-</span> <span class="built_in">LAG</span>(salary) <span class="keyword">OVER</span>(<span class="keyword">PARTITION</span> <span class="keyword">BY</span> dept_id <span class="keyword">ORDER</span> <span class="keyword">BY</span> salary) <span class="keyword">AS</span> diff</span><br><span class="line"><span class="keyword">FROM</span> employees</span><br><span class="line"><span class="keyword">ORDER</span> <span class="keyword">BY</span> dept_id, salary;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 结果：</span></span><br><span class="line"><span class="comment">-- name | dept_id | salary | prev_salary | diff</span></span><br><span class="line"><span class="comment">-- -----+---------+--------+-------------+------</span></span><br><span class="line"><span class="comment">-- 张三  |    1    | 8000   | NULL        | NULL</span></span><br><span class="line"><span class="comment">-- 李四  |    1    | 10000  | 8000        | 2000</span></span><br><span class="line"><span class="comment">-- 王五  |    1    | 12000  | 10000       | 2000</span></span><br><span class="line"><span class="comment">-- 赵六  |    2    | 7000   | NULL        | NULL</span></span><br><span class="line"><span class="comment">-- 孙七  |    2    | 9000   | 7000        | 2000</span></span><br><span class="line"><span class="comment">-- 周八  |    2    | 11000  | 9000        | 2000</span></span><br><span class="line"><span class="comment">-- 吴九  |    3    | 6000   | NULL        | NULL</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="5-4-Top-N-问题"><a href="#5-4-Top-N-问题" class="headerlink" title="5.4 Top N 问题"></a>5.4 Top N 问题</h3><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- 问题：获取每个部门工资最高的 2 名员工</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> (</span><br><span class="line">    <span class="keyword">SELECT</span></span><br><span class="line">        name,</span><br><span class="line">        dept_id,</span><br><span class="line">        salary,</span><br><span class="line">        <span class="built_in">ROW_NUMBER</span>() <span class="keyword">OVER</span>(<span class="keyword">PARTITION</span> <span class="keyword">BY</span> dept_id <span class="keyword">ORDER</span> <span class="keyword">BY</span> salary <span class="keyword">DESC</span>) <span class="keyword">AS</span> rn</span><br><span class="line">    <span class="keyword">FROM</span> employees</span><br><span class="line">) t</span><br><span class="line"><span class="keyword">WHERE</span> rn <span class="operator">&lt;=</span> <span class="number">2</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 结果：</span></span><br><span class="line"><span class="comment">-- name | dept_id | salary | rn</span></span><br><span class="line"><span class="comment">-- -----+---------+--------+----</span></span><br><span class="line"><span class="comment">-- 王五  |    1    | 12000  | 1</span></span><br><span class="line"><span class="comment">-- 李四  |    1    | 10000  | 2</span></span><br><span class="line"><span class="comment">-- 周八  |    2    | 11000  | 1</span></span><br><span class="line"><span class="comment">-- 孙七  |    2    | 9000   | 2</span></span><br><span class="line"><span class="comment">-- 吴九  |    3    | 6000   | 1</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="六、窗口函数的执行顺序"><a href="#六、窗口函数的执行顺序" class="headerlink" title="六、窗口函数的执行顺序"></a>六、窗口函数的执行顺序</h2><p>理解窗口函数的执行顺序对于编写正确的 SQL 至关重要。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">SELECT 执行顺序：</span><br><span class="line">1. FROM / JOIN</span><br><span class="line">2. WHERE</span><br><span class="line">3. GROUP BY</span><br><span class="line">4. HAVING</span><br><span class="line">5. 窗口函数（OVER）</span><br><span class="line">6. SELECT</span><br><span class="line">7. DISTINCT</span><br><span class="line">8. ORDER BY（最终排序）</span><br><span class="line">9. LIMIT</span><br></pre></td></tr></table></figure>
+
+<p><strong>关键点</strong>：</p>
+<ul>
+<li>窗口函数在 WHERE、GROUP BY、HAVING <strong>之后</strong>执行</li>
+<li>窗口函数在最终 ORDER BY <strong>之前</strong>执行</li>
+<li>可以在外层查询中对窗口函数的结果进行过滤</li>
+</ul>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- 错误：不能在 WHERE 中直接使用窗口函数</span></span><br><span class="line"><span class="keyword">SELECT</span> name, salary, <span class="built_in">ROW_NUMBER</span>() <span class="keyword">OVER</span>(<span class="keyword">ORDER</span> <span class="keyword">BY</span> salary) <span class="keyword">AS</span> rn</span><br><span class="line"><span class="keyword">FROM</span> employees</span><br><span class="line"><span class="keyword">WHERE</span> rn <span class="operator">&lt;=</span> <span class="number">3</span>;  <span class="comment">-- ERROR: rn 在 WHERE 之后计算</span></span><br><span class="line"></span><br><span class="line"><span class="comment">-- 正确：使用子查询</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> (</span><br><span class="line">    <span class="keyword">SELECT</span> name, salary, <span class="built_in">ROW_NUMBER</span>() <span class="keyword">OVER</span>(<span class="keyword">ORDER</span> <span class="keyword">BY</span> salary) <span class="keyword">AS</span> rn</span><br><span class="line">    <span class="keyword">FROM</span> employees</span><br><span class="line">) t</span><br><span class="line"><span class="keyword">WHERE</span> rn <span class="operator">&lt;=</span> <span class="number">3</span>;</span><br></pre></td></tr></table></figure>
+
+<h2 id="七、窗口函数的版本要求"><a href="#七、窗口函数的版本要求" class="headerlink" title="七、窗口函数的版本要求"></a>七、窗口函数的版本要求</h2><h3 id="7-1-MySQL-版本支持"><a href="#7-1-MySQL-版本支持" class="headerlink" title="7.1 MySQL 版本支持"></a>7.1 MySQL 版本支持</h3><table>
+<thead>
+<tr>
+<th>MySQL 版本</th>
+<th>窗口函数支持</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>5.7 及以下</td>
+<td>❌ 不支持</td>
+</tr>
+<tr>
+<td>8.0+</td>
+<td>✅ 完全支持</td>
+</tr>
+</tbody></table>
+<h3 id="7-2-查看-MySQL-版本"><a href="#7-2-查看-MySQL-版本" class="headerlink" title="7.2 查看 MySQL 版本"></a>7.2 查看 MySQL 版本</h3><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> VERSION();</span><br></pre></td></tr></table></figure>
+
+<h3 id="7-3-旧版本替代方案"><a href="#7-3-旧版本替代方案" class="headerlink" title="7.3 旧版本替代方案"></a>7.3 旧版本替代方案</h3><p>如果使用 MySQL 5.7，可以使用<strong>用户变量</strong>模拟窗口函数：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- MySQL 5.7：使用变量实现 ROW_NUMBER</span></span><br><span class="line"><span class="keyword">SELECT</span></span><br><span class="line">    name,</span><br><span class="line">    dept_id,</span><br><span class="line">    salary,</span><br><span class="line">    <span class="variable">@rn</span> :<span class="operator">=</span> IF(<span class="variable">@prev_dept</span> <span class="operator">=</span> dept_id, <span class="variable">@rn</span> <span class="operator">+</span> <span class="number">1</span>, <span class="number">1</span>) <span class="keyword">AS</span> rn,</span><br><span class="line">    <span class="variable">@prev_dept</span> :<span class="operator">=</span> dept_id</span><br><span class="line"><span class="keyword">FROM</span> employees, (<span class="keyword">SELECT</span> <span class="variable">@rn</span> :<span class="operator">=</span> <span class="number">0</span>, <span class="variable">@prev_dept</span> :<span class="operator">=</span> <span class="keyword">NULL</span>) vars</span><br><span class="line"><span class="keyword">ORDER</span> <span class="keyword">BY</span> dept_id, salary <span class="keyword">DESC</span>;</span><br></pre></td></tr></table></figure>
+
+<p>但这种方法<strong>语法复杂、易出错、性能较差</strong>，建议升级到 MySQL 8.0+。</p>
+<h2 id="八、小结"><a href="#八、小结" class="headerlink" title="八、小结"></a>八、小结</h2><h3 id="核心知识点"><a href="#核心知识点" class="headerlink" title="核心知识点"></a>核心知识点</h3><ol>
+<li><p><strong>窗口函数特点</strong></p>
+<ul>
+<li>为每一行返回一个结果</li>
+<li>不改变原始数据</li>
+<li>基于窗口（一组行）进行计算</li>
+</ul>
+</li>
+<li><p><strong>与聚合函数的区别</strong></p>
+<ul>
+<li>聚合函数：多行 → 一个结果</li>
+<li>窗口函数：多行 → 每行一个结果</li>
+</ul>
+</li>
+<li><p><strong>OVER 子句组件</strong></p>
+<ul>
+<li><code>PARTITION BY</code>：划分分区</li>
+<li><code>ORDER BY</code>：窗口内排序</li>
+<li><code>ROWS/RANGE BETWEEN</code>：窗口边界</li>
+</ul>
+</li>
+<li><p><strong>窗口函数分类</strong></p>
+<ul>
+<li>排名函数：ROW_NUMBER、RANK、DENSE_RANK、NTILE</li>
+<li>聚合函数：SUM、AVG、COUNT、MAX、MIN</li>
+<li>分析函数：LEAD、LAG、FIRST_VALUE、LAST_VALUE</li>
+</ul>
+</li>
+</ol>
+<h3 id="下一章预告"><a href="#下一章预告" class="headerlink" title="下一章预告"></a>下一章预告</h3><p>下一篇文章将详细介绍<strong>排名函数</strong>（ROW_NUMBER、RANK、DENSE_RANK）的使用方法，包括：</p>
+<ul>
+<li>三种排名函数的区别</li>
+<li>实战：Top N 问题</li>
+<li>实战：分组内排名</li>
+<li>性能优化建议</li>
+</ul>
+<hr>
+<p><strong>下一篇</strong>：[MySQL 进阶教程 04-02 ROW_NUMBER 和排名函数](&#x2F;2026&#x2F;02&#x2F;24&#x2F;MySQL 进阶教程 04-02 ROW_NUMBER 和排名函数&#x2F;)</p>
+<p><strong>上一篇</strong>：[MySQL 进阶教程 03-10 表子查询](&#x2F;2026&#x2F;02&#x2F;23&#x2F;MySQL 进阶教程 03-10 表子查询&#x2F;)</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://brian-lin-c.github.io">过拟合的炸鱼薯条</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://brian-lin-c.github.io/2026/02/24/MySQL%20%E8%BF%9B%E9%98%B6%E6%95%99%E7%A8%8B%2004-01%20%E7%AA%97%E5%8F%A3%E5%87%BD%E6%95%B0%E6%A6%82%E8%BF%B0/">https://brian-lin-c.github.io/2026/02/24/MySQL%20%E8%BF%9B%E9%98%B6%E6%95%99%E7%A8%8B%2004-01%20%E7%AA%97%E5%8F%A3%E5%87%BD%E6%95%B0%E6%A6%82%E8%BF%B0/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://brian-lin-c.github.io" target="_blank">过拟合的炸鱼薯条</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/MySQL/">MySQL</a><a class="post-meta__tags" href="/tags/%E7%AA%97%E5%8F%A3%E5%87%BD%E6%95%B0/">窗口函数</a><a class="post-meta__tags" href="/tags/OVER/">OVER</a><a class="post-meta__tags" href="/tags/%E5%88%86%E6%9E%90%E5%87%BD%E6%95%B0/">分析函数</a></div><div class="post-share"><div class="social-share" data-image="/img/%E5%A4%B4%E5%83%8F.jpg" data-sites="facebook,x,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related" href="/2026/02/24/MySQL%20%E8%BF%9B%E9%98%B6%E6%95%99%E7%A8%8B%2006-01%20%E5%AD%98%E5%82%A8%E5%BC%95%E6%93%8E%E8%AF%A6%E8%A7%A3/" title="MySQL 进阶教程 06-01 存储引擎详解"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">MySQL 进阶教程 06-01 存储引擎详解</div></div><div class="info-2"><div class="info-item-1">MySQL 进阶教程 06-01 存储引擎详解存储引擎是 MySQL 的核心组件之一，决定了数据的存储方式和访问特性。本文将详细介绍 MySQL 的存储引擎架构和常用引擎的特点。 一、存储引擎概述1.1 什么是存储引擎？存储引擎（Storage Engine） 是 MySQL 中负责数据存储、提取和管理的底层组件。MySQL 采用插件式存储引擎架构，可以根据需求选择不同的引擎。 1234567891011MySQL 架构简图：┌─────────────────────────────────────┐│         SQL 接口（查询解析）          │├─────────────────────────────────────┤│         查询优化器                   │├─────────────────────────────────────┤│     存储引擎层（插件式架构）           ││  ┌─────────┬─────────┬─────────┐    ││  │ InnoDB  │ MyISAM  │ Mem...</div></div></div></a><a class="pagination-related" href="/2026/02/24/Markdown%20%E8%AF%AD%E6%B3%95%E6%95%99%E7%A8%8B%E2%80%94%E2%80%94%E5%A6%82%E4%BD%95%E5%86%99%E5%8D%9A%E5%AE%A2/" title="Markdown 语法教程——如何写博客"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">Markdown 语法教程——如何写博客</div></div><div class="info-2"><div class="info-item-1">前言这篇教程是写给我自己的 Markdown 语法备忘录。记录常用的 Markdown 语法和博客配置，方便以后写博客时快速查阅。  提醒自己：写博客不是为了追求完美，而是为了记录和分享。不要等到什么都准备好了才开始，先写起来，在写作中不断完善。  一、Markdown 基础语法1.1 标题使用 # 符号来定义标题： 1234# 一级标题（文章标题，每篇文章只能有一个）## 二级标题（主要章节）### 三级标题（小节）#### 四级标题（细分内容）   提醒自己：  文章标题用一级标题，正文中从二级标题开始 标题层级要清晰，不要跳级使用（比如不要从 ## 直接跳到 ####） 每个大章节用 ##，子内容用 ###   1.2 段落与换行1234这是第一段。段落之间要空一行。这是第二段。行尾加两个空格可以强制换行。这是换行后的内容。   提醒自己：  段落不要太长，3-5 句一段比较合适 代码教程中，解释和代码示例之间要空行，方便阅读   1.3 文本样式   样式 语法 示例    粗体 **文本** 重要内容   斜体 *文本* 强调一下   删除线 ~~文本~~ 过时的内容 ...</div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/2026/02/24/MySQL%20%E8%BF%9B%E9%98%B6%E6%95%99%E7%A8%8B%2004-07%20%E7%AA%97%E5%8F%A3%E5%87%BD%E6%95%B0%E5%AE%9E%E6%88%98%E6%A1%88%E4%BE%8B/" title="MySQL 进阶教程 04-07 窗口函数实战案例"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-02-24</div><div class="info-item-2">MySQL 进阶教程 04-07 窗口函数实战案例</div></div><div class="info-2"><div class="info-item-1">MySQL 进阶教程 04-07 窗口函数实战案例本文通过综合实战案例，展示如何运用窗口函数解决实际业务问题。案例涵盖连续登录、Top N 问题、累计分析、复杂报表等常见场景。 一、连续登录问题1.1 问题描述场景：用户签到系统，找出连续签到 3 天以上的用户。 1234567891011121314-- 准备签到数据DROP TABLE IF EXISTS user_signin;CREATE TABLE user_signin (    id INT PRIMARY KEY AUTO_INCREMENT,    user_id INT NOT NULL,    signin_date DATE NOT NULL,    UNIQUE KEY uk_user_date (user_id, signin_date)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;INSERT INTO user_signin (user_id, signin_date) VALUES(1, &#x27;2024-01-01&#x27;), (1, &#x27;202...</div></div></div></a><a class="pagination-related" href="/2026/02/24/MySQL%20%E8%BF%9B%E9%98%B6%E6%95%99%E7%A8%8B%2004-05%20%E7%AA%97%E5%8F%A3%E6%A1%86%E6%9E%B6%E8%AF%A6%E8%A7%A3/" title="MySQL 进阶教程 04-05 窗口框架详解"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-02-24</div><div class="info-item-2">MySQL 进阶教程 04-05 窗口框架详解</div></div><div class="info-2"><div class="info-item-1">MySQL 进阶教程 04-05 窗口框架详解窗口框架（Window Frame）用于精确定义窗口函数操作的数据范围。本文将详细讲解 ROWS 和 RANGE 的区别，以及各种窗口边界的使用方法。 一、窗口框架概述1.1 什么是窗口框架？窗口框架 是窗口函数中用于定义”窗口”具体范围的部分，决定了哪些行参与计算。 12345OVER (    [PARTITION BY 列名]     -- 分区：将数据分成多个组    [ORDER BY 列名]          -- 排序：窗口内数据的排序    [ROWS/RANGE BETWEEN ...] -- 窗口框架：精确定义窗口范围)  1.2 默认窗口框架关键规则：  有 ORDER BY 无框架子句：默认 RANGE BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW 无 ORDER BY：使用整个分区  12345678910111213141516171819202122232425262728293031-- 准备测试数据DROP TABLE IF EXISTS sales;CREA...</div></div></div></a><a class="pagination-related" href="/2026/02/24/MySQL%20%E8%BF%9B%E9%98%B6%E6%95%99%E7%A8%8B%2004-03%20%E8%81%9A%E5%90%88%E7%AA%97%E5%8F%A3%E5%87%BD%E6%95%B0/" title="MySQL 进阶教程 04-03 聚合窗口函数"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-02-24</div><div class="info-item-2">MySQL 进阶教程 04-03 聚合窗口函数</div></div><div class="info-2"><div class="info-item-1">MySQL 进阶教程 04-03 聚合窗口函数MySQL 的所有聚合函数（SUM、AVG、COUNT、MAX、MIN）都可以用作窗口函数。本文将详细讲解聚合窗口函数的使用方法，包括累计求和、移动平均、占比计算等常见场景。 一、聚合窗口函数基础1.1 聚合函数 vs 聚合窗口函数12345678910111213141516171819202122232425262728293031323334353637383940-- 准备测试数据DROP TABLE IF EXISTS orders;CREATE TABLE orders (    id INT PRIMARY KEY AUTO_INCREMENT,    order_date DATE NOT NULL,    amount DECIMAL(10, 2) NOT NULL) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;INSERT INTO orders (order_date, amount) VALUES(&#x27;2024-01-01&#x27;, 100),(&#x27;2024-...</div></div></div></a><a class="pagination-related" href="/2026/02/24/MySQL%20%E8%BF%9B%E9%98%B6%E6%95%99%E7%A8%8B%2004-02%20ROW_NUMBER%20%E5%92%8C%E6%8E%92%E5%90%8D%E5%87%BD%E6%95%B0/" title="MySQL 进阶教程 04-02 ROW_NUMBER 和排名函数"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-02-24</div><div class="info-item-2">MySQL 进阶教程 04-02 ROW_NUMBER 和排名函数</div></div><div class="info-2"><div class="info-item-1">MySQL 进阶教程 04-02 ROW_NUMBER 和排名函数在窗口函数中，排名函数是最常用、最重要的一类函数。本文将详细讲解 ROW_NUMBER、RANK、DENSE_RANK 三种排名函数的区别和使用方法。 一、排名函数简介MySQL 提供三种主要的排名函数：    函数 说明 排名序列示例    ROW_NUMBER() 连续排名，无重复，不跳过 1, 2, 3, 4, 5   RANK() 跳跃排名，有重复，跳过 1, 2, 2, 4, 5   DENSE_RANK() 密集排名，有重复，不跳过 1, 2, 2, 3, 4   测试数据准备1234567891011121314151617181920-- 创建员工表DROP TABLE IF EXISTS employees;CREATE TABLE employees (    id INT PRIMARY KEY AUTO_INCREMENT,    name VARCHAR(50) NOT NULL,    dept_id INT NOT NULL,    salary DECIMAL(10, 2) NOT ...</div></div></div></a><a class="pagination-related" href="/2026/02/24/MySQL%20%E8%BF%9B%E9%98%B6%E6%95%99%E7%A8%8B%2004-06%20NTILE%20%E5%88%86%E6%A1%B6%E5%87%BD%E6%95%B0/" title="MySQL 进阶教程 04-06 NTILE 分桶函数"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-02-24</div><div class="info-item-2">MySQL 进阶教程 04-06 NTILE 分桶函数</div></div><div class="info-2"><div class="info-item-1">MySQL 进阶教程 04-06 NTILE 分桶函数NTILE 函数用于将有序数据分成指定数量的组（桶），常用于排名分组、百分位计算等场景。本文将详细讲解 NTILE 函数的使用方法。 一、NTILE 函数基础1.1 函数语法1234NTILE(n) OVER (    [PARTITION BY 列名]    ORDER BY 列名)  参数说明：    参数 说明    n 要分成的桶数量（正整数）   返回值：  返回 1 到 n 之间的整数 表示该行所属的桶编号  1.2 测试数据准备1234567891011121314151617181920-- 准备学生成绩数据DROP TABLE IF EXISTS scores;CREATE TABLE scores (    id INT PRIMARY KEY AUTO_INCREMENT,    student_name VARCHAR(50) NOT NULL,    subject VARCHAR(20) NOT NULL,    score INT NOT NULL) ENGINE=InnoDB DEFAULT C...</div></div></div></a><a class="pagination-related" href="/2026/02/24/MySQL%20%E8%BF%9B%E9%98%B6%E6%95%99%E7%A8%8B%2004-04%20LEAD%20LAG%20%E5%89%8D%E5%90%8E%E8%A1%8C%E8%AE%BF%E9%97%AE/" title="MySQL 进阶教程 04-04 LEAD&#x2F;LAG 前后行访问"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-02-24</div><div class="info-item-2">MySQL 进阶教程 04-04 LEAD&#x2F;LAG 前后行访问</div></div><div class="info-2"><div class="info-item-1">MySQL 进阶教程 04-04 LEAD&#x2F;LAG 前后行访问LEAD 和 LAG 函数允许在结果集中访问当前行之前或之后的行数据，无需自连接即可实现前后行对比。本文将详细讲解这两个函数的使用方法，包括同比、环比、差值分析等常见场景。 一、LEAD 和 LAG 函数基础1.1 函数语法1234567891011-- LAG 函数：访问当前行之前第 n 行的数据LAG(col, n, default) OVER (    [PARTITION BY 列名]    ORDER BY 列名)-- LEAD 函数：访问当前行之后第 n 行的数据LEAD(col, n, default) OVER (    [PARTITION BY 列名]    ORDER BY 列名)  参数说明：    参数 说明 默认值    col 要访问的列 -   n 向前&#x2F;后偏移的行数 1   default 超出范围时的默认值 NULL   1.2 测试数据准备1234567891011121314151617181920-- 准备月度销售数据DROP TABLE IF EXISTS...</div></div></div></a></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/img/%E5%A4%B4%E5%83%8F.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">过拟合的炸鱼薯条</div><div class="author-info-description">好好学习，天天向上</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">68</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">157</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">9</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/Brian-Lin-C"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons"><a class="social-icon" href="https://github.com/Brian-Lin-C" target="_blank" title="Github"><i class="fab fa-github" style="color: #24292e;"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">欢迎来到我的个人博客！</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#MySQL-%E8%BF%9B%E9%98%B6%E6%95%99%E7%A8%8B-04-01-%E7%AA%97%E5%8F%A3%E5%87%BD%E6%95%B0%E6%A6%82%E8%BF%B0"><span class="toc-number">1.</span> <span class="toc-text">MySQL 进阶教程 04-01 窗口函数概述</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%80%E3%80%81%E7%AA%97%E5%8F%A3%E5%87%BD%E6%95%B0%E7%AE%80%E4%BB%8B"><span class="toc-number">1.1.</span> <span class="toc-text">一、窗口函数简介</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-1-%E4%BB%80%E4%B9%88%E6%98%AF%E7%AA%97%E5%8F%A3%E5%87%BD%E6%95%B0%EF%BC%9F"><span class="toc-number">1.1.1.</span> <span class="toc-text">1.1 什么是窗口函数？</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-2-%E7%AA%97%E5%8F%A3%E5%87%BD%E6%95%B0%E7%9A%84%E5%BA%94%E7%94%A8%E5%9C%BA%E6%99%AF"><span class="toc-number">1.1.2.</span> <span class="toc-text">1.2 窗口函数的应用场景</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-3-%E4%B8%BA%E4%BB%80%E4%B9%88%E9%9C%80%E8%A6%81%E7%AA%97%E5%8F%A3%E5%87%BD%E6%95%B0%EF%BC%9F"><span class="toc-number">1.1.3.</span> <span class="toc-text">1.3 为什么需要窗口函数？</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%8C%E3%80%81%E7%AA%97%E5%8F%A3%E5%87%BD%E6%95%B0-vs-%E8%81%9A%E5%90%88%E5%87%BD%E6%95%B0"><span class="toc-number">1.2.</span> <span class="toc-text">二、窗口函数 vs 聚合函数</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#2-1-%E5%9F%BA%E6%9C%AC%E5%8C%BA%E5%88%AB"><span class="toc-number">1.2.1.</span> <span class="toc-text">2.1 基本区别</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-2-%E5%AF%B9%E6%AF%94%E6%80%BB%E7%BB%93"><span class="toc-number">1.2.2.</span> <span class="toc-text">2.2 对比总结</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%89%E3%80%81%E7%AA%97%E5%8F%A3%E5%87%BD%E6%95%B0%E8%AF%AD%E6%B3%95%E7%BB%93%E6%9E%84"><span class="toc-number">1.3.</span> <span class="toc-text">三、窗口函数语法结构</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#3-1-%E5%9F%BA%E6%9C%AC%E8%AF%AD%E6%B3%95"><span class="toc-number">1.3.1.</span> <span class="toc-text">3.1 基本语法</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-2-%E8%AF%AD%E6%B3%95%E7%BB%84%E4%BB%B6%E8%AF%A6%E8%A7%A3"><span class="toc-number">1.3.2.</span> <span class="toc-text">3.2 语法组件详解</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%EF%BC%881%EF%BC%89OVER-%E5%AD%90%E5%8F%A5"><span class="toc-number">1.3.2.1.</span> <span class="toc-text">（1）OVER 子句</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%EF%BC%882%EF%BC%89PARTITION-BY-%E5%AD%90%E5%8F%A5"><span class="toc-number">1.3.2.2.</span> <span class="toc-text">（2）PARTITION BY 子句</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%EF%BC%883%EF%BC%89ORDER-BY-%E5%AD%90%E5%8F%A5"><span class="toc-number">1.3.2.3.</span> <span class="toc-text">（3）ORDER BY 子句</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%EF%BC%884%EF%BC%89%E7%AA%97%E5%8F%A3%E8%BE%B9%E7%95%8C%E5%AD%90%E5%8F%A5"><span class="toc-number">1.3.2.4.</span> <span class="toc-text">（4）窗口边界子句</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9B%9B%E3%80%81%E7%AA%97%E5%8F%A3%E5%87%BD%E6%95%B0%E5%88%86%E7%B1%BB"><span class="toc-number">1.4.</span> <span class="toc-text">四、窗口函数分类</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#4-1-%E6%8E%92%E5%90%8D%E5%87%BD%E6%95%B0"><span class="toc-number">1.4.1.</span> <span class="toc-text">4.1 排名函数</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-2-%E8%81%9A%E5%90%88%E5%87%BD%E6%95%B0%EF%BC%88%E7%AA%97%E5%8F%A3%E7%89%88%EF%BC%89"><span class="toc-number">1.4.2.</span> <span class="toc-text">4.2 聚合函数（窗口版）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-3-%E5%88%86%E6%9E%90%E5%87%BD%E6%95%B0"><span class="toc-number">1.4.3.</span> <span class="toc-text">4.3 分析函数</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%94%E3%80%81%E7%AA%97%E5%8F%A3%E5%87%BD%E6%95%B0%E5%85%A5%E9%97%A8%E7%A4%BA%E4%BE%8B"><span class="toc-number">1.5.</span> <span class="toc-text">五、窗口函数入门示例</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#5-1-%E6%8E%92%E5%90%8D%E9%97%AE%E9%A2%98"><span class="toc-number">1.5.1.</span> <span class="toc-text">5.1 排名问题</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5-2-%E7%B4%AF%E8%AE%A1%E6%B1%82%E5%92%8C"><span class="toc-number">1.5.2.</span> <span class="toc-text">5.2 累计求和</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5-3-%E5%89%8D%E5%90%8E%E8%A1%8C%E5%AF%B9%E6%AF%94"><span class="toc-number">1.5.3.</span> <span class="toc-text">5.3 前后行对比</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5-4-Top-N-%E9%97%AE%E9%A2%98"><span class="toc-number">1.5.4.</span> <span class="toc-text">5.4 Top N 问题</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%85%AD%E3%80%81%E7%AA%97%E5%8F%A3%E5%87%BD%E6%95%B0%E7%9A%84%E6%89%A7%E8%A1%8C%E9%A1%BA%E5%BA%8F"><span class="toc-number">1.6.</span> <span class="toc-text">六、窗口函数的执行顺序</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%83%E3%80%81%E7%AA%97%E5%8F%A3%E5%87%BD%E6%95%B0%E7%9A%84%E7%89%88%E6%9C%AC%E8%A6%81%E6%B1%82"><span class="toc-number">1.7.</span> <span class="toc-text">七、窗口函数的版本要求</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#7-1-MySQL-%E7%89%88%E6%9C%AC%E6%94%AF%E6%8C%81"><span class="toc-number">1.7.1.</span> <span class="toc-text">7.1 MySQL 版本支持</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#7-2-%E6%9F%A5%E7%9C%8B-MySQL-%E7%89%88%E6%9C%AC"><span class="toc-number">1.7.2.</span> <span class="toc-text">7.2 查看 MySQL 版本</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#7-3-%E6%97%A7%E7%89%88%E6%9C%AC%E6%9B%BF%E4%BB%A3%E6%96%B9%E6%A1%88"><span class="toc-number">1.7.3.</span> <span class="toc-text">7.3 旧版本替代方案</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%85%AB%E3%80%81%E5%B0%8F%E7%BB%93"><span class="toc-number">1.8.</span> <span class="toc-text">八、小结</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%A0%B8%E5%BF%83%E7%9F%A5%E8%AF%86%E7%82%B9"><span class="toc-number">1.8.1.</span> <span class="toc-text">核心知识点</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%8B%E4%B8%80%E7%AB%A0%E9%A2%84%E5%91%8A"><span class="toc-number">1.8.2.</span> <span class="toc-text">下一章预告</span></a></li></ol></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/02/24/IDE%20%E5%B7%A5%E5%85%B7%E9%85%8D%E7%BD%AE%EF%BC%9AVS%20Code%20+%20Jupyter%20+%20DataGrip/" title="IDE 工具配置：VS Code + Jupyter + DataGrip">IDE 工具配置：VS Code + Jupyter + DataGrip</a><time datetime="2026-02-24T15:00:00.000Z" title="发表于 2026-02-24 23:00:00">2026-02-24</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/02/24/Git%20%E7%89%88%E6%9C%AC%E6%8E%A7%E5%88%B6%E4%B8%8E%E5%9B%A2%E9%98%9F%E5%8D%8F%E4%BD%9C/" title="Git 版本控制与团队协作">Git 版本控制与团队协作</a><time datetime="2026-02-24T14:00:00.000Z" title="发表于 2026-02-24 22:00:00">2026-02-24</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/02/24/Linux%20%E4%B8%8E%20Shell%EF%BC%88%E4%BA%8C%EF%BC%89Shell%20%E8%84%9A%E6%9C%AC%E7%BC%96%E5%86%99/" title="Linux 与 Shell（二）Shell 脚本编写">Linux 与 Shell（二）Shell 脚本编写</a><time datetime="2026-02-24T13:00:00.000Z" title="发表于 2026-02-24 21:00:00">2026-02-24</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/02/24/%E6%95%B0%E6%8D%AE%E4%BB%93%E5%BA%93%E6%A0%B8%E5%BF%83%E6%A6%82%E5%BF%B5%E8%AF%A6%E8%A7%A3%20-%20%E7%BB%B4%E5%BA%A6%E5%BB%BA%E6%A8%A1%E3%80%81%E6%95%B0%E6%8D%AE%E5%88%86%E5%B1%82%E4%B8%8E%20SCD%20%E5%A4%84%E7%90%86/" title="数据仓库核心概念详解 - 维度建模、数据分层与 SCD 处理">数据仓库核心概念详解 - 维度建模、数据分层与 SCD 处理</a><time datetime="2026-02-24T13:00:00.000Z" title="发表于 2026-02-24 21:00:00">2026-02-24</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/02/24/MySQL%20%E8%BF%90%E7%BB%B4%E7%AF%87%2004-10%20MyCat%20%E7%AE%A1%E7%90%86%E4%B8%8E%E7%9B%91%E6%8E%A7/" title="MySQL 运维篇 04-10 MyCat 管理与监控">MySQL 运维篇 04-10 MyCat 管理与监控</a><time datetime="2026-02-24T12:05:00.000Z" title="发表于 2026-02-24 20:05:00">2026-02-24</time></div></div></div></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2025 - 2026 By 过拟合的炸鱼薯条</span><span class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 8.1.1</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.5.4</a></span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=5.5.4"></script><script src="/js/main.js?v=5.5.4"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><i class="fas fa-spinner fa-pulse" id="loading-status" hidden="hidden"></i><button class="search-close-button"><i class="fas fa-times"></i></button></nav><div class="text-center" id="loading-database"><i class="fas fa-spinner fa-pulse"></i><span>  数据加载中</span></div><div class="local-search-input"><input placeholder="搜索..." type="text"/></div><hr/><div id="local-search-results"></div><div class="ais-Pagination" id="local-search-pagination" style="display:none;"><ul class="ais-Pagination-list"></ul></div><div id="local-search-stats"></div></div><div id="search-mask"></div><script src="/js/search/local-search.js?v=5.5.4"></script></div></div></body></html>

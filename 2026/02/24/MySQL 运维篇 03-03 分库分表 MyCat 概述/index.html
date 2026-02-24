@@ -1,0 +1,265 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>MySQL 运维篇 03-03 分库分表 MyCat 概述 | 过拟合的炸鱼薯条</title><meta name="author" content="过拟合的炸鱼薯条"><meta name="copyright" content="过拟合的炸鱼薯条"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="MySQL 运维篇 03-03 分库分表 MyCat 概述MyCat 是一个开源的数据库中间件，位于应用程序和数据库之间，负责 SQL 解析、路由和结果合并。本文将介绍 MyCat 的基本概念、架构和核心功能。 一、MyCat 介绍1.1 什么是 MyCat？MyCat 是一个基于 Java 开发的数据库中间件，前身是阿里巴巴的 Cobar 项目。 12应用程序 → MyCat → MySQL 集">
+<meta property="og:type" content="article">
+<meta property="og:title" content="MySQL 运维篇 03-03 分库分表 MyCat 概述">
+<meta property="og:url" content="https://brian-lin-c.github.io/2026/02/24/MySQL%20%E8%BF%90%E7%BB%B4%E7%AF%87%2003-03%20%E5%88%86%E5%BA%93%E5%88%86%E8%A1%A8%20MyCat%20%E6%A6%82%E8%BF%B0/index.html">
+<meta property="og:site_name" content="过拟合的炸鱼薯条">
+<meta property="og:description" content="MySQL 运维篇 03-03 分库分表 MyCat 概述MyCat 是一个开源的数据库中间件，位于应用程序和数据库之间，负责 SQL 解析、路由和结果合并。本文将介绍 MyCat 的基本概念、架构和核心功能。 一、MyCat 介绍1.1 什么是 MyCat？MyCat 是一个基于 Java 开发的数据库中间件，前身是阿里巴巴的 Cobar 项目。 12应用程序 → MyCat → MySQL 集">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://brian-lin-c.github.io/img/%E5%A4%B4%E5%83%8F.jpg">
+<meta property="article:published_time" content="2026-02-24T11:10:00.000Z">
+<meta property="article:modified_time" content="2026-02-24T11:22:56.904Z">
+<meta property="article:author" content="过拟合的炸鱼薯条">
+<meta property="article:tag" content="MyCat">
+<meta property="article:tag" content="MySQL">
+<meta property="article:tag" content="中间件">
+<meta property="article:tag" content="分库分表">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://brian-lin-c.github.io/img/%E5%A4%B4%E5%83%8F.jpg"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "MySQL 运维篇 03-03 分库分表 MyCat 概述",
+  "url": "https://brian-lin-c.github.io/2026/02/24/MySQL%20%E8%BF%90%E7%BB%B4%E7%AF%87%2003-03%20%E5%88%86%E5%BA%93%E5%88%86%E8%A1%A8%20MyCat%20%E6%A6%82%E8%BF%B0/",
+  "image": "https://brian-lin-c.github.io/img/%E5%A4%B4%E5%83%8F.jpg",
+  "datePublished": "2026-02-24T11:10:00.000Z",
+  "dateModified": "2026-02-24T11:22:56.904Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "过拟合的炸鱼薯条",
+      "url": "https://brian-lin-c.github.io"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://brian-lin-c.github.io/2026/02/24/MySQL%20%E8%BF%90%E7%BB%B4%E7%AF%87%2003-03%20%E5%88%86%E5%BA%93%E5%88%86%E8%A1%A8%20MyCat%20%E6%A6%82%E8%BF%B0/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=5.5.4"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.1.0/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        if (!ttl) return
+        const expiry = Date.now() + ttl * 86400000
+        localStorage.setItem(key, JSON.stringify({ value, expiry }))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return undefined
+        const { value, expiry } = JSON.parse(itemStr)
+        if (Date.now() > expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return value
+      }
+    }
+
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        Object.entries(attr).forEach(([key, val]) => script.setAttribute(key, val))
+        script.onload = script.onreadystatechange = () => {
+          if (!script.readyState || /loaded|complete/.test(script.readyState)) resolve()
+        }
+        script.onerror = reject
+        document.head.appendChild(script)
+      }),
+      getCSS: (url, id) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onload = link.onreadystatechange = () => {
+          if (!link.readyState || /loaded|complete/.test(link.readyState)) resolve()
+        }
+        link.onerror = reject
+        document.head.appendChild(link)
+      }),
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"/search.xml","preload":true,"top_n_per_article":1,"unescape":false,"pagination":{"enable":false,"hitsPerPage":8},"languages":{"hits_empty":"未找到符合您查询的内容：${query}","hits_stats":"共找到 ${hits} 篇文章"}},
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.13.0/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'MySQL 运维篇 03-03 分库分表 MyCat 概述',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><meta name="generator" content="Hexo 8.1.1"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/img/%E5%A4%B4%E5%83%8F.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">68</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">157</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">9</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user"></i><span> 关于</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">过拟合的炸鱼薯条</span></a><a class="nav-page-title" href="/"><span class="site-name">MySQL 运维篇 03-03 分库分表 MyCat 概述</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div id="search-button"><span class="site-page social-icon search"><i class="fas fa-search fa-fw"></i><span> 搜索</span></span></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user"></i><span> 关于</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">MySQL 运维篇 03-03 分库分表 MyCat 概述</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2026-02-24T11:10:00.000Z" title="发表于 2026-02-24 19:10:00">2026-02-24</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-02-24T11:22:56.904Z" title="更新于 2026-02-24 19:22:56">2026-02-24</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/MySQL-%E8%BF%90%E7%BB%B4%E7%AF%87/">MySQL 运维篇</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-wordcount"><i class="far fa-file-word fa-fw post-meta-icon"></i><span class="post-meta-label">总字数:</span><span class="word-count">630</span><span class="post-meta-separator">|</span><i class="far fa-clock fa-fw post-meta-icon"></i><span class="post-meta-label">阅读时长:</span><span>2分钟</span></span><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><h1 id="MySQL-运维篇-03-03-分库分表-MyCat-概述"><a href="#MySQL-运维篇-03-03-分库分表-MyCat-概述" class="headerlink" title="MySQL 运维篇 03-03 分库分表 MyCat 概述"></a>MySQL 运维篇 03-03 分库分表 MyCat 概述</h1><p>MyCat 是一个开源的数据库中间件，位于应用程序和数据库之间，负责 SQL 解析、路由和结果合并。本文将介绍 MyCat 的基本概念、架构和核心功能。</p>
+<h2 id="一、MyCat-介绍"><a href="#一、MyCat-介绍" class="headerlink" title="一、MyCat 介绍"></a>一、MyCat 介绍</h2><h3 id="1-1-什么是-MyCat？"><a href="#1-1-什么是-MyCat？" class="headerlink" title="1.1 什么是 MyCat？"></a>1.1 什么是 MyCat？</h3><p><strong>MyCat</strong> 是一个基于 Java 开发的数据库中间件，前身是阿里巴巴的 Cobar 项目。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">应用程序 → MyCat → MySQL 集群</span><br><span class="line">         (数据库中间件)</span><br></pre></td></tr></table></figure>
+
+<p><strong>核心功能</strong>：</p>
+<ul>
+<li>SQL 解析和路由</li>
+<li>分库分表</li>
+<li>读写分离</li>
+<li>连接池管理</li>
+<li>负载均衡</li>
+</ul>
+<h3 id="1-2-MyCat-特点"><a href="#1-2-MyCat-特点" class="headerlink" title="1.2 MyCat 特点"></a>1.2 MyCat 特点</h3><table>
+<thead>
+<tr>
+<th>特点</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>协议兼容</td>
+<td>完全兼容 MySQL 协议</td>
+</tr>
+<tr>
+<td>透明分片</td>
+<td>应用无需修改代码</td>
+</tr>
+<tr>
+<td>多种分片</td>
+<td>支持 10+ 种分片规则</td>
+</tr>
+<tr>
+<td>读写分离</td>
+<td>自动路由读写请求</td>
+</tr>
+<tr>
+<td>高可用</td>
+<td>支持主从切换</td>
+</tr>
+</tbody></table>
+<h3 id="1-3-适用场景"><a href="#1-3-适用场景" class="headerlink" title="1.3 适用场景"></a>1.3 适用场景</h3><table>
+<thead>
+<tr>
+<th>场景</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>分库分表</td>
+<td>单表数据量过大</td>
+</tr>
+<tr>
+<td>读写分离</td>
+<td>读多写少场景</td>
+</tr>
+<tr>
+<td>数据库迁移</td>
+<td>平滑迁移数据</td>
+</tr>
+<tr>
+<td>多租户</td>
+<td>SaaS 应用数据隔离</td>
+</tr>
+</tbody></table>
+<h2 id="二、MyCat-架构"><a href="#二、MyCat-架构" class="headerlink" title="二、MyCat 架构"></a>二、MyCat 架构</h2><h3 id="2-1-整体架构"><a href="#2-1-整体架构" class="headerlink" title="2.1 整体架构"></a>2.1 整体架构</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">应用程序 → MyCat → MySQL 集群</span><br></pre></td></tr></table></figure>
+
+<p><strong>核心组件</strong>：</p>
+<ul>
+<li>SQL 解析器</li>
+<li>SQL 路由引擎</li>
+<li>结果集合并</li>
+<li>连接池管理</li>
+<li>会话管理</li>
+</ul>
+<h3 id="2-2-架构图"><a href="#2-2-架构图" class="headerlink" title="2.2 架构图"></a>2.2 架构图</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">┌─────────────┐</span><br><span class="line">│   应用程序    │</span><br><span class="line">│  (JDBC 等)   │</span><br><span class="line">└──────┬──────┘</span><br><span class="line">       │ MySQL 协议</span><br><span class="line">┌──────▼──────────────────────────────┐</span><br><span class="line">│              MyCat                   │</span><br><span class="line">│  ┌────────────────────────────────┐ │</span><br><span class="line">│  │   连接管理 | 会话管理 | 事务    │ │</span><br><span class="line">│  ├────────────────────────────────┤ │</span><br><span class="line">│  │          SQL 解析器             │ │</span><br><span class="line">│  ├────────────────────────────────┤ │</span><br><span class="line">│  │          SQL 路由引擎           │ │</span><br><span class="line">│  ├────────────────────────────────┤ │</span><br><span class="line">│  │          结果集合并             │ │</span><br><span class="line">│  └────────────────────────────────┘ │</span><br><span class="line">└──────┬──────────────┬──────────────┘</span><br><span class="line">       │              │</span><br><span class="line">  ┌────▼────┐    ┌────▼────┐</span><br><span class="line">  │ Master  │    │ Slave   │</span><br><span class="line">  │ (写)    │    │ (读)    │</span><br><span class="line">  └─────────┘    └─────────┘</span><br></pre></td></tr></table></figure>
+
+<h2 id="三、MyCat-核心概念"><a href="#三、MyCat-核心概念" class="headerlink" title="三、MyCat 核心概念"></a>三、MyCat 核心概念</h2><h3 id="3-1-逻辑表"><a href="#3-1-逻辑表" class="headerlink" title="3.1 逻辑表"></a>3.1 逻辑表</h3><p><strong>定义</strong>：应用程序看到的表，实际可能分布在多个物理表中。</p>
+<p><strong>示例</strong>：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">逻辑表：orders</span><br><span class="line">物理表：orders_0000, orders_0001, ..., orders_9999</span><br></pre></td></tr></table></figure>
+
+<h3 id="3-2-数据节点（DataNode）"><a href="#3-2-数据节点（DataNode）" class="headerlink" title="3.2 数据节点（DataNode）"></a>3.2 数据节点（DataNode）</h3><p><strong>定义</strong>：物理数据库实例上的数据库。</p>
+<p><strong>配置示例</strong>：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dataNode</span> <span class="attr">name</span>=<span class="string">&quot;dn1&quot;</span> <span class="attr">dataHost</span>=<span class="string">&quot;host1&quot;</span> <span class="attr">database</span>=<span class="string">&quot;db1&quot;</span>/&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">dataNode</span> <span class="attr">name</span>=<span class="string">&quot;dn2&quot;</span> <span class="attr">dataHost</span>=<span class="string">&quot;host2&quot;</span> <span class="attr">database</span>=<span class="string">&quot;db2&quot;</span>/&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="3-3-数据主机（DataHost）"><a href="#3-3-数据主机（DataHost）" class="headerlink" title="3.3 数据主机（DataHost）"></a>3.3 数据主机（DataHost）</h3><p><strong>定义</strong>：物理 MySQL 服务器配置。</p>
+<p><strong>配置示例</strong>：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dataHost</span> <span class="attr">name</span>=<span class="string">&quot;host1&quot;</span> <span class="attr">maxCon</span>=<span class="string">&quot;1000&quot;</span> <span class="attr">minCon</span>=<span class="string">&quot;10&quot;</span></span></span><br><span class="line"><span class="tag">          <span class="attr">balance</span>=<span class="string">&quot;0&quot;</span> <span class="attr">writeType</span>=<span class="string">&quot;0&quot;</span></span></span><br><span class="line"><span class="tag">          <span class="attr">dbType</span>=<span class="string">&quot;mysql&quot;</span> <span class="attr">dbDriver</span>=<span class="string">&quot;native&quot;</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">heartbeat</span>&gt;</span>select user()<span class="tag">&lt;/<span class="name">heartbeat</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">writeHost</span> <span class="attr">host</span>=<span class="string">&quot;master1&quot;</span> <span class="attr">url</span>=<span class="string">&quot;192.168.1.100:3306&quot;</span></span></span><br><span class="line"><span class="tag">               <span class="attr">user</span>=<span class="string">&quot;mycat&quot;</span> <span class="attr">password</span>=<span class="string">&quot;password&quot;</span>/&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dataHost</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="3-4-分片规则（Rule）"><a href="#3-4-分片规则（Rule）" class="headerlink" title="3.4 分片规则（Rule）"></a>3.4 分片规则（Rule）</h3><p><strong>定义</strong>：数据如何分布到不同节点的规则。</p>
+<p><strong>配置示例</strong>：</p>
+<pre><code class="language-xml">&lt;tableRule name=&quot;mod-long&quot;&gt;
+    &lt;rule&gt;
+        &lt;columns&gt;id&lt;/columns&gt;
+        &lt;algorithm&gt;mod-long&lt;/algorithm&gt;
+    &lt;/rule&gt;
+&lt;/tableRule&gt;
+
+&lt;function name=&quot;mod-long&quot; class=&quot;io.mycat.route.function.PartitionByMod&quot;&gt;
+    &lt;property name=&quot;count&quot;&gt;100&lt;/property&gt;
+</code></pre>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://brian-lin-c.github.io">过拟合的炸鱼薯条</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://brian-lin-c.github.io/2026/02/24/MySQL%20%E8%BF%90%E7%BB%B4%E7%AF%87%2003-03%20%E5%88%86%E5%BA%93%E5%88%86%E8%A1%A8%20MyCat%20%E6%A6%82%E8%BF%B0/">https://brian-lin-c.github.io/2026/02/24/MySQL%20%E8%BF%90%E7%BB%B4%E7%AF%87%2003-03%20%E5%88%86%E5%BA%93%E5%88%86%E8%A1%A8%20MyCat%20%E6%A6%82%E8%BF%B0/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://brian-lin-c.github.io" target="_blank">过拟合的炸鱼薯条</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/MySQL/">MySQL</a><a class="post-meta__tags" href="/tags/%E5%88%86%E5%BA%93%E5%88%86%E8%A1%A8/">分库分表</a><a class="post-meta__tags" href="/tags/MyCat/">MyCat</a><a class="post-meta__tags" href="/tags/%E4%B8%AD%E9%97%B4%E4%BB%B6/">中间件</a></div><div class="post-share"><div class="social-share" data-image="/img/%E5%A4%B4%E5%83%8F.jpg" data-sites="facebook,x,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related" href="/2026/02/24/MySQL%20%E8%BF%90%E7%BB%B4%E7%AF%87%2003-04%20MyCat%20%E5%AE%89%E8%A3%85%E4%B8%8E%E9%85%8D%E7%BD%AE/" title="MySQL 运维篇 03-04 MyCat 安装与配置"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">MySQL 运维篇 03-04 MyCat 安装与配置</div></div><div class="info-2"><div class="info-item-1">MySQL 运维篇 03-04 MyCat 安装与配置本文将详细讲解 MyCat 的下载、安装、配置和启动过程，帮助你快速搭建 MyCat 环境。 一、环境准备1.1 系统要求   组件 要求    Java JDK 1.8+   内存 最少 2GB，推荐 4GB+   磁盘 最少 10GB 可用空间   MySQL 5.6+   1.2 环境信息   服务器 IP 地址 角色 软件    server1 192.168.1.100 MyCat + Master MyCat, MySQL   server2 192.168.1.101 Slave MySQL   1.3 安装 JavaLinux (CentOS&#x2F;RHEL)： 12345# 安装 OpenJDK 8yum install -y java-1.8.0-openjdk java-1.8.0-openjdk-devel# 验证安装java -version  Linux (Ubuntu&#x2F;Debian)： 123456# 安装 OpenJDK 8apt-get updateapt-get install...</div></div></div></a><a class="pagination-related" href="/2026/02/24/MySQL%20%E8%BF%90%E7%BB%B4%E7%AF%87%2003-02%20%E6%8B%86%E5%88%86%E6%96%B9%E5%BC%8F%E8%AF%A6%E8%A7%A3/" title="MySQL 运维篇 03-02 拆分方式详解"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">MySQL 运维篇 03-02 拆分方式详解</div></div><div class="info-2"><div class="info-item-1">MySQL 运维篇 03-02 拆分方式详解本文将详细讲解各种分库分表的拆分方式，包括垂直拆分、水平拆分的实战案例和代码示例。 一、垂直拆分实战1.1 场景描述原始表结构： 1234567891011CREATE TABLE products (    id INT PRIMARY KEY AUTO_INCREMENT,    name VARCHAR(100),    description TEXT,        -- 大字段    detail TEXT,             -- 大字段    price DECIMAL(10, 2),    stock INT,    images BLOB,             -- 图片数据    created_at DATETIME,    updated_at DATETIME);  问题：  单表 1000 万数据 description、detail、images 占用大量空间 查询商品列表时不需要大字段  1.2 垂直拆分方案拆分后表结构： 1234567891011121314151617181920-- 商...</div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/2026/02/24/MySQL%20%E8%BF%90%E7%BB%B4%E7%AF%87%2004-01%20MyCat%20%E5%85%A5%E9%97%A8/" title="MySQL 运维篇 04-01 MyCat 入门"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-02-24</div><div class="info-item-2">MySQL 运维篇 04-01 MyCat 入门</div></div><div class="info-2"><div class="info-item-1">MySQL 运维篇 04-01 MyCat 入门本文是 MyCat 分库分表的入门教程，将介绍如何使用 MyCat 实现简单的分库分表功能。 一、MyCat 简介1.1 什么是 MyCatMyCat 是一个数据库中间件层，位于应用程序和 MySQL 数据库之间，提供分库分表、读写分离等功能。 1应用程序 → MyCat (中间件) → MySQL 集群  1.2 MyCat 功能   功能 说明    分库分表 将数据分布到多个库&#x2F;表中   读写分离 自动将读请求路由到从库   SQL 路由 根据规则路由 SQL 到对应节点   结果合并 合并多个分片的查询结果   连接池 管理数据库连接   1.3 MyCat 版本 MyCat 1.x：经典版本，稳定 MyCat 2.x：重构版本，性能更好  二、快速开始2.1 环境准备软件版本：  MyCat 2.0 MySQL 8.0 JDK 1.8+  服务器：    服务器 IP 角色    server1 192.168.1.100 MyCat + MySQL   2.2 目录结构123456789/opt/mycat/├...</div></div></div></a><a class="pagination-related" href="/2026/02/24/MySQL%20%E8%BF%90%E7%BB%B4%E7%AF%87%2004-08%20MyCat%20%E5%8F%96%E6%A8%A1%E5%88%86%E7%89%87/" title="MySQL 运维篇 04-08 MyCat 取模分片"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-02-24</div><div class="info-item-2">MySQL 运维篇 04-08 MyCat 取模分片</div></div><div class="info-2"><div class="info-item-1">MySQL 运维篇 04-08 MyCat 取模分片取模分片是最常用的分片方式，按照分片键对分片数取模来路由数据。本文将详细介绍取模分片的配置和使用。 一、取模分片介绍1.1 什么是取模分片取模分片：根据分片键对分片数量取模来确定数据存储位置。 12345678公式：分片索引 = 分片键 % 分片数量示例（4 个分片）：id=1 → 1%4=1 → 分片 1id=2 → 2%4=2 → 分片 2id=3 → 3%4=3 → 分片 3id=4 → 4%4=0 → 分片 0id=5 → 5%4=1 → 分片 1  1.2 适用场景   场景 说明    用户订单 按 user_id 取模   用户数据 按用户 ID 取模   均匀分布 需要数据均匀分布   1.3 优缺点优点：  数据分布均匀 算法简单高效 查询效率高  缺点：  扩容困难（需要 rehash） 范围查询效率低  二、基础配置2.1 rule.yml12345678910tableRules:  - name: mod-long    function: mod-long    columns: idfunction...</div></div></div></a><a class="pagination-related" href="/2026/02/24/MySQL%20%E8%BF%90%E7%BB%B4%E7%AF%87%2004-02%20MyCat%20%E6%B5%8B%E8%AF%95/" title="MySQL 运维篇 04-02 MyCat 测试"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-02-24</div><div class="info-item-2">MySQL 运维篇 04-02 MyCat 测试</div></div><div class="info-2"><div class="info-item-1">MySQL 运维篇 04-02 MyCat 测试完成 MyCat 配置后，需要进行全面的测试以验证分库分表功能是否正常。本文将介绍各种测试场景。 一、连接测试1.1 基本连接12# 使用 MySQL 客户端连接 MyCatmysql -h 127.0.0.1 -P 8066 -u root -p123456  1.2 查看数据库1234-- 查看逻辑数据库SHOW DATABASES;-- 输出应该包含 testdb  1.3 查看表123456USE testdb;-- 查看逻辑表SHOW TABLES;-- 输出应该包含 orders  二、CRUD 测试2.1 插入测试123456789101112USE testdb;-- 插入单条记录INSERT INTO orders (id, order_no, user_id, amount, status)VALUES (1, &#x27;ORD001&#x27;, 100, 199.99, 1);-- 插入多条记录INSERT INTO orders (id, order_no, user_id, amount, status...</div></div></div></a><a class="pagination-related" href="/2026/02/24/MySQL%20%E8%BF%90%E7%BB%B4%E7%AF%87%2004-09%20MyCat%20%E4%B8%80%E8%87%B4%E6%80%A7%20Hash/" title="MySQL 运维篇 04-09 MyCat 一致性 Hash"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-02-24</div><div class="info-item-2">MySQL 运维篇 04-09 MyCat 一致性 Hash</div></div><div class="info-2"><div class="info-item-1">MySQL 运维篇 04-09 MyCat 一致性 Hash一致性 Hash 是一种分布式哈希技术，可以减少扩容时的数据迁移量。本文将介绍一致性 Hash 的原理和在 MyCat 中的应用。 一、一致性 Hash 介绍1.1 什么是一致性 Hash一致性 Hash：将数据和节点映射到一个哈希环上，数据存储在顺时针方向最近的节点上。 1234567传统 Hash 问题：- 扩容时需要 rehash 所有数据- 数据迁移量大一致性 Hash 优势：- 扩容时只影响相邻节点- 数据迁移量小  1.2 原理123456789101112131415哈希环示意图：          节点 A (hash=100)         /         \        /           \  数据 X            数据 Y (hash=50)        (hash=200)      |             |      |             |  节点 C         节点 B (hash=0)      (hash=300)数据存储规则：- 数据 X (...</div></div></div></a><a class="pagination-related" href="/2026/02/24/MySQL%20%E8%BF%90%E7%BB%B4%E7%AF%87%2003-04%20MyCat%20%E5%AE%89%E8%A3%85%E4%B8%8E%E9%85%8D%E7%BD%AE/" title="MySQL 运维篇 03-04 MyCat 安装与配置"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-02-24</div><div class="info-item-2">MySQL 运维篇 03-04 MyCat 安装与配置</div></div><div class="info-2"><div class="info-item-1">MySQL 运维篇 03-04 MyCat 安装与配置本文将详细讲解 MyCat 的下载、安装、配置和启动过程，帮助你快速搭建 MyCat 环境。 一、环境准备1.1 系统要求   组件 要求    Java JDK 1.8+   内存 最少 2GB，推荐 4GB+   磁盘 最少 10GB 可用空间   MySQL 5.6+   1.2 环境信息   服务器 IP 地址 角色 软件    server1 192.168.1.100 MyCat + Master MyCat, MySQL   server2 192.168.1.101 Slave MySQL   1.3 安装 JavaLinux (CentOS&#x2F;RHEL)： 12345# 安装 OpenJDK 8yum install -y java-1.8.0-openjdk java-1.8.0-openjdk-devel# 验证安装java -version  Linux (Ubuntu&#x2F;Debian)： 123456# 安装 OpenJDK 8apt-get updateapt-get install...</div></div></div></a><a class="pagination-related" href="/2026/02/24/MySQL%20%E8%BF%90%E7%BB%B4%E7%AF%87%2004-05%20MyCat%20%E5%9E%82%E7%9B%B4%E5%88%86%E5%BA%93%E6%B5%8B%E8%AF%95/" title="MySQL 运维篇 04-05 MyCat 垂直分库测试"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-02-24</div><div class="info-item-2">MySQL 运维篇 04-05 MyCat 垂直分库测试</div></div><div class="info-2"><div class="info-item-1">MySQL 运维篇 04-05 MyCat 垂直分库测试完成垂直分库配置后，需要进行全面的测试以验证各库之间的数据隔离和跨库操作是否正常。 一、测试环境1.1 环境信息   组件 配置    MyCat 2.0   MySQL 8.0   主机 1 192.168.1.100 (user_db, order_db)   主机 2 192.168.1.101 (product_db)   1.2 数据库结构1234567mall_db (逻辑库)├── users (user_db)├── user_profile (user_db)├── orders (order_db)├── order_detail (order_db)├── products (product_db)└── category (product_db)  二、基础功能测试2.1 连接测试12# 连接 MyCatmysql -h 127.0.0.1 -P 8066 -u root -p123456  2.2 查看表12345678910111213141516USE mall_db;-- 查看所有表SHOW ...</div></div></div></a></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/img/%E5%A4%B4%E5%83%8F.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">过拟合的炸鱼薯条</div><div class="author-info-description">好好学习，天天向上</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">68</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">157</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">9</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/Brian-Lin-C"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons"><a class="social-icon" href="https://github.com/Brian-Lin-C" target="_blank" title="Github"><i class="fab fa-github" style="color: #24292e;"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">欢迎来到我的个人博客！</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#MySQL-%E8%BF%90%E7%BB%B4%E7%AF%87-03-03-%E5%88%86%E5%BA%93%E5%88%86%E8%A1%A8-MyCat-%E6%A6%82%E8%BF%B0"><span class="toc-number">1.</span> <span class="toc-text">MySQL 运维篇 03-03 分库分表 MyCat 概述</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%80%E3%80%81MyCat-%E4%BB%8B%E7%BB%8D"><span class="toc-number">1.1.</span> <span class="toc-text">一、MyCat 介绍</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-1-%E4%BB%80%E4%B9%88%E6%98%AF-MyCat%EF%BC%9F"><span class="toc-number">1.1.1.</span> <span class="toc-text">1.1 什么是 MyCat？</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-2-MyCat-%E7%89%B9%E7%82%B9"><span class="toc-number">1.1.2.</span> <span class="toc-text">1.2 MyCat 特点</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-3-%E9%80%82%E7%94%A8%E5%9C%BA%E6%99%AF"><span class="toc-number">1.1.3.</span> <span class="toc-text">1.3 适用场景</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%8C%E3%80%81MyCat-%E6%9E%B6%E6%9E%84"><span class="toc-number">1.2.</span> <span class="toc-text">二、MyCat 架构</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#2-1-%E6%95%B4%E4%BD%93%E6%9E%B6%E6%9E%84"><span class="toc-number">1.2.1.</span> <span class="toc-text">2.1 整体架构</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-2-%E6%9E%B6%E6%9E%84%E5%9B%BE"><span class="toc-number">1.2.2.</span> <span class="toc-text">2.2 架构图</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%89%E3%80%81MyCat-%E6%A0%B8%E5%BF%83%E6%A6%82%E5%BF%B5"><span class="toc-number">1.3.</span> <span class="toc-text">三、MyCat 核心概念</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#3-1-%E9%80%BB%E8%BE%91%E8%A1%A8"><span class="toc-number">1.3.1.</span> <span class="toc-text">3.1 逻辑表</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-2-%E6%95%B0%E6%8D%AE%E8%8A%82%E7%82%B9%EF%BC%88DataNode%EF%BC%89"><span class="toc-number">1.3.2.</span> <span class="toc-text">3.2 数据节点（DataNode）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-3-%E6%95%B0%E6%8D%AE%E4%B8%BB%E6%9C%BA%EF%BC%88DataHost%EF%BC%89"><span class="toc-number">1.3.3.</span> <span class="toc-text">3.3 数据主机（DataHost）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-4-%E5%88%86%E7%89%87%E8%A7%84%E5%88%99%EF%BC%88Rule%EF%BC%89"><span class="toc-number">1.3.4.</span> <span class="toc-text">3.4 分片规则（Rule）</span></a></li></ol></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/02/24/IDE%20%E5%B7%A5%E5%85%B7%E9%85%8D%E7%BD%AE%EF%BC%9AVS%20Code%20+%20Jupyter%20+%20DataGrip/" title="IDE 工具配置：VS Code + Jupyter + DataGrip">IDE 工具配置：VS Code + Jupyter + DataGrip</a><time datetime="2026-02-24T15:00:00.000Z" title="发表于 2026-02-24 23:00:00">2026-02-24</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/02/24/Git%20%E7%89%88%E6%9C%AC%E6%8E%A7%E5%88%B6%E4%B8%8E%E5%9B%A2%E9%98%9F%E5%8D%8F%E4%BD%9C/" title="Git 版本控制与团队协作">Git 版本控制与团队协作</a><time datetime="2026-02-24T14:00:00.000Z" title="发表于 2026-02-24 22:00:00">2026-02-24</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/02/24/Linux%20%E4%B8%8E%20Shell%EF%BC%88%E4%BA%8C%EF%BC%89Shell%20%E8%84%9A%E6%9C%AC%E7%BC%96%E5%86%99/" title="Linux 与 Shell（二）Shell 脚本编写">Linux 与 Shell（二）Shell 脚本编写</a><time datetime="2026-02-24T13:00:00.000Z" title="发表于 2026-02-24 21:00:00">2026-02-24</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/02/24/%E6%95%B0%E6%8D%AE%E4%BB%93%E5%BA%93%E6%A0%B8%E5%BF%83%E6%A6%82%E5%BF%B5%E8%AF%A6%E8%A7%A3%20-%20%E7%BB%B4%E5%BA%A6%E5%BB%BA%E6%A8%A1%E3%80%81%E6%95%B0%E6%8D%AE%E5%88%86%E5%B1%82%E4%B8%8E%20SCD%20%E5%A4%84%E7%90%86/" title="数据仓库核心概念详解 - 维度建模、数据分层与 SCD 处理">数据仓库核心概念详解 - 维度建模、数据分层与 SCD 处理</a><time datetime="2026-02-24T13:00:00.000Z" title="发表于 2026-02-24 21:00:00">2026-02-24</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/02/24/MySQL%20%E8%BF%90%E7%BB%B4%E7%AF%87%2004-10%20MyCat%20%E7%AE%A1%E7%90%86%E4%B8%8E%E7%9B%91%E6%8E%A7/" title="MySQL 运维篇 04-10 MyCat 管理与监控">MySQL 运维篇 04-10 MyCat 管理与监控</a><time datetime="2026-02-24T12:05:00.000Z" title="发表于 2026-02-24 20:05:00">2026-02-24</time></div></div></div></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2025 - 2026 By 过拟合的炸鱼薯条</span><span class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 8.1.1</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.5.4</a></span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=5.5.4"></script><script src="/js/main.js?v=5.5.4"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><i class="fas fa-spinner fa-pulse" id="loading-status" hidden="hidden"></i><button class="search-close-button"><i class="fas fa-times"></i></button></nav><div class="text-center" id="loading-database"><i class="fas fa-spinner fa-pulse"></i><span>  数据加载中</span></div><div class="local-search-input"><input placeholder="搜索..." type="text"/></div><hr/><div id="local-search-results"></div><div class="ais-Pagination" id="local-search-pagination" style="display:none;"><ul class="ais-Pagination-list"></ul></div><div id="local-search-stats"></div></div><div id="search-mask"></div><script src="/js/search/local-search.js?v=5.5.4"></script></div></div></body></html>

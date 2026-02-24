@@ -1,0 +1,521 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>MySQL 运维篇 04-03 MyCat 配置详解 | 过拟合的炸鱼薯条</title><meta name="author" content="过拟合的炸鱼薯条"><meta name="copyright" content="过拟合的炸鱼薯条"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="MySQL 运维篇 04-03 MyCat 配置详解本文将详细讲解 MyCat 的各个配置文件，包括 server.yml、schema.yml、datasource.yml 和 rule.yml 的完整配置说明。 一、配置文件概述1.1 配置文件位置1234567&#x2F;opt&#x2F;mycat&#x2F;conf&#x2F;├── server.yml         # 主配置文件├── schema.yml">
+<meta property="og:type" content="article">
+<meta property="og:title" content="MySQL 运维篇 04-03 MyCat 配置详解">
+<meta property="og:url" content="https://brian-lin-c.github.io/2026/02/24/MySQL%20%E8%BF%90%E7%BB%B4%E7%AF%87%2004-03%20MyCat%20%E9%85%8D%E7%BD%AE%E8%AF%A6%E8%A7%A3/index.html">
+<meta property="og:site_name" content="过拟合的炸鱼薯条">
+<meta property="og:description" content="MySQL 运维篇 04-03 MyCat 配置详解本文将详细讲解 MyCat 的各个配置文件，包括 server.yml、schema.yml、datasource.yml 和 rule.yml 的完整配置说明。 一、配置文件概述1.1 配置文件位置1234567&#x2F;opt&#x2F;mycat&#x2F;conf&#x2F;├── server.yml         # 主配置文件├── schema.yml">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://brian-lin-c.github.io/img/%E5%A4%B4%E5%83%8F.jpg">
+<meta property="article:published_time" content="2026-02-24T11:30:00.000Z">
+<meta property="article:modified_time" content="2026-02-24T11:28:41.700Z">
+<meta property="article:author" content="过拟合的炸鱼薯条">
+<meta property="article:tag" content="MyCat">
+<meta property="article:tag" content="MySQL">
+<meta property="article:tag" content="详解">
+<meta property="article:tag" content="配置文件">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://brian-lin-c.github.io/img/%E5%A4%B4%E5%83%8F.jpg"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "MySQL 运维篇 04-03 MyCat 配置详解",
+  "url": "https://brian-lin-c.github.io/2026/02/24/MySQL%20%E8%BF%90%E7%BB%B4%E7%AF%87%2004-03%20MyCat%20%E9%85%8D%E7%BD%AE%E8%AF%A6%E8%A7%A3/",
+  "image": "https://brian-lin-c.github.io/img/%E5%A4%B4%E5%83%8F.jpg",
+  "datePublished": "2026-02-24T11:30:00.000Z",
+  "dateModified": "2026-02-24T11:28:41.700Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "过拟合的炸鱼薯条",
+      "url": "https://brian-lin-c.github.io"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://brian-lin-c.github.io/2026/02/24/MySQL%20%E8%BF%90%E7%BB%B4%E7%AF%87%2004-03%20MyCat%20%E9%85%8D%E7%BD%AE%E8%AF%A6%E8%A7%A3/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=5.5.4"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.1.0/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        if (!ttl) return
+        const expiry = Date.now() + ttl * 86400000
+        localStorage.setItem(key, JSON.stringify({ value, expiry }))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return undefined
+        const { value, expiry } = JSON.parse(itemStr)
+        if (Date.now() > expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return value
+      }
+    }
+
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        Object.entries(attr).forEach(([key, val]) => script.setAttribute(key, val))
+        script.onload = script.onreadystatechange = () => {
+          if (!script.readyState || /loaded|complete/.test(script.readyState)) resolve()
+        }
+        script.onerror = reject
+        document.head.appendChild(script)
+      }),
+      getCSS: (url, id) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onload = link.onreadystatechange = () => {
+          if (!link.readyState || /loaded|complete/.test(link.readyState)) resolve()
+        }
+        link.onerror = reject
+        document.head.appendChild(link)
+      }),
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"/search.xml","preload":true,"top_n_per_article":1,"unescape":false,"pagination":{"enable":false,"hitsPerPage":8},"languages":{"hits_empty":"未找到符合您查询的内容：${query}","hits_stats":"共找到 ${hits} 篇文章"}},
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.13.0/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'MySQL 运维篇 04-03 MyCat 配置详解',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><meta name="generator" content="Hexo 8.1.1"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/img/%E5%A4%B4%E5%83%8F.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">68</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">157</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">9</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user"></i><span> 关于</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">过拟合的炸鱼薯条</span></a><a class="nav-page-title" href="/"><span class="site-name">MySQL 运维篇 04-03 MyCat 配置详解</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div id="search-button"><span class="site-page social-icon search"><i class="fas fa-search fa-fw"></i><span> 搜索</span></span></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user"></i><span> 关于</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">MySQL 运维篇 04-03 MyCat 配置详解</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2026-02-24T11:30:00.000Z" title="发表于 2026-02-24 19:30:00">2026-02-24</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-02-24T11:28:41.700Z" title="更新于 2026-02-24 19:28:41">2026-02-24</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/MySQL-%E8%BF%90%E7%BB%B4%E7%AF%87/">MySQL 运维篇</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-wordcount"><i class="far fa-file-word fa-fw post-meta-icon"></i><span class="post-meta-label">总字数:</span><span class="word-count">1.8k</span><span class="post-meta-separator">|</span><i class="far fa-clock fa-fw post-meta-icon"></i><span class="post-meta-label">阅读时长:</span><span>7分钟</span></span><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><h1 id="MySQL-运维篇-04-03-MyCat-配置详解"><a href="#MySQL-运维篇-04-03-MyCat-配置详解" class="headerlink" title="MySQL 运维篇 04-03 MyCat 配置详解"></a>MySQL 运维篇 04-03 MyCat 配置详解</h1><p>本文将详细讲解 MyCat 的各个配置文件，包括 server.yml、schema.yml、datasource.yml 和 rule.yml 的完整配置说明。</p>
+<h2 id="一、配置文件概述"><a href="#一、配置文件概述" class="headerlink" title="一、配置文件概述"></a>一、配置文件概述</h2><h3 id="1-1-配置文件位置"><a href="#1-1-配置文件位置" class="headerlink" title="1.1 配置文件位置"></a>1.1 配置文件位置</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">/opt/mycat/conf/</span><br><span class="line">├── server.yml         # 主配置文件</span><br><span class="line">├── schema.yml         # Schema 配置</span><br><span class="line">├── datasource.yml     # 数据源配置</span><br><span class="line">├── rule.yml           # 分片规则配置</span><br><span class="line">├── sequence.yml       # 全局序列配置</span><br><span class="line">└── log4j2.xml         # 日志配置</span><br></pre></td></tr></table></figure>
+
+<h3 id="1-2-配置加载顺序"><a href="#1-2-配置加载顺序" class="headerlink" title="1.2 配置加载顺序"></a>1.2 配置加载顺序</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">1. server.yml (系统配置)</span><br><span class="line">2. datasource.yml (数据源)</span><br><span class="line">3. schema.yml (Schema 和表)</span><br><span class="line">4. rule.yml (分片规则)</span><br></pre></td></tr></table></figure>
+
+<h2 id="二、server-yml-详解"><a href="#二、server-yml-详解" class="headerlink" title="二、server.yml 详解"></a>二、server.yml 详解</h2><h3 id="2-1-完整配置示例"><a href="#2-1-完整配置示例" class="headerlink" title="2.1 完整配置示例"></a>2.1 完整配置示例</h3><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># MyCat 服务器配置</span></span><br><span class="line"><span class="attr">system:</span></span><br><span class="line">  <span class="comment"># 系统参数</span></span><br><span class="line">  <span class="attr">schemaChecksum:</span> <span class="literal">false</span>           <span class="comment"># 是否检查 schema 配置 checksum</span></span><br><span class="line">  <span class="attr">checkTableType:</span> <span class="number">0</span>               <span class="comment"># 检查表类型 0=不检查 1=检查</span></span><br><span class="line">  <span class="attr">noneBlockHeartbeat:</span> <span class="number">0</span>           <span class="comment"># 非阻塞心跳 0=阻塞 1=非阻塞</span></span><br><span class="line"></span><br><span class="line">  <span class="comment"># 连接参数</span></span><br><span class="line">  <span class="attr">maxCon:</span> <span class="number">2000</span>                    <span class="comment"># 最大连接数</span></span><br><span class="line">  <span class="attr">defaultMaxCon:</span> <span class="number">1000</span>             <span class="comment"># 默认最大连接数</span></span><br><span class="line"></span><br><span class="line">  <span class="comment"># 超时参数</span></span><br><span class="line">  <span class="attr">connectTimeout:</span> <span class="number">10000</span>           <span class="comment"># 连接超时 (ms)</span></span><br><span class="line">  <span class="attr">idleTimeout:</span> <span class="number">30000000</span>           <span class="comment"># 空闲超时 (ms)</span></span><br><span class="line"></span><br><span class="line">  <span class="comment"># 事务参数</span></span><br><span class="line">  <span class="attr">transactionLog:</span> <span class="number">0</span>               <span class="comment"># 事务日志 0=关闭 1=开启</span></span><br><span class="line"></span><br><span class="line">  <span class="comment"># 字符集</span></span><br><span class="line">  <span class="attr">charset:</span> <span class="string">utf8mb4</span>                <span class="comment"># 默认字符集</span></span><br><span class="line"></span><br><span class="line">  <span class="comment"># 端口</span></span><br><span class="line">  <span class="attr">port:</span> <span class="number">8066</span>                      <span class="comment"># MySQL 协议端口</span></span><br><span class="line">  <span class="attr">managePort:</span> <span class="number">9066</span>                <span class="comment"># 管理端口</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 用户配置</span></span><br><span class="line"><span class="attr">users:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">root</span>                    <span class="comment"># 用户名</span></span><br><span class="line">    <span class="attr">password:</span> <span class="number">123456</span>              <span class="comment"># 密码</span></span><br><span class="line">    <span class="attr">schemas:</span>                      <span class="comment"># 可访问的 schema 列表</span></span><br><span class="line">      <span class="bullet">-</span> <span class="string">testdb</span></span><br><span class="line">      <span class="bullet">-</span> <span class="string">testdb2</span></span><br><span class="line">    <span class="attr">readOnly:</span> <span class="literal">false</span>               <span class="comment"># 是否只读</span></span><br><span class="line">    <span class="attr">maxCon:</span> <span class="number">100</span>                   <span class="comment"># 用户最大连接数</span></span><br><span class="line"></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">readonly</span>                <span class="comment"># 只读用户</span></span><br><span class="line">    <span class="attr">password:</span> <span class="number">123456</span></span><br><span class="line">    <span class="attr">schemas:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="string">testdb</span></span><br><span class="line">    <span class="attr">readOnly:</span> <span class="literal">true</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 防火墙配置</span></span><br><span class="line"><span class="attr">firewall:</span></span><br><span class="line">  <span class="attr">enabled:</span> <span class="literal">false</span>                  <span class="comment"># 是否启用防火墙</span></span><br><span class="line">  <span class="attr">whitelist:</span>                      <span class="comment"># 白名单</span></span><br><span class="line">    <span class="bullet">-</span> <span class="number">192.168</span><span class="number">.1</span><span class="string">.*</span></span><br><span class="line">    <span class="bullet">-</span> <span class="number">10.0</span><span class="number">.0</span><span class="string">.*</span></span><br><span class="line">  <span class="attr">blacklist:</span>                      <span class="comment"># 黑名单</span></span><br><span class="line">    <span class="bullet">-</span> <span class="number">192.168</span><span class="number">.2</span><span class="number">.100</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="2-2-系统参数说明"><a href="#2-2-系统参数说明" class="headerlink" title="2.2 系统参数说明"></a>2.2 系统参数说明</h3><table>
+<thead>
+<tr>
+<th>参数</th>
+<th>说明</th>
+<th>默认值</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>schemaChecksum</td>
+<td>检查 schema 配置 checksum</td>
+<td>false</td>
+</tr>
+<tr>
+<td>checkTableType</td>
+<td>检查表类型</td>
+<td>0</td>
+</tr>
+<tr>
+<td>maxCon</td>
+<td>最大连接数</td>
+<td>2000</td>
+</tr>
+<tr>
+<td>connectTimeout</td>
+<td>连接超时 (ms)</td>
+<td>10000</td>
+</tr>
+<tr>
+<td>idleTimeout</td>
+<td>空闲超时 (ms)</td>
+<td>30000000</td>
+</tr>
+<tr>
+<td>charset</td>
+<td>默认字符集</td>
+<td>utf8mb4</td>
+</tr>
+<tr>
+<td>port</td>
+<td>MySQL 协议端口</td>
+<td>8066</td>
+</tr>
+<tr>
+<td>managePort</td>
+<td>管理端口</td>
+<td>9066</td>
+</tr>
+</tbody></table>
+<h3 id="2-3-用户配置说明"><a href="#2-3-用户配置说明" class="headerlink" title="2.3 用户配置说明"></a>2.3 用户配置说明</h3><table>
+<thead>
+<tr>
+<th>参数</th>
+<th>说明</th>
+<th>必填</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>name</td>
+<td>用户名</td>
+<td>是</td>
+</tr>
+<tr>
+<td>password</td>
+<td>密码</td>
+<td>是</td>
+</tr>
+<tr>
+<td>schemas</td>
+<td>可访问的 schema 列表</td>
+<td>是</td>
+</tr>
+<tr>
+<td>readOnly</td>
+<td>是否只读</td>
+<td>否</td>
+</tr>
+<tr>
+<td>maxCon</td>
+<td>用户最大连接数</td>
+<td>否</td>
+</tr>
+</tbody></table>
+<h2 id="三、schema-yml-详解"><a href="#三、schema-yml-详解" class="headerlink" title="三、schema.yml 详解"></a>三、schema.yml 详解</h2><h3 id="3-1-完整配置示例"><a href="#3-1-完整配置示例" class="headerlink" title="3.1 完整配置示例"></a>3.1 完整配置示例</h3><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">schemas:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">testdb</span>                    <span class="comment"># 逻辑库名</span></span><br><span class="line">    <span class="attr">tables:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">orders</span>                <span class="comment"># 逻辑表名</span></span><br><span class="line">        <span class="attr">primaryKey:</span> <span class="string">id</span>              <span class="comment"># 主键字段</span></span><br><span class="line">        <span class="attr">dataNodes:</span> <span class="string">dn1,dn2,dn3,dn4</span>  <span class="comment"># 数据节点</span></span><br><span class="line">        <span class="attr">rule:</span> <span class="string">mod-long</span>              <span class="comment"># 分片规则</span></span><br><span class="line"></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">order_detail</span>          <span class="comment"># 另一个表</span></span><br><span class="line">        <span class="attr">primaryKey:</span> <span class="string">id</span></span><br><span class="line">        <span class="attr">dataNodes:</span> <span class="string">dn1,dn2</span></span><br><span class="line">        <span class="attr">rule:</span> <span class="string">mod-long</span></span><br><span class="line"></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">category</span>              <span class="comment"># 全局表</span></span><br><span class="line">        <span class="attr">primaryKey:</span> <span class="string">id</span></span><br><span class="line">        <span class="attr">dataNodes:</span> <span class="string">dn1</span>              <span class="comment"># 只在一个节点</span></span><br><span class="line"></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">user</span>                  <span class="comment"># 绑定表</span></span><br><span class="line">        <span class="attr">primaryKey:</span> <span class="string">id</span></span><br><span class="line">        <span class="attr">dataNodes:</span> <span class="string">dn1,dn2,dn3,dn4</span></span><br><span class="line">        <span class="attr">rule:</span> <span class="string">mod-long</span></span><br><span class="line">        <span class="attr">parentPrimaryKey:</span> <span class="string">user_id</span>   <span class="comment"># 绑定到 orders 表</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="3-2-表配置说明"><a href="#3-2-表配置说明" class="headerlink" title="3.2 表配置说明"></a>3.2 表配置说明</h3><table>
+<thead>
+<tr>
+<th>参数</th>
+<th>说明</th>
+<th>必填</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>name</td>
+<td>逻辑表名</td>
+<td>是</td>
+</tr>
+<tr>
+<td>primaryKey</td>
+<td>主键字段</td>
+<td>是</td>
+</tr>
+<tr>
+<td>dataNodes</td>
+<td>数据节点列表</td>
+<td>是</td>
+</tr>
+<tr>
+<td>rule</td>
+<td>分片规则名</td>
+<td>是</td>
+</tr>
+<tr>
+<td>parentPrimaryKey</td>
+<td>绑定表的主键</td>
+<td>否</td>
+</tr>
+</tbody></table>
+<h3 id="3-3-表类型"><a href="#3-3-表类型" class="headerlink" title="3.3 表类型"></a>3.3 表类型</h3><p><strong>分片表</strong>：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="bullet">-</span> <span class="attr">name:</span> <span class="string">orders</span></span><br><span class="line">  <span class="attr">dataNodes:</span> <span class="string">dn1,dn2,dn3,dn4</span></span><br><span class="line">  <span class="attr">rule:</span> <span class="string">mod-long</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>全局表</strong>（所有节点都有相同数据）：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="bullet">-</span> <span class="attr">name:</span> <span class="string">category</span></span><br><span class="line">  <span class="attr">dataNodes:</span> <span class="string">dn1,dn2,dn3,dn4</span></span><br><span class="line">  <span class="attr">type:</span> <span class="string">global</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>单节点表</strong>：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="bullet">-</span> <span class="attr">name:</span> <span class="string">config</span></span><br><span class="line">  <span class="attr">dataNodes:</span> <span class="string">dn1</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="四、datasource-yml-详解"><a href="#四、datasource-yml-详解" class="headerlink" title="四、datasource.yml 详解"></a>四、datasource.yml 详解</h2><h3 id="4-1-完整配置示例"><a href="#4-1-完整配置示例" class="headerlink" title="4.1 完整配置示例"></a>4.1 完整配置示例</h3><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 数据节点配置</span></span><br><span class="line"><span class="attr">dataNodes:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">dn1</span>                       <span class="comment"># 节点名称</span></span><br><span class="line">    <span class="attr">dataHost:</span> <span class="string">host1</span>                 <span class="comment"># 数据主机名</span></span><br><span class="line">    <span class="attr">database:</span> <span class="string">db1</span>                   <span class="comment"># 数据库名</span></span><br><span class="line"></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">dn2</span></span><br><span class="line">    <span class="attr">dataHost:</span> <span class="string">host1</span></span><br><span class="line">    <span class="attr">database:</span> <span class="string">db2</span></span><br><span class="line"></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">dn3</span></span><br><span class="line">    <span class="attr">dataHost:</span> <span class="string">host2</span></span><br><span class="line">    <span class="attr">database:</span> <span class="string">db1</span></span><br><span class="line"></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">dn4</span></span><br><span class="line">    <span class="attr">dataHost:</span> <span class="string">host2</span></span><br><span class="line">    <span class="attr">database:</span> <span class="string">db2</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 数据主机配置</span></span><br><span class="line"><span class="attr">dataHosts:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">host1</span>                     <span class="comment"># 主机名称</span></span><br><span class="line">    <span class="attr">type:</span> <span class="string">mysql</span>                     <span class="comment"># 数据库类型</span></span><br><span class="line">    <span class="attr">maxCon:</span> <span class="number">1000</span>                    <span class="comment"># 最大连接数</span></span><br><span class="line">    <span class="attr">minCon:</span> <span class="number">10</span>                      <span class="comment"># 最小连接数</span></span><br><span class="line"></span><br><span class="line">    <span class="comment"># 心跳配置</span></span><br><span class="line">    <span class="attr">heartbeat:</span></span><br><span class="line">      <span class="attr">statement:</span> <span class="string">select</span> <span class="string">user()</span>      <span class="comment"># 心跳 SQL</span></span><br><span class="line">      <span class="attr">timeout:</span> <span class="number">10000</span>                <span class="comment"># 超时 (ms)</span></span><br><span class="line">      <span class="attr">maxRetryCount:</span> <span class="number">3</span>              <span class="comment"># 最大重试次数</span></span><br><span class="line"></span><br><span class="line">    <span class="comment"># 写主机</span></span><br><span class="line">    <span class="attr">writeHosts:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">host:</span> <span class="string">master1</span>               <span class="comment"># 主机名称</span></span><br><span class="line">        <span class="attr">url:</span> <span class="number">192.168</span><span class="number">.1</span><span class="number">.100</span><span class="string">:3306</span>     <span class="comment"># 连接地址</span></span><br><span class="line">        <span class="attr">user:</span> <span class="string">mycat</span>                 <span class="comment"># 用户名</span></span><br><span class="line">        <span class="attr">password:</span> <span class="string">MyCat@123</span>         <span class="comment"># 密码</span></span><br><span class="line">        <span class="attr">weight:</span> <span class="number">1.0</span>                 <span class="comment"># 权重</span></span><br><span class="line"></span><br><span class="line">    <span class="comment"># 读主机（读写分离）</span></span><br><span class="line">    <span class="attr">readHosts:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">host:</span> <span class="string">slave1</span></span><br><span class="line">        <span class="attr">url:</span> <span class="number">192.168</span><span class="number">.1</span><span class="number">.101</span><span class="string">:3306</span></span><br><span class="line">        <span class="attr">user:</span> <span class="string">mycat</span></span><br><span class="line">        <span class="attr">password:</span> <span class="string">MyCat@123</span></span><br><span class="line">        <span class="attr">weight:</span> <span class="number">1.0</span></span><br><span class="line"></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">host2</span></span><br><span class="line">    <span class="attr">type:</span> <span class="string">mysql</span></span><br><span class="line">    <span class="attr">maxCon:</span> <span class="number">1000</span></span><br><span class="line">    <span class="attr">minCon:</span> <span class="number">10</span></span><br><span class="line">    <span class="attr">heartbeat:</span></span><br><span class="line">      <span class="attr">statement:</span> <span class="string">select</span> <span class="string">user()</span></span><br><span class="line">    <span class="attr">writeHosts:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">host:</span> <span class="string">master2</span></span><br><span class="line">        <span class="attr">url:</span> <span class="number">192.168</span><span class="number">.1</span><span class="number">.102</span><span class="string">:3306</span></span><br><span class="line">        <span class="attr">user:</span> <span class="string">mycat</span></span><br><span class="line">        <span class="attr">password:</span> <span class="string">MyCat@123</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="4-2-数据节点参数"><a href="#4-2-数据节点参数" class="headerlink" title="4.2 数据节点参数"></a>4.2 数据节点参数</h3><table>
+<thead>
+<tr>
+<th>参数</th>
+<th>说明</th>
+<th>必填</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>name</td>
+<td>节点名称</td>
+<td>是</td>
+</tr>
+<tr>
+<td>dataHost</td>
+<td>数据主机名</td>
+<td>是</td>
+</tr>
+<tr>
+<td>database</td>
+<td>数据库名</td>
+<td>是</td>
+</tr>
+</tbody></table>
+<h3 id="4-3-数据主机参数"><a href="#4-3-数据主机参数" class="headerlink" title="4.3 数据主机参数"></a>4.3 数据主机参数</h3><table>
+<thead>
+<tr>
+<th>参数</th>
+<th>说明</th>
+<th>默认值</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>name</td>
+<td>主机名称</td>
+<td>-</td>
+</tr>
+<tr>
+<td>type</td>
+<td>数据库类型</td>
+<td>mysql</td>
+</tr>
+<tr>
+<td>maxCon</td>
+<td>最大连接数</td>
+<td>1000</td>
+</tr>
+<tr>
+<td>minCon</td>
+<td>最小连接数</td>
+<td>10</td>
+</tr>
+<tr>
+<td>balance</td>
+<td>负载均衡类型</td>
+<td>0</td>
+</tr>
+<tr>
+<td>writeType</td>
+<td>写入类型</td>
+<td>0</td>
+</tr>
+</tbody></table>
+<h3 id="4-4-balance-配置"><a href="#4-4-balance-配置" class="headerlink" title="4.4 balance 配置"></a>4.4 balance 配置</h3><table>
+<thead>
+<tr>
+<th>值</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>0</td>
+<td>不开启读写分离</td>
+</tr>
+<tr>
+<td>1</td>
+<td>全部读请求发送到从库</td>
+</tr>
+<tr>
+<td>2</td>
+<td>读请求随机发送到主库或从库</td>
+</tr>
+<tr>
+<td>3</td>
+<td>读请求按比例发送到主从库</td>
+</tr>
+</tbody></table>
+<h3 id="4-5-writeType-配置"><a href="#4-5-writeType-配置" class="headerlink" title="4.5 writeType 配置"></a>4.5 writeType 配置</h3><table>
+<thead>
+<tr>
+<th>值</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>0</td>
+<td>全部写到主库</td>
+</tr>
+<tr>
+<td>1</td>
+<td>写到所有库（不常用）</td>
+</tr>
+</tbody></table>
+<h2 id="五、rule-yml-详解"><a href="#五、rule-yml-详解" class="headerlink" title="五、rule.yml 详解"></a>五、rule.yml 详解</h2><h3 id="5-1-完整配置示例"><a href="#5-1-完整配置示例" class="headerlink" title="5.1 完整配置示例"></a>5.1 完整配置示例</h3><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 表规则配置</span></span><br><span class="line"><span class="attr">tableRules:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">mod-long</span>                  <span class="comment"># 规则名称</span></span><br><span class="line">    <span class="attr">function:</span> <span class="string">mod-long</span>              <span class="comment"># 函数名称</span></span><br><span class="line">    <span class="attr">columns:</span> <span class="string">id</span>                     <span class="comment"># 分片字段</span></span><br><span class="line"></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">range-date</span></span><br><span class="line">    <span class="attr">function:</span> <span class="string">range-date</span></span><br><span class="line">    <span class="attr">columns:</span> <span class="string">created_at</span></span><br><span class="line"></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">hash-id</span></span><br><span class="line">    <span class="attr">function:</span> <span class="string">hash-id</span></span><br><span class="line">    <span class="attr">columns:</span> <span class="string">user_id</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 函数配置</span></span><br><span class="line"><span class="attr">functions:</span></span><br><span class="line">  <span class="comment"># 取模分片</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">mod-long</span></span><br><span class="line">    <span class="attr">className:</span> <span class="string">io.mycat.router.function.PartitionByFunction</span></span><br><span class="line">    <span class="attr">properties:</span></span><br><span class="line">      <span class="attr">count:</span> <span class="number">4</span>                      <span class="comment"># 分片数量</span></span><br><span class="line"></span><br><span class="line">  <span class="comment"># 范围分片（按日期）</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">range-date</span></span><br><span class="line">    <span class="attr">className:</span> <span class="string">io.mycat.router.function.PartitionByDateRange</span></span><br><span class="line">    <span class="attr">properties:</span></span><br><span class="line">      <span class="attr">sPartionDay:</span> <span class="number">2024-01-01</span>       <span class="comment"># 起始日期</span></span><br><span class="line">      <span class="attr">datePattern:</span> <span class="string">yyyy-MM-dd</span>       <span class="comment"># 日期格式</span></span><br><span class="line">      <span class="attr">days:</span> <span class="number">30</span>                      <span class="comment"># 每 30 天一个分片</span></span><br><span class="line"></span><br><span class="line">  <span class="comment"># 哈希分片</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">hash-id</span></span><br><span class="line">    <span class="attr">className:</span> <span class="string">io.mycat.router.function.PartitionByHash</span></span><br><span class="line">    <span class="attr">properties:</span></span><br><span class="line">      <span class="attr">count:</span> <span class="number">4</span></span><br><span class="line">      <span class="attr">seed:</span> <span class="number">0</span>                       <span class="comment"># 哈希种子</span></span><br><span class="line"></span><br><span class="line">  <span class="comment"># 字符串哈希</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">string-hash</span></span><br><span class="line">    <span class="attr">className:</span> <span class="string">io.mycat.router.function.PartitionByString</span></span><br><span class="line">    <span class="attr">properties:</span></span><br><span class="line">      <span class="attr">count:</span> <span class="number">4</span></span><br><span class="line">      <span class="attr">hashLength:</span> <span class="number">16</span>                <span class="comment"># 哈希长度</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="5-2-常用分片函数"><a href="#5-2-常用分片函数" class="headerlink" title="5.2 常用分片函数"></a>5.2 常用分片函数</h3><table>
+<thead>
+<tr>
+<th>函数名</th>
+<th>类名</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>mod-long</td>
+<td>PartitionByFunction</td>
+<td>取模分片</td>
+</tr>
+<tr>
+<td>hash-id</td>
+<td>PartitionByHash</td>
+<td>哈希分片</td>
+</tr>
+<tr>
+<td>range-date</td>
+<td>PartitionByDateRange</td>
+<td>日期范围</td>
+</tr>
+<tr>
+<td>string-hash</td>
+<td>PartitionByString</td>
+<td>字符串哈希</td>
+</tr>
+<tr>
+<td>month</td>
+<td>PartitionByMonth</td>
+<td>月份分片</td>
+</tr>
+</tbody></table>
+<h3 id="5-3-分片规则选择"><a href="#5-3-分片规则选择" class="headerlink" title="5.3 分片规则选择"></a>5.3 分片规则选择</h3><table>
+<thead>
+<tr>
+<th>场景</th>
+<th>推荐规则</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>数值 ID</td>
+<td>mod-long</td>
+</tr>
+<tr>
+<td>日期数据</td>
+<td>range-date</td>
+</tr>
+<tr>
+<td>字符串 ID</td>
+<td>string-hash</td>
+</tr>
+<tr>
+<td>月份数据</td>
+<td>month</td>
+</tr>
+</tbody></table>
+<h2 id="六、sequence-yml-详解"><a href="#六、sequence-yml-详解" class="headerlink" title="六、sequence.yml 详解"></a>六、sequence.yml 详解</h2><h3 id="6-1-全局序列配置"><a href="#6-1-全局序列配置" class="headerlink" title="6.1 全局序列配置"></a>6.1 全局序列配置</h3><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 全局序列配置</span></span><br><span class="line"><span class="attr">sequences:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">orders_seq</span>                <span class="comment"># 序列名称</span></span><br><span class="line">    <span class="attr">className:</span> <span class="string">io.mycat.sequence.db.DBSequence</span></span><br><span class="line">    <span class="attr">properties:</span></span><br><span class="line">      <span class="attr">db:</span> <span class="string">db1</span>                       <span class="comment"># 存储序列的数据库</span></span><br><span class="line">      <span class="attr">table:</span> <span class="string">sequence_info</span>          <span class="comment"># 序列表</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 序列表结构</span></span><br><span class="line"><span class="comment"># CREATE TABLE sequence_info (</span></span><br><span class="line"><span class="comment">#     name VARCHAR(50) PRIMARY KEY,</span></span><br><span class="line"><span class="comment">#     current_value BIGINT,</span></span><br><span class="line"><span class="comment">#     increment INT</span></span><br><span class="line"><span class="comment"># );</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="6-2-使用全局序列"><a href="#6-2-使用全局序列" class="headerlink" title="6.2 使用全局序列"></a>6.2 使用全局序列</h3><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- 在 INSERT 时使用</span></span><br><span class="line"><span class="keyword">INSERT INTO</span> orders (id, order_no, user_id)</span><br><span class="line"><span class="keyword">VALUES</span> (NEXT <span class="keyword">VALUE</span> <span class="keyword">FOR</span> orders_seq, <span class="string">&#x27;ORD001&#x27;</span>, <span class="number">100</span>);</span><br></pre></td></tr></table></figure>
+
+<h2 id="七、配置实例"><a href="#七、配置实例" class="headerlink" title="七、配置实例"></a>七、配置实例</h2><h3 id="7-1-一主一从分片配置"><a href="#7-1-一主一从分片配置" class="headerlink" title="7.1 一主一从分片配置"></a>7.1 一主一从分片配置</h3><p><strong>server.yml</strong>：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">users:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">root</span></span><br><span class="line">    <span class="attr">password:</span> <span class="number">123456</span></span><br><span class="line">    <span class="attr">schemas:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="string">testdb</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>schema.yml</strong>：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">schemas:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">testdb</span></span><br><span class="line">    <span class="attr">tables:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">orders</span></span><br><span class="line">        <span class="attr">primaryKey:</span> <span class="string">id</span></span><br><span class="line">        <span class="attr">dataNodes:</span> <span class="string">dn1,dn2</span></span><br><span class="line">        <span class="attr">rule:</span> <span class="string">mod-long</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>datasource.yml</strong>：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">dataNodes:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">dn1</span></span><br><span class="line">    <span class="attr">dataHost:</span> <span class="string">host1</span></span><br><span class="line">    <span class="attr">database:</span> <span class="string">db1</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">dn2</span></span><br><span class="line">    <span class="attr">dataHost:</span> <span class="string">host1</span></span><br><span class="line">    <span class="attr">database:</span> <span class="string">db2</span></span><br><span class="line"></span><br><span class="line"><span class="attr">dataHosts:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">host1</span></span><br><span class="line">    <span class="attr">type:</span> <span class="string">mysql</span></span><br><span class="line">    <span class="attr">maxCon:</span> <span class="number">1000</span></span><br><span class="line">    <span class="attr">minCon:</span> <span class="number">10</span></span><br><span class="line">    <span class="attr">heartbeat:</span></span><br><span class="line">      <span class="attr">statement:</span> <span class="string">select</span> <span class="string">user()</span></span><br><span class="line">    <span class="attr">writeHosts:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">host:</span> <span class="string">master</span></span><br><span class="line">        <span class="attr">url:</span> <span class="number">192.168</span><span class="number">.1</span><span class="number">.100</span><span class="string">:3306</span></span><br><span class="line">        <span class="attr">user:</span> <span class="string">mycat</span></span><br><span class="line">        <span class="attr">password:</span> <span class="string">MyCat@123</span></span><br><span class="line">    <span class="attr">readHosts:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">host:</span> <span class="string">slave</span></span><br><span class="line">        <span class="attr">url:</span> <span class="number">192.168</span><span class="number">.1</span><span class="number">.101</span><span class="string">:3306</span></span><br><span class="line">        <span class="attr">user:</span> <span class="string">mycat</span></span><br><span class="line">        <span class="attr">password:</span> <span class="string">MyCat@123</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>rule.yml</strong>：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">tableRules:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">mod-long</span></span><br><span class="line">    <span class="attr">function:</span> <span class="string">mod-long</span></span><br><span class="line">    <span class="attr">columns:</span> <span class="string">id</span></span><br><span class="line"></span><br><span class="line"><span class="attr">functions:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">mod-long</span></span><br><span class="line">    <span class="attr">className:</span> <span class="string">io.mycat.router.function.PartitionByFunction</span></span><br><span class="line">    <span class="attr">properties:</span></span><br><span class="line">      <span class="attr">count:</span> <span class="number">2</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="八、配置验证"><a href="#八、配置验证" class="headerlink" title="八、配置验证"></a>八、配置验证</h2><h3 id="8-1-检查配置语法"><a href="#8-1-检查配置语法" class="headerlink" title="8.1 检查配置语法"></a>8.1 检查配置语法</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 启动前检查配置文件</span></span><br><span class="line"><span class="built_in">cat</span> conf/server.yml | <span class="built_in">head</span> -50</span><br><span class="line"><span class="built_in">cat</span> conf/schema.yml</span><br><span class="line"><span class="built_in">cat</span> conf/datasource.yml</span><br><span class="line"><span class="built_in">cat</span> conf/rule.yml</span><br></pre></td></tr></table></figure>
+
+<h3 id="8-2-测试连接"><a href="#8-2-测试连接" class="headerlink" title="8.2 测试连接"></a>8.2 测试连接</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 启动 MyCat</span></span><br><span class="line">bin/mycat start</span><br><span class="line"></span><br><span class="line"><span class="comment"># 连接测试</span></span><br><span class="line">mysql -h 127.0.0.1 -P 8066 -u root -p</span><br></pre></td></tr></table></figure>
+
+<h3 id="8-3-查看配置信息"><a href="#8-3-查看配置信息" class="headerlink" title="8.3 查看配置信息"></a>8.3 查看配置信息</h3><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- 查看数据源</span></span><br><span class="line"><span class="keyword">SHOW</span> @<span class="variable">@DATASOURCE</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 查看 Schema</span></span><br><span class="line"><span class="keyword">SHOW</span> DATABASES;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 查看表</span></span><br><span class="line">USE testdb;</span><br><span class="line"><span class="keyword">SHOW</span> TABLES;</span><br></pre></td></tr></table></figure>
+
+<h2 id="九、小结"><a href="#九、小结" class="headerlink" title="九、小结"></a>九、小结</h2><h3 id="配置文件总结"><a href="#配置文件总结" class="headerlink" title="配置文件总结"></a>配置文件总结</h3><table>
+<thead>
+<tr>
+<th>文件</th>
+<th>作用</th>
+<th>关键配置</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>server.yml</td>
+<td>系统配置</td>
+<td>用户、端口、连接数</td>
+</tr>
+<tr>
+<td>schema.yml</td>
+<td>Schema 配置</td>
+<td>逻辑表、数据节点</td>
+</tr>
+<tr>
+<td>datasource.yml</td>
+<td>数据源配置</td>
+<td>主机、数据库、读写分离</td>
+</tr>
+<tr>
+<td>rule.yml</td>
+<td>分片规则配置</td>
+<td>分片函数、分片字段</td>
+</tr>
+</tbody></table>
+<h3 id="配置流程"><a href="#配置流程" class="headerlink" title="配置流程"></a>配置流程</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">1. 规划分片方案</span><br><span class="line">2. 配置 datasource.yml（数据源）</span><br><span class="line">3. 配置 rule.yml（分片规则）</span><br><span class="line">4. 配置 schema.yml（Schema 和表）</span><br><span class="line">5. 配置 server.yml（用户和系统）</span><br><span class="line">6. 启动测试</span><br></pre></td></tr></table></figure>
+
+<hr>
+<p><strong>下一篇</strong>：[MySQL 运维篇 04-04 MyCat 垂直分库](&#x2F;2026&#x2F;02&#x2F;24&#x2F;MySQL 运维篇 04-04 MyCat 垂直分库&#x2F;)</p>
+<p><strong>上一篇</strong>：[MySQL 运维篇 04-02 MyCat 测试](&#x2F;2026&#x2F;02&#x2F;24&#x2F;MySQL 运维篇 04-02 MyCat 测试&#x2F;)</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://brian-lin-c.github.io">过拟合的炸鱼薯条</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://brian-lin-c.github.io/2026/02/24/MySQL%20%E8%BF%90%E7%BB%B4%E7%AF%87%2004-03%20MyCat%20%E9%85%8D%E7%BD%AE%E8%AF%A6%E8%A7%A3/">https://brian-lin-c.github.io/2026/02/24/MySQL%20%E8%BF%90%E7%BB%B4%E7%AF%87%2004-03%20MyCat%20%E9%85%8D%E7%BD%AE%E8%AF%A6%E8%A7%A3/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://brian-lin-c.github.io" target="_blank">过拟合的炸鱼薯条</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/MySQL/">MySQL</a><a class="post-meta__tags" href="/tags/MyCat/">MyCat</a><a class="post-meta__tags" href="/tags/%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6/">配置文件</a><a class="post-meta__tags" href="/tags/%E8%AF%A6%E8%A7%A3/">详解</a></div><div class="post-share"><div class="social-share" data-image="/img/%E5%A4%B4%E5%83%8F.jpg" data-sites="facebook,x,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related" href="/2026/02/24/MySQL%20%E8%BF%90%E7%BB%B4%E7%AF%87%2004-04%20MyCat%20%E5%9E%82%E7%9B%B4%E5%88%86%E5%BA%93/" title="MySQL 运维篇 04-04 MyCat 垂直分库"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">MySQL 运维篇 04-04 MyCat 垂直分库</div></div><div class="info-2"><div class="info-item-1">MySQL 运维篇 04-04 MyCat 垂直分库垂直分库是将不同的业务表分布到不同的数据库中。本文将介绍如何使用 MyCat 实现垂直分库。 一、垂直分库介绍1.1 什么是垂直分库垂直分库：按照业务模块将表拆分到不同的数据库中。 1234567原始架构：single_db (users, orders, products, logs, ...)垂直分库后：user_db (users, user_profile, user_login, ...)order_db (orders, order_detail, order_log, ...)product_db (products, category, brand, ...)  1.2 适用场景   场景 说明    业务模块清晰 各模块相对独立   表数量过多 单库表数量超过 100   访问量差异大 热门表和冷门表分离   团队分工 不同团队负责不同模块   1.3 优缺点优点：  业务清晰，便于管理 减少单库压力 便于水平扩展  缺点：  跨库 JOIN 复杂 事务处理困难 增加运维成本  二、环境准备2.1 数据库规划 ...</div></div></div></a><a class="pagination-related" href="/2026/02/24/MySQL%20%E8%BF%90%E7%BB%B4%E7%AF%87%2004-02%20MyCat%20%E6%B5%8B%E8%AF%95/" title="MySQL 运维篇 04-02 MyCat 测试"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">MySQL 运维篇 04-02 MyCat 测试</div></div><div class="info-2"><div class="info-item-1">MySQL 运维篇 04-02 MyCat 测试完成 MyCat 配置后，需要进行全面的测试以验证分库分表功能是否正常。本文将介绍各种测试场景。 一、连接测试1.1 基本连接12# 使用 MySQL 客户端连接 MyCatmysql -h 127.0.0.1 -P 8066 -u root -p123456  1.2 查看数据库1234-- 查看逻辑数据库SHOW DATABASES;-- 输出应该包含 testdb  1.3 查看表123456USE testdb;-- 查看逻辑表SHOW TABLES;-- 输出应该包含 orders  二、CRUD 测试2.1 插入测试123456789101112USE testdb;-- 插入单条记录INSERT INTO orders (id, order_no, user_id, amount, status)VALUES (1, &#x27;ORD001&#x27;, 100, 199.99, 1);-- 插入多条记录INSERT INTO orders (id, order_no, user_id, amount, status...</div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/2026/02/24/MySQL%20%E8%BF%90%E7%BB%B4%E7%AF%87%2004-08%20MyCat%20%E5%8F%96%E6%A8%A1%E5%88%86%E7%89%87/" title="MySQL 运维篇 04-08 MyCat 取模分片"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-02-24</div><div class="info-item-2">MySQL 运维篇 04-08 MyCat 取模分片</div></div><div class="info-2"><div class="info-item-1">MySQL 运维篇 04-08 MyCat 取模分片取模分片是最常用的分片方式，按照分片键对分片数取模来路由数据。本文将详细介绍取模分片的配置和使用。 一、取模分片介绍1.1 什么是取模分片取模分片：根据分片键对分片数量取模来确定数据存储位置。 12345678公式：分片索引 = 分片键 % 分片数量示例（4 个分片）：id=1 → 1%4=1 → 分片 1id=2 → 2%4=2 → 分片 2id=3 → 3%4=3 → 分片 3id=4 → 4%4=0 → 分片 0id=5 → 5%4=1 → 分片 1  1.2 适用场景   场景 说明    用户订单 按 user_id 取模   用户数据 按用户 ID 取模   均匀分布 需要数据均匀分布   1.3 优缺点优点：  数据分布均匀 算法简单高效 查询效率高  缺点：  扩容困难（需要 rehash） 范围查询效率低  二、基础配置2.1 rule.yml12345678910tableRules:  - name: mod-long    function: mod-long    columns: idfunction...</div></div></div></a><a class="pagination-related" href="/2026/02/24/MySQL%20%E8%BF%90%E7%BB%B4%E7%AF%87%2004-06%20MyCat%20%E6%B0%B4%E5%B9%B3%E5%88%86%E8%A1%A8/" title="MySQL 运维篇 04-06 MyCat 水平分表"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-02-24</div><div class="info-item-2">MySQL 运维篇 04-06 MyCat 水平分表</div></div><div class="info-2"><div class="info-item-1">MySQL 运维篇 04-06 MyCat 水平分表水平分表是将一个大表的数据按照某种规则分布到多个表中。本文将介绍如何使用 MyCat 实现水平分表。 一、水平分表介绍1.1 什么是水平分表水平分表：将同一个表的数据按照行拆分到多个物理表中。 12345678原始表：orders (1 亿条数据)水平分表后：orders_0000 (250 万条)orders_0001 (250 万条)orders_0002 (250 万条)orders_0003 (250 万条)  1.2 适用场景   场景 说明    单表数据量大 超过 1000 万行   查询性能下降 索引效率低   维护困难 DDL 操作耗时过长   1.3 分片规则   规则 说明 适用场景    取模 id % 分片数 均匀分布   范围 按 ID 或日期范围 历史数据归档   哈希 hash(key) % 分片数 随机分布   二、环境准备2.1 数据库规划12345order_db├── orders_0000├── orders_0001├── orders_0002└── orders_0003  2.2...</div></div></div></a><a class="pagination-related" href="/2026/02/24/MySQL%20%E8%BF%90%E7%BB%B4%E7%AF%87%2003-03%20%E5%88%86%E5%BA%93%E5%88%86%E8%A1%A8%20MyCat%20%E6%A6%82%E8%BF%B0/" title="MySQL 运维篇 03-03 分库分表 MyCat 概述"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-02-24</div><div class="info-item-2">MySQL 运维篇 03-03 分库分表 MyCat 概述</div></div><div class="info-2"><div class="info-item-1">MySQL 运维篇 03-03 分库分表 MyCat 概述MyCat 是一个开源的数据库中间件，位于应用程序和数据库之间，负责 SQL 解析、路由和结果合并。本文将介绍 MyCat 的基本概念、架构和核心功能。 一、MyCat 介绍1.1 什么是 MyCat？MyCat 是一个基于 Java 开发的数据库中间件，前身是阿里巴巴的 Cobar 项目。 12应用程序 → MyCat → MySQL 集群         (数据库中间件)  核心功能：  SQL 解析和路由 分库分表 读写分离 连接池管理 负载均衡  1.2 MyCat 特点   特点 说明    协议兼容 完全兼容 MySQL 协议   透明分片 应用无需修改代码   多种分片 支持 10+ 种分片规则   读写分离 自动路由读写请求   高可用 支持主从切换   1.3 适用场景   场景 说明    分库分表 单表数据量过大   读写分离 读多写少场景   数据库迁移 平滑迁移数据   多租户 SaaS 应用数据隔离   二、MyCat 架构2.1 整体架构1应用程序 → MyCat → MySQL 集群  核心...</div></div></div></a><a class="pagination-related" href="/2026/02/24/MySQL%20%E8%BF%90%E7%BB%B4%E7%AF%87%2004-09%20MyCat%20%E4%B8%80%E8%87%B4%E6%80%A7%20Hash/" title="MySQL 运维篇 04-09 MyCat 一致性 Hash"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-02-24</div><div class="info-item-2">MySQL 运维篇 04-09 MyCat 一致性 Hash</div></div><div class="info-2"><div class="info-item-1">MySQL 运维篇 04-09 MyCat 一致性 Hash一致性 Hash 是一种分布式哈希技术，可以减少扩容时的数据迁移量。本文将介绍一致性 Hash 的原理和在 MyCat 中的应用。 一、一致性 Hash 介绍1.1 什么是一致性 Hash一致性 Hash：将数据和节点映射到一个哈希环上，数据存储在顺时针方向最近的节点上。 1234567传统 Hash 问题：- 扩容时需要 rehash 所有数据- 数据迁移量大一致性 Hash 优势：- 扩容时只影响相邻节点- 数据迁移量小  1.2 原理123456789101112131415哈希环示意图：          节点 A (hash=100)         /         \        /           \  数据 X            数据 Y (hash=50)        (hash=200)      |             |      |             |  节点 C         节点 B (hash=0)      (hash=300)数据存储规则：- 数据 X (...</div></div></div></a><a class="pagination-related" href="/2026/02/24/MySQL%20%E8%BF%90%E7%BB%B4%E7%AF%87%2003-04%20MyCat%20%E5%AE%89%E8%A3%85%E4%B8%8E%E9%85%8D%E7%BD%AE/" title="MySQL 运维篇 03-04 MyCat 安装与配置"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-02-24</div><div class="info-item-2">MySQL 运维篇 03-04 MyCat 安装与配置</div></div><div class="info-2"><div class="info-item-1">MySQL 运维篇 03-04 MyCat 安装与配置本文将详细讲解 MyCat 的下载、安装、配置和启动过程，帮助你快速搭建 MyCat 环境。 一、环境准备1.1 系统要求   组件 要求    Java JDK 1.8+   内存 最少 2GB，推荐 4GB+   磁盘 最少 10GB 可用空间   MySQL 5.6+   1.2 环境信息   服务器 IP 地址 角色 软件    server1 192.168.1.100 MyCat + Master MyCat, MySQL   server2 192.168.1.101 Slave MySQL   1.3 安装 JavaLinux (CentOS&#x2F;RHEL)： 12345# 安装 OpenJDK 8yum install -y java-1.8.0-openjdk java-1.8.0-openjdk-devel# 验证安装java -version  Linux (Ubuntu&#x2F;Debian)： 123456# 安装 OpenJDK 8apt-get updateapt-get install...</div></div></div></a><a class="pagination-related" href="/2026/02/24/MySQL%20%E8%BF%90%E7%BB%B4%E7%AF%87%2004-10%20MyCat%20%E7%AE%A1%E7%90%86%E4%B8%8E%E7%9B%91%E6%8E%A7/" title="MySQL 运维篇 04-10 MyCat 管理与监控"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-02-24</div><div class="info-item-2">MySQL 运维篇 04-10 MyCat 管理与监控</div></div><div class="info-2"><div class="info-item-1">MySQL 运维篇 04-10 MyCat 管理与监控本文将介绍 MyCat 的管理命令、监控方法和运维最佳实践。 一、MyCat 管理端口1.1 管理端口MyCat 有两个端口：  8066：MySQL 协议端口（应用连接） 9066：管理端口（运维管理）  1.2 连接管理端口12# 连接管理端口mysql -h 127.0.0.1 -P 9066 -u root -p123456  二、管理命令2.1 查看服务器状态123456789-- 查看服务器信息SHOW @@SERVER;-- 输出示例：# +---------+----------------+----------------+# | VERSION | UPTIME         | USED_HEAP      |# +---------+----------------+----------------+# | 2.0     | 123456 seconds | 512 MB         |# +---------+----------------+----------------+  2.2 查看...</div></div></div></a></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/img/%E5%A4%B4%E5%83%8F.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">过拟合的炸鱼薯条</div><div class="author-info-description">好好学习，天天向上</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">68</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">157</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">9</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/Brian-Lin-C"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons"><a class="social-icon" href="https://github.com/Brian-Lin-C" target="_blank" title="Github"><i class="fab fa-github" style="color: #24292e;"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">欢迎来到我的个人博客！</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#MySQL-%E8%BF%90%E7%BB%B4%E7%AF%87-04-03-MyCat-%E9%85%8D%E7%BD%AE%E8%AF%A6%E8%A7%A3"><span class="toc-number">1.</span> <span class="toc-text">MySQL 运维篇 04-03 MyCat 配置详解</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%80%E3%80%81%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6%E6%A6%82%E8%BF%B0"><span class="toc-number">1.1.</span> <span class="toc-text">一、配置文件概述</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-1-%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6%E4%BD%8D%E7%BD%AE"><span class="toc-number">1.1.1.</span> <span class="toc-text">1.1 配置文件位置</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-2-%E9%85%8D%E7%BD%AE%E5%8A%A0%E8%BD%BD%E9%A1%BA%E5%BA%8F"><span class="toc-number">1.1.2.</span> <span class="toc-text">1.2 配置加载顺序</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%8C%E3%80%81server-yml-%E8%AF%A6%E8%A7%A3"><span class="toc-number">1.2.</span> <span class="toc-text">二、server.yml 详解</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#2-1-%E5%AE%8C%E6%95%B4%E9%85%8D%E7%BD%AE%E7%A4%BA%E4%BE%8B"><span class="toc-number">1.2.1.</span> <span class="toc-text">2.1 完整配置示例</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-2-%E7%B3%BB%E7%BB%9F%E5%8F%82%E6%95%B0%E8%AF%B4%E6%98%8E"><span class="toc-number">1.2.2.</span> <span class="toc-text">2.2 系统参数说明</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-3-%E7%94%A8%E6%88%B7%E9%85%8D%E7%BD%AE%E8%AF%B4%E6%98%8E"><span class="toc-number">1.2.3.</span> <span class="toc-text">2.3 用户配置说明</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%89%E3%80%81schema-yml-%E8%AF%A6%E8%A7%A3"><span class="toc-number">1.3.</span> <span class="toc-text">三、schema.yml 详解</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#3-1-%E5%AE%8C%E6%95%B4%E9%85%8D%E7%BD%AE%E7%A4%BA%E4%BE%8B"><span class="toc-number">1.3.1.</span> <span class="toc-text">3.1 完整配置示例</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-2-%E8%A1%A8%E9%85%8D%E7%BD%AE%E8%AF%B4%E6%98%8E"><span class="toc-number">1.3.2.</span> <span class="toc-text">3.2 表配置说明</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-3-%E8%A1%A8%E7%B1%BB%E5%9E%8B"><span class="toc-number">1.3.3.</span> <span class="toc-text">3.3 表类型</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9B%9B%E3%80%81datasource-yml-%E8%AF%A6%E8%A7%A3"><span class="toc-number">1.4.</span> <span class="toc-text">四、datasource.yml 详解</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#4-1-%E5%AE%8C%E6%95%B4%E9%85%8D%E7%BD%AE%E7%A4%BA%E4%BE%8B"><span class="toc-number">1.4.1.</span> <span class="toc-text">4.1 完整配置示例</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-2-%E6%95%B0%E6%8D%AE%E8%8A%82%E7%82%B9%E5%8F%82%E6%95%B0"><span class="toc-number">1.4.2.</span> <span class="toc-text">4.2 数据节点参数</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-3-%E6%95%B0%E6%8D%AE%E4%B8%BB%E6%9C%BA%E5%8F%82%E6%95%B0"><span class="toc-number">1.4.3.</span> <span class="toc-text">4.3 数据主机参数</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-4-balance-%E9%85%8D%E7%BD%AE"><span class="toc-number">1.4.4.</span> <span class="toc-text">4.4 balance 配置</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-5-writeType-%E9%85%8D%E7%BD%AE"><span class="toc-number">1.4.5.</span> <span class="toc-text">4.5 writeType 配置</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%94%E3%80%81rule-yml-%E8%AF%A6%E8%A7%A3"><span class="toc-number">1.5.</span> <span class="toc-text">五、rule.yml 详解</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#5-1-%E5%AE%8C%E6%95%B4%E9%85%8D%E7%BD%AE%E7%A4%BA%E4%BE%8B"><span class="toc-number">1.5.1.</span> <span class="toc-text">5.1 完整配置示例</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5-2-%E5%B8%B8%E7%94%A8%E5%88%86%E7%89%87%E5%87%BD%E6%95%B0"><span class="toc-number">1.5.2.</span> <span class="toc-text">5.2 常用分片函数</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5-3-%E5%88%86%E7%89%87%E8%A7%84%E5%88%99%E9%80%89%E6%8B%A9"><span class="toc-number">1.5.3.</span> <span class="toc-text">5.3 分片规则选择</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%85%AD%E3%80%81sequence-yml-%E8%AF%A6%E8%A7%A3"><span class="toc-number">1.6.</span> <span class="toc-text">六、sequence.yml 详解</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#6-1-%E5%85%A8%E5%B1%80%E5%BA%8F%E5%88%97%E9%85%8D%E7%BD%AE"><span class="toc-number">1.6.1.</span> <span class="toc-text">6.1 全局序列配置</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#6-2-%E4%BD%BF%E7%94%A8%E5%85%A8%E5%B1%80%E5%BA%8F%E5%88%97"><span class="toc-number">1.6.2.</span> <span class="toc-text">6.2 使用全局序列</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%83%E3%80%81%E9%85%8D%E7%BD%AE%E5%AE%9E%E4%BE%8B"><span class="toc-number">1.7.</span> <span class="toc-text">七、配置实例</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#7-1-%E4%B8%80%E4%B8%BB%E4%B8%80%E4%BB%8E%E5%88%86%E7%89%87%E9%85%8D%E7%BD%AE"><span class="toc-number">1.7.1.</span> <span class="toc-text">7.1 一主一从分片配置</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%85%AB%E3%80%81%E9%85%8D%E7%BD%AE%E9%AA%8C%E8%AF%81"><span class="toc-number">1.8.</span> <span class="toc-text">八、配置验证</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#8-1-%E6%A3%80%E6%9F%A5%E9%85%8D%E7%BD%AE%E8%AF%AD%E6%B3%95"><span class="toc-number">1.8.1.</span> <span class="toc-text">8.1 检查配置语法</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#8-2-%E6%B5%8B%E8%AF%95%E8%BF%9E%E6%8E%A5"><span class="toc-number">1.8.2.</span> <span class="toc-text">8.2 测试连接</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#8-3-%E6%9F%A5%E7%9C%8B%E9%85%8D%E7%BD%AE%E4%BF%A1%E6%81%AF"><span class="toc-number">1.8.3.</span> <span class="toc-text">8.3 查看配置信息</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B9%9D%E3%80%81%E5%B0%8F%E7%BB%93"><span class="toc-number">1.9.</span> <span class="toc-text">九、小结</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6%E6%80%BB%E7%BB%93"><span class="toc-number">1.9.1.</span> <span class="toc-text">配置文件总结</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%85%8D%E7%BD%AE%E6%B5%81%E7%A8%8B"><span class="toc-number">1.9.2.</span> <span class="toc-text">配置流程</span></a></li></ol></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/02/24/IDE%20%E5%B7%A5%E5%85%B7%E9%85%8D%E7%BD%AE%EF%BC%9AVS%20Code%20+%20Jupyter%20+%20DataGrip/" title="IDE 工具配置：VS Code + Jupyter + DataGrip">IDE 工具配置：VS Code + Jupyter + DataGrip</a><time datetime="2026-02-24T15:00:00.000Z" title="发表于 2026-02-24 23:00:00">2026-02-24</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/02/24/Git%20%E7%89%88%E6%9C%AC%E6%8E%A7%E5%88%B6%E4%B8%8E%E5%9B%A2%E9%98%9F%E5%8D%8F%E4%BD%9C/" title="Git 版本控制与团队协作">Git 版本控制与团队协作</a><time datetime="2026-02-24T14:00:00.000Z" title="发表于 2026-02-24 22:00:00">2026-02-24</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/02/24/Linux%20%E4%B8%8E%20Shell%EF%BC%88%E4%BA%8C%EF%BC%89Shell%20%E8%84%9A%E6%9C%AC%E7%BC%96%E5%86%99/" title="Linux 与 Shell（二）Shell 脚本编写">Linux 与 Shell（二）Shell 脚本编写</a><time datetime="2026-02-24T13:00:00.000Z" title="发表于 2026-02-24 21:00:00">2026-02-24</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/02/24/%E6%95%B0%E6%8D%AE%E4%BB%93%E5%BA%93%E6%A0%B8%E5%BF%83%E6%A6%82%E5%BF%B5%E8%AF%A6%E8%A7%A3%20-%20%E7%BB%B4%E5%BA%A6%E5%BB%BA%E6%A8%A1%E3%80%81%E6%95%B0%E6%8D%AE%E5%88%86%E5%B1%82%E4%B8%8E%20SCD%20%E5%A4%84%E7%90%86/" title="数据仓库核心概念详解 - 维度建模、数据分层与 SCD 处理">数据仓库核心概念详解 - 维度建模、数据分层与 SCD 处理</a><time datetime="2026-02-24T13:00:00.000Z" title="发表于 2026-02-24 21:00:00">2026-02-24</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/02/24/MySQL%20%E8%BF%90%E7%BB%B4%E7%AF%87%2004-10%20MyCat%20%E7%AE%A1%E7%90%86%E4%B8%8E%E7%9B%91%E6%8E%A7/" title="MySQL 运维篇 04-10 MyCat 管理与监控">MySQL 运维篇 04-10 MyCat 管理与监控</a><time datetime="2026-02-24T12:05:00.000Z" title="发表于 2026-02-24 20:05:00">2026-02-24</time></div></div></div></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2025 - 2026 By 过拟合的炸鱼薯条</span><span class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 8.1.1</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.5.4</a></span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=5.5.4"></script><script src="/js/main.js?v=5.5.4"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><i class="fas fa-spinner fa-pulse" id="loading-status" hidden="hidden"></i><button class="search-close-button"><i class="fas fa-times"></i></button></nav><div class="text-center" id="loading-database"><i class="fas fa-spinner fa-pulse"></i><span>  数据加载中</span></div><div class="local-search-input"><input placeholder="搜索..." type="text"/></div><hr/><div id="local-search-results"></div><div class="ais-Pagination" id="local-search-pagination" style="display:none;"><ul class="ais-Pagination-list"></ul></div><div id="local-search-stats"></div></div><div id="search-mask"></div><script src="/js/search/local-search.js?v=5.5.4"></script></div></div></body></html>
