@@ -1,0 +1,540 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>IDE 工具配置：VS Code + Jupyter + DataGrip | 过拟合的炸鱼薯条</title><meta name="author" content="过拟合的炸鱼薯条"><meta name="copyright" content="过拟合的炸鱼薯条"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="IDE 工具配置：VS Code + Jupyter + DataGrip工欲善其事，必先利其器。本篇将介绍三款常用的开发工具：VS Code（通用 IDE）、Jupyter Notebook（数据科学）和 DataGrip（数据库管理）。 一、VS Code1.1 简介与安装Visual Studio Code (VS Code) 是微软开发的免费开源代码编辑器，支持几乎所有主流编程语言。 特点">
+<meta property="og:type" content="article">
+<meta property="og:title" content="IDE 工具配置：VS Code + Jupyter + DataGrip">
+<meta property="og:url" content="https://brian-lin-c.github.io/2026/02/24/IDE%20%E5%B7%A5%E5%85%B7%E9%85%8D%E7%BD%AE%EF%BC%9AVS%20Code%20+%20Jupyter%20+%20DataGrip/index.html">
+<meta property="og:site_name" content="过拟合的炸鱼薯条">
+<meta property="og:description" content="IDE 工具配置：VS Code + Jupyter + DataGrip工欲善其事，必先利其器。本篇将介绍三款常用的开发工具：VS Code（通用 IDE）、Jupyter Notebook（数据科学）和 DataGrip（数据库管理）。 一、VS Code1.1 简介与安装Visual Studio Code (VS Code) 是微软开发的免费开源代码编辑器，支持几乎所有主流编程语言。 特点">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://brian-lin-c.github.io/img/%E5%A4%B4%E5%83%8F.jpg">
+<meta property="article:published_time" content="2026-02-24T15:00:00.000Z">
+<meta property="article:modified_time" content="2026-02-24T03:58:11.490Z">
+<meta property="article:author" content="过拟合的炸鱼薯条">
+<meta property="article:tag" content="DataGrip">
+<meta property="article:tag" content="IDE">
+<meta property="article:tag" content="Jupyter">
+<meta property="article:tag" content="VS Code">
+<meta property="article:tag" content="开发工具">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://brian-lin-c.github.io/img/%E5%A4%B4%E5%83%8F.jpg"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "IDE 工具配置：VS Code + Jupyter + DataGrip",
+  "url": "https://brian-lin-c.github.io/2026/02/24/IDE%20%E5%B7%A5%E5%85%B7%E9%85%8D%E7%BD%AE%EF%BC%9AVS%20Code%20+%20Jupyter%20+%20DataGrip/",
+  "image": "https://brian-lin-c.github.io/img/%E5%A4%B4%E5%83%8F.jpg",
+  "datePublished": "2026-02-24T15:00:00.000Z",
+  "dateModified": "2026-02-24T03:58:11.490Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "过拟合的炸鱼薯条",
+      "url": "https://brian-lin-c.github.io"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://brian-lin-c.github.io/2026/02/24/IDE%20%E5%B7%A5%E5%85%B7%E9%85%8D%E7%BD%AE%EF%BC%9AVS%20Code%20+%20Jupyter%20+%20DataGrip/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=5.5.4"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.1.0/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        if (!ttl) return
+        const expiry = Date.now() + ttl * 86400000
+        localStorage.setItem(key, JSON.stringify({ value, expiry }))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return undefined
+        const { value, expiry } = JSON.parse(itemStr)
+        if (Date.now() > expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return value
+      }
+    }
+
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        Object.entries(attr).forEach(([key, val]) => script.setAttribute(key, val))
+        script.onload = script.onreadystatechange = () => {
+          if (!script.readyState || /loaded|complete/.test(script.readyState)) resolve()
+        }
+        script.onerror = reject
+        document.head.appendChild(script)
+      }),
+      getCSS: (url, id) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onload = link.onreadystatechange = () => {
+          if (!link.readyState || /loaded|complete/.test(link.readyState)) resolve()
+        }
+        link.onerror = reject
+        document.head.appendChild(link)
+      }),
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"/search.xml","preload":true,"top_n_per_article":1,"unescape":false,"pagination":{"enable":false,"hitsPerPage":8},"languages":{"hits_empty":"未找到符合您查询的内容：${query}","hits_stats":"共找到 ${hits} 篇文章"}},
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.13.0/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'IDE 工具配置：VS Code + Jupyter + DataGrip',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><meta name="generator" content="Hexo 8.1.1"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/img/%E5%A4%B4%E5%83%8F.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">26</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">68</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">7</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user"></i><span> 关于</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">过拟合的炸鱼薯条</span></a><a class="nav-page-title" href="/"><span class="site-name">IDE 工具配置：VS Code + Jupyter + DataGrip</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div id="search-button"><span class="site-page social-icon search"><i class="fas fa-search fa-fw"></i><span> 搜索</span></span></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user"></i><span> 关于</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">IDE 工具配置：VS Code + Jupyter + DataGrip</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2026-02-24T15:00:00.000Z" title="发表于 2026-02-24 23:00:00">2026-02-24</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-02-24T03:58:11.490Z" title="更新于 2026-02-24 11:58:11">2026-02-24</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E7%B3%BB%E7%BB%9F%E4%B8%8E%E5%B7%A5%E5%85%B7/">系统与工具</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-wordcount"><i class="far fa-file-word fa-fw post-meta-icon"></i><span class="post-meta-label">总字数:</span><span class="word-count">3.6k</span><span class="post-meta-separator">|</span><i class="far fa-clock fa-fw post-meta-icon"></i><span class="post-meta-label">阅读时长:</span><span>15分钟</span></span><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><h1 id="IDE-工具配置：VS-Code-Jupyter-DataGrip"><a href="#IDE-工具配置：VS-Code-Jupyter-DataGrip" class="headerlink" title="IDE 工具配置：VS Code + Jupyter + DataGrip"></a>IDE 工具配置：VS Code + Jupyter + DataGrip</h1><p>工欲善其事，必先利其器。本篇将介绍三款常用的开发工具：VS Code（通用 IDE）、Jupyter Notebook（数据科学）和 DataGrip（数据库管理）。</p>
+<h2 id="一、VS-Code"><a href="#一、VS-Code" class="headerlink" title="一、VS Code"></a>一、VS Code</h2><h3 id="1-1-简介与安装"><a href="#1-1-简介与安装" class="headerlink" title="1.1 简介与安装"></a>1.1 简介与安装</h3><p><strong>Visual Studio Code (VS Code)</strong> 是微软开发的免费开源代码编辑器，支持几乎所有主流编程语言。</p>
+<p><strong>特点：</strong></p>
+<ul>
+<li>免费开源</li>
+<li>跨平台（Windows、macOS、Linux）</li>
+<li>丰富的插件生态</li>
+<li>轻量快速</li>
+<li>内置 Git 支持</li>
+</ul>
+<p><strong>下载安装：</strong></p>
+<ul>
+<li>官网：<a target="_blank" rel="noopener" href="https://code.visualstudio.com/">https://code.visualstudio.com/</a></li>
+<li>下载对应系统版本安装</li>
+</ul>
+<h3 id="1-2-基础配置"><a href="#1-2-基础配置" class="headerlink" title="1.2 基础配置"></a>1.2 基础配置</h3><figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// settings.json (文件 -&gt; 首选项 -&gt; 设置 -&gt; 点击右上角打开 settings.json)</span></span><br><span class="line"><span class="punctuation">&#123;</span></span><br><span class="line">    <span class="comment">// 编辑器设置</span></span><br><span class="line">    <span class="attr">&quot;editor.fontSize&quot;</span><span class="punctuation">:</span> <span class="number">14</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;editor.fontFamily&quot;</span><span class="punctuation">:</span> <span class="string">&quot;&#x27;JetBrains Mono&#x27;, &#x27;Fira Code&#x27;, Consolas, &#x27;Courier New&#x27;, monospace&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;editor.minimap.enabled&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">true</span></span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;editor.renderWhitespace&quot;</span><span class="punctuation">:</span> <span class="string">&quot;selection&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;editor.formatOnSave&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">true</span></span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;editor.tabSize&quot;</span><span class="punctuation">:</span> <span class="number">4</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;editor.insertSpaces&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">true</span></span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;editor.wordWrap&quot;</span><span class="punctuation">:</span> <span class="string">&quot;on&quot;</span><span class="punctuation">,</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">// 文件设置</span></span><br><span class="line">    <span class="attr">&quot;files.encoding&quot;</span><span class="punctuation">:</span> <span class="string">&quot;utf8&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;files.eol&quot;</span><span class="punctuation">:</span> <span class="string">&quot;\n&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;files.autoSave&quot;</span><span class="punctuation">:</span> <span class="string">&quot;afterDelay&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;files.autoSaveDelay&quot;</span><span class="punctuation">:</span> <span class="number">1000</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;files.exclude&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">        <span class="attr">&quot;**/.git&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">true</span></span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;**/.svn&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">true</span></span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;**/.hg&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">true</span></span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;**/node_modules&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">true</span></span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;**/__pycache__&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">true</span></span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;**/*.pyc&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">true</span></span></span><br><span class="line">    <span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">// 终端设置</span></span><br><span class="line">    <span class="attr">&quot;terminal.integrated.defaultProfile.windows&quot;</span><span class="punctuation">:</span> <span class="string">&quot;Git Bash&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;terminal.integrated.fontSize&quot;</span><span class="punctuation">:</span> <span class="number">13</span><span class="punctuation">,</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">// 工作台设置</span></span><br><span class="line">    <span class="attr">&quot;workbench.colorTheme&quot;</span><span class="punctuation">:</span> <span class="string">&quot;Default Dark+&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;workbench.iconTheme&quot;</span><span class="punctuation">:</span> <span class="string">&quot;material-icon-theme&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;workbench.statusBar.visible&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">true</span></span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;workbench.activityBar.visible&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">true</span></span><span class="punctuation">,</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">// Python 设置</span></span><br><span class="line">    <span class="attr">&quot;python.defaultInterpreterPath&quot;</span><span class="punctuation">:</span> <span class="string">&quot;python&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;python.linting.enabled&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">true</span></span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;python.linting.pylintEnabled&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">true</span></span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;python.formatting.provider&quot;</span><span class="punctuation">:</span> <span class="string">&quot;black&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;python.formatting.blackPath&quot;</span><span class="punctuation">:</span> <span class="string">&quot;black&quot;</span><span class="punctuation">,</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">// Git 设置</span></span><br><span class="line">    <span class="attr">&quot;git.autorefresh&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">true</span></span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;git.enableSmartCommit&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">true</span></span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;git.confirmSync&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">false</span></span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;git.pruneOnFetch&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">true</span></span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="1-3-必备插件"><a href="#1-3-必备插件" class="headerlink" title="1.3 必备插件"></a>1.3 必备插件</h3><p><strong>通用插件：</strong></p>
+<table>
+<thead>
+<tr>
+<th>插件名</th>
+<th>用途</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Chinese (Simplified)</td>
+<td>中文语言包</td>
+</tr>
+<tr>
+<td>Material Icon Theme</td>
+<td>文件图标美化</td>
+</tr>
+<tr>
+<td>One Dark Pro &#x2F; Dracula</td>
+<td>主题</td>
+</tr>
+<tr>
+<td>Prettier - Code formatter</td>
+<td>代码格式化</td>
+</tr>
+<tr>
+<td>ESLint</td>
+<td>JavaScript 语法检查</td>
+</tr>
+<tr>
+<td>GitLens</td>
+<td>Git 增强</td>
+</tr>
+<tr>
+<td>Path Intellisense</td>
+<td>路径自动补全</td>
+</tr>
+<tr>
+<td>Bracket Pair Colorizer</td>
+<td>括号颜色配对</td>
+</tr>
+<tr>
+<td>Settings Sync</td>
+<td>配置同步</td>
+</tr>
+</tbody></table>
+<p><strong>Python 开发：</strong></p>
+<table>
+<thead>
+<tr>
+<th>插件名</th>
+<th>用途</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Python (Microsoft)</td>
+<td>Python 支持</td>
+</tr>
+<tr>
+<td>Pylance</td>
+<td>Python 语言服务器</td>
+</tr>
+<tr>
+<td>Jupyter</td>
+<td>Jupyter Notebook 支持</td>
+</tr>
+<tr>
+<td>Python Indent</td>
+<td>Python 缩进优化</td>
+</tr>
+<tr>
+<td>autoDocstring</td>
+<td>自动生成文档字符串</td>
+</tr>
+</tbody></table>
+<p><strong>Web 开发：</strong></p>
+<table>
+<thead>
+<tr>
+<th>插件名</th>
+<th>用途</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Live Server</td>
+<td>本地服务器</td>
+</tr>
+<tr>
+<td>Auto Rename Tag</td>
+<td>自动重命名 HTML 标签</td>
+</tr>
+<tr>
+<td>CSS Peek</td>
+<td>CSS 定义跳转</td>
+</tr>
+<tr>
+<td>JavaScript (ES6) code snippets</td>
+<td>JS 代码片段</td>
+</tr>
+<tr>
+<td>Vue Language Features</td>
+<td>Vue 支持</td>
+</tr>
+<tr>
+<td>Vetur</td>
+<td>Vue 2 支持</td>
+</tr>
+</tbody></table>
+<p><strong>其他语言：</strong></p>
+<table>
+<thead>
+<tr>
+<th>插件名</th>
+<th>用途</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>C&#x2F;C++ (Microsoft)</td>
+<td>C&#x2F;C++ 支持</td>
+</tr>
+<tr>
+<td>Go (Go Team at Google)</td>
+<td>Go 支持</td>
+</tr>
+<tr>
+<td>Rust Analyzer</td>
+<td>Rust 支持</td>
+</tr>
+<tr>
+<td>Java Extension Pack</td>
+<td>Java 支持</td>
+</tr>
+</tbody></table>
+<h3 id="1-4-快捷键"><a href="#1-4-快捷键" class="headerlink" title="1.4 快捷键"></a>1.4 快捷键</h3><p><strong>常用快捷键（Windows）：</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">Ctrl + P          快速打开文件</span><br><span class="line">Ctrl + Shift + P  命令面板</span><br><span class="line">Ctrl + `          打开终端</span><br><span class="line">Ctrl + S          保存</span><br><span class="line">Ctrl + Z          撤销</span><br><span class="line">Ctrl + Y          重做</span><br><span class="line">Ctrl + F          查找</span><br><span class="line">Ctrl + H          替换</span><br><span class="line">Ctrl + /          行注释</span><br><span class="line">Ctrl + Shift + /  块注释</span><br><span class="line">Alt + Up/Down     移动行</span><br><span class="line">Shift + Alt + Up/Down  复制行</span><br><span class="line">F12               跳转到定义</span><br><span class="line">Alt + F12         查看定义</span><br><span class="line">Shift + F12       查看引用</span><br><span class="line">Ctrl + D          选择下一个匹配项</span><br><span class="line">Ctrl + Shift + L  选择所有匹配项</span><br><span class="line">Ctrl + K, Ctrl + S  查看快捷键列表</span><br></pre></td></tr></table></figure>
+
+<p><strong>自定义快捷键（keybindings.json）：</strong></p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">[</span></span><br><span class="line">    <span class="punctuation">&#123;</span></span><br><span class="line">        <span class="attr">&quot;key&quot;</span><span class="punctuation">:</span> <span class="string">&quot;ctrl+s&quot;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;command&quot;</span><span class="punctuation">:</span> <span class="string">&quot;workbench.action.files.save&quot;</span></span><br><span class="line">    <span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="punctuation">&#123;</span></span><br><span class="line">        <span class="attr">&quot;key&quot;</span><span class="punctuation">:</span> <span class="string">&quot;ctrl+/&quot;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;command&quot;</span><span class="punctuation">:</span> <span class="string">&quot;editor.action.commentLine&quot;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;when&quot;</span><span class="punctuation">:</span> <span class="string">&quot;editorTextFocus&quot;</span></span><br><span class="line">    <span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="punctuation">&#123;</span></span><br><span class="line">        <span class="attr">&quot;key&quot;</span><span class="punctuation">:</span> <span class="string">&quot;ctrl+`&quot;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;command&quot;</span><span class="punctuation">:</span> <span class="string">&quot;workbench.action.terminal.toggleTerminal&quot;</span></span><br><span class="line">    <span class="punctuation">&#125;</span></span><br><span class="line"><span class="punctuation">]</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="1-5-代码片段（Snippets）"><a href="#1-5-代码片段（Snippets）" class="headerlink" title="1.5 代码片段（Snippets）"></a>1.5 代码片段（Snippets）</h3><p><strong>创建自定义代码片段：</strong><br>文件 -&gt; 首选项 -&gt; 配置用户代码片段</p>
+<p><strong>Python 代码片段示例：</strong></p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span></span><br><span class="line">    <span class="attr">&quot;Python Main&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">        <span class="attr">&quot;prefix&quot;</span><span class="punctuation">:</span> <span class="string">&quot;main&quot;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;body&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span></span><br><span class="line">            <span class="string">&quot;if __name__ == &#x27;__main__&#x27;:&quot;</span><span class="punctuation">,</span></span><br><span class="line">            <span class="string">&quot;    $&#123;0&#125;&quot;</span></span><br><span class="line">        <span class="punctuation">]</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;description&quot;</span><span class="punctuation">:</span> <span class="string">&quot;Python main 入口&quot;</span></span><br><span class="line">    <span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;Python Class&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">        <span class="attr">&quot;prefix&quot;</span><span class="punctuation">:</span> <span class="string">&quot;class&quot;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;body&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span></span><br><span class="line">            <span class="string">&quot;class $&#123;1:ClassName&#125;:&quot;</span><span class="punctuation">,</span></span><br><span class="line">            <span class="string">&quot;    \&quot;\&quot;\&quot;$&#123;2:类描述&#125;\&quot;\&quot;\&quot;&quot;</span><span class="punctuation">,</span></span><br><span class="line">            <span class="string">&quot;    &quot;</span><span class="punctuation">,</span></span><br><span class="line">            <span class="string">&quot;    def __init__(self, $&#123;3:args&#125;):&quot;</span><span class="punctuation">,</span></span><br><span class="line">            <span class="string">&quot;        self.$&#123;3&#125; = $&#123;3&#125;&quot;</span><span class="punctuation">,</span></span><br><span class="line">            <span class="string">&quot;    &quot;</span><span class="punctuation">,</span></span><br><span class="line">            <span class="string">&quot;    def $&#123;4:method&#125;(self):&quot;</span><span class="punctuation">,</span></span><br><span class="line">            <span class="string">&quot;        $&#123;0&#125;&quot;</span></span><br><span class="line">        <span class="punctuation">]</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;description&quot;</span><span class="punctuation">:</span> <span class="string">&quot;Python 类模板&quot;</span></span><br><span class="line">    <span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;Python Function&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">        <span class="attr">&quot;prefix&quot;</span><span class="punctuation">:</span> <span class="string">&quot;def&quot;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;body&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span></span><br><span class="line">            <span class="string">&quot;def $&#123;1:function_name&#125;($&#123;2:args&#125;):&quot;</span><span class="punctuation">,</span></span><br><span class="line">            <span class="string">&quot;    \&quot;\&quot;\&quot;$&#123;3:函数描述&#125;\&quot;\&quot;\&quot;&quot;</span><span class="punctuation">,</span></span><br><span class="line">            <span class="string">&quot;    $&#123;0&#125;&quot;</span></span><br><span class="line">        <span class="punctuation">]</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;description&quot;</span><span class="punctuation">:</span> <span class="string">&quot;Python 函数模板&quot;</span></span><br><span class="line">    <span class="punctuation">&#125;</span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="1-6-调试配置"><a href="#1-6-调试配置" class="headerlink" title="1.6 调试配置"></a>1.6 调试配置</h3><p><strong>launch.json 示例：</strong></p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span></span><br><span class="line">    <span class="attr">&quot;version&quot;</span><span class="punctuation">:</span> <span class="string">&quot;0.2.0&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;configurations&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span></span><br><span class="line">        <span class="punctuation">&#123;</span></span><br><span class="line">            <span class="attr">&quot;name&quot;</span><span class="punctuation">:</span> <span class="string">&quot;Python: 当前文件&quot;</span><span class="punctuation">,</span></span><br><span class="line">            <span class="attr">&quot;type&quot;</span><span class="punctuation">:</span> <span class="string">&quot;python&quot;</span><span class="punctuation">,</span></span><br><span class="line">            <span class="attr">&quot;request&quot;</span><span class="punctuation">:</span> <span class="string">&quot;launch&quot;</span><span class="punctuation">,</span></span><br><span class="line">            <span class="attr">&quot;program&quot;</span><span class="punctuation">:</span> <span class="string">&quot;$&#123;file&#125;&quot;</span><span class="punctuation">,</span></span><br><span class="line">            <span class="attr">&quot;console&quot;</span><span class="punctuation">:</span> <span class="string">&quot;integratedTerminal&quot;</span><span class="punctuation">,</span></span><br><span class="line">            <span class="attr">&quot;justMyCode&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">true</span></span></span><br><span class="line">        <span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="punctuation">&#123;</span></span><br><span class="line">            <span class="attr">&quot;name&quot;</span><span class="punctuation">:</span> <span class="string">&quot;Python: 带参数&quot;</span><span class="punctuation">,</span></span><br><span class="line">            <span class="attr">&quot;type&quot;</span><span class="punctuation">:</span> <span class="string">&quot;python&quot;</span><span class="punctuation">,</span></span><br><span class="line">            <span class="attr">&quot;request&quot;</span><span class="punctuation">:</span> <span class="string">&quot;launch&quot;</span><span class="punctuation">,</span></span><br><span class="line">            <span class="attr">&quot;program&quot;</span><span class="punctuation">:</span> <span class="string">&quot;$&#123;file&#125;&quot;</span><span class="punctuation">,</span></span><br><span class="line">            <span class="attr">&quot;console&quot;</span><span class="punctuation">:</span> <span class="string">&quot;integratedTerminal&quot;</span><span class="punctuation">,</span></span><br><span class="line">            <span class="attr">&quot;args&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span><span class="string">&quot;--arg1&quot;</span><span class="punctuation">,</span> <span class="string">&quot;value1&quot;</span><span class="punctuation">,</span> <span class="string">&quot;--arg2&quot;</span><span class="punctuation">,</span> <span class="string">&quot;value2&quot;</span><span class="punctuation">]</span></span><br><span class="line">        <span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="punctuation">&#123;</span></span><br><span class="line">            <span class="attr">&quot;name&quot;</span><span class="punctuation">:</span> <span class="string">&quot;Python: Django&quot;</span><span class="punctuation">,</span></span><br><span class="line">            <span class="attr">&quot;type&quot;</span><span class="punctuation">:</span> <span class="string">&quot;python&quot;</span><span class="punctuation">,</span></span><br><span class="line">            <span class="attr">&quot;request&quot;</span><span class="punctuation">:</span> <span class="string">&quot;launch&quot;</span><span class="punctuation">,</span></span><br><span class="line">            <span class="attr">&quot;program&quot;</span><span class="punctuation">:</span> <span class="string">&quot;$&#123;workspaceFolder&#125;/manage.py&quot;</span><span class="punctuation">,</span></span><br><span class="line">            <span class="attr">&quot;console&quot;</span><span class="punctuation">:</span> <span class="string">&quot;integratedTerminal&quot;</span><span class="punctuation">,</span></span><br><span class="line">            <span class="attr">&quot;args&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span></span><br><span class="line">                <span class="string">&quot;runserver&quot;</span><span class="punctuation">,</span></span><br><span class="line">                <span class="string">&quot;--noreload&quot;</span></span><br><span class="line">            <span class="punctuation">]</span><span class="punctuation">,</span></span><br><span class="line">            <span class="attr">&quot;django&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">true</span></span></span><br><span class="line">        <span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="punctuation">&#123;</span></span><br><span class="line">            <span class="attr">&quot;name&quot;</span><span class="punctuation">:</span> <span class="string">&quot;Python: Flask&quot;</span><span class="punctuation">,</span></span><br><span class="line">            <span class="attr">&quot;type&quot;</span><span class="punctuation">:</span> <span class="string">&quot;python&quot;</span><span class="punctuation">,</span></span><br><span class="line">            <span class="attr">&quot;request&quot;</span><span class="punctuation">:</span> <span class="string">&quot;launch&quot;</span><span class="punctuation">,</span></span><br><span class="line">            <span class="attr">&quot;module&quot;</span><span class="punctuation">:</span> <span class="string">&quot;flask&quot;</span><span class="punctuation">,</span></span><br><span class="line">            <span class="attr">&quot;env&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">                <span class="attr">&quot;FLASK_APP&quot;</span><span class="punctuation">:</span> <span class="string">&quot;app.py&quot;</span><span class="punctuation">,</span></span><br><span class="line">                <span class="attr">&quot;FLASK_ENV&quot;</span><span class="punctuation">:</span> <span class="string">&quot;development&quot;</span><span class="punctuation">,</span></span><br><span class="line">                <span class="attr">&quot;FLASK_DEBUG&quot;</span><span class="punctuation">:</span> <span class="string">&quot;1&quot;</span></span><br><span class="line">            <span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">            <span class="attr">&quot;args&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span></span><br><span class="line">                <span class="string">&quot;run&quot;</span><span class="punctuation">,</span></span><br><span class="line">                <span class="string">&quot;--no-debugger&quot;</span><span class="punctuation">,</span></span><br><span class="line">                <span class="string">&quot;--no-reload&quot;</span></span><br><span class="line">            <span class="punctuation">]</span><span class="punctuation">,</span></span><br><span class="line">            <span class="attr">&quot;jinja&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">true</span></span></span><br><span class="line">        <span class="punctuation">&#125;</span></span><br><span class="line">    <span class="punctuation">]</span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="二、Jupyter-Notebook"><a href="#二、Jupyter-Notebook" class="headerlink" title="二、Jupyter Notebook"></a>二、Jupyter Notebook</h2><h3 id="2-1-简介与安装"><a href="#2-1-简介与安装" class="headerlink" title="2.1 简介与安装"></a>2.1 简介与安装</h3><p><strong>Jupyter Notebook</strong> 是一个开源的 Web 应用程序，支持创建和共享包含实时代码、公式、可视化和叙述性文本的文档。</p>
+<p><strong>适用场景：</strong></p>
+<ul>
+<li>数据清洗和转换</li>
+<li>数值模拟</li>
+<li>统计建模</li>
+<li>数据可视化</li>
+<li>机器学习</li>
+</ul>
+<p><strong>安装方式：</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 方式一：pip 安装</span></span><br><span class="line">pip install jupyter</span><br><span class="line">pip install notebook</span><br><span class="line"></span><br><span class="line"><span class="comment"># 方式二：conda 安装（推荐）</span></span><br><span class="line">conda install jupyter notebook</span><br><span class="line"></span><br><span class="line"><span class="comment"># 启动 Jupyter</span></span><br><span class="line">jupyter notebook</span><br><span class="line"></span><br><span class="line"><span class="comment"># 指定端口</span></span><br><span class="line">jupyter notebook --port 8889</span><br><span class="line"></span><br><span class="line"><span class="comment"># 允许远程访问</span></span><br><span class="line">jupyter notebook --ip=0.0.0.0 --port=8888 --no-browser</span><br><span class="line"></span><br><span class="line"><span class="comment"># 生成配置文件</span></span><br><span class="line">jupyter notebook --generate-config</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-2-JupyterLab"><a href="#2-2-JupyterLab" class="headerlink" title="2.2 JupyterLab"></a>2.2 JupyterLab</h3><p><strong>JupyterLab</strong> 是新一代的 Jupyter 界面，更强大更灵活。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 安装</span></span><br><span class="line">pip install jupyterlab</span><br><span class="line">conda install jupyterlab</span><br><span class="line"></span><br><span class="line"><span class="comment"># 启动</span></span><br><span class="line">jupyter lab</span><br><span class="line"></span><br><span class="line"><span class="comment"># 安装插件</span></span><br><span class="line">jupyter labextension install @jupyterlab/git</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-3-基本使用"><a href="#2-3-基本使用" class="headerlink" title="2.3 基本使用"></a>2.3 基本使用</h3><p><strong>Notebook 界面元素：</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">菜单栏：File, Edit, View, Insert, Cell, Kernel, Help</span><br><span class="line">工具栏：保存、添加单元格、剪切、复制、粘贴、移动、运行、停止</span><br><span class="line">单元格类型：Code（代码）、Markdown（文本）、Raw NBConvert（原始文本）</span><br></pre></td></tr></table></figure>
+
+<p><strong>常用操作：</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">Esc          进入命令模式</span><br><span class="line">Enter        进入编辑模式</span><br><span class="line">A            在上方插入单元格</span><br><span class="line">B            在下方插入单元格</span><br><span class="line">M            转为 Markdown 单元格</span><br><span class="line">Y            转为 Code 单元格</span><br><span class="line">D, D         删除单元格</span><br><span class="line">Z            撤销删除</span><br><span class="line">C            复制单元格</span><br><span class="line">V            粘贴单元格</span><br><span class="line">X            剪切单元格</span><br><span class="line">Shift + V    粘贴到上方</span><br><span class="line">Shift + Enter 运行并跳到下一个</span><br><span class="line">Ctrl + Enter 运行当前单元格</span><br><span class="line">Alt + Enter  运行并在下方插入新单元格</span><br><span class="line">1, 2, 3...   设置为对应级别的标题</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-4-Markdown-单元格"><a href="#2-4-Markdown-单元格" class="headerlink" title="2.4 Markdown 单元格"></a>2.4 Markdown 单元格</h3><figure class="highlight markdown"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="section"># 一级标题</span></span><br><span class="line"><span class="section">## 二级标题</span></span><br><span class="line"><span class="section">### 三级标题</span></span><br><span class="line"></span><br><span class="line"><span class="strong">**粗体文本**</span></span><br><span class="line"><span class="emphasis">*斜体文本*</span></span><br><span class="line">~~删除线~~</span><br><span class="line"></span><br><span class="line"><span class="bullet">-</span> 无序列表项 1</span><br><span class="line"><span class="bullet">-</span> 无序列表项 2</span><br><span class="line"></span><br><span class="line"><span class="bullet">1.</span> 有序列表项 1</span><br><span class="line"><span class="bullet">2.</span> 有序列表项 2</span><br><span class="line"></span><br><span class="line">[<span class="string">链接文本</span>](<span class="link">https://example.com</span>)</span><br><span class="line"></span><br><span class="line">![<span class="string">图片描述</span>](<span class="link">image.png</span>)</span><br><span class="line"></span><br><span class="line"><span class="quote">&gt; 引用文本</span></span><br><span class="line"></span><br><span class="line"><span class="code">`行内代码`</span></span><br><span class="line"></span><br><span class="line"><span class="code">```python</span></span><br><span class="line"><span class="code"># 代码块</span></span><br><span class="line"><span class="code">def hello():</span></span><br><span class="line"><span class="code">    print(&quot;Hello, World!&quot;)</span></span><br></pre></td></tr></table></figure>
+
+<table>
+<thead>
+<tr>
+<th>表头 1</th>
+<th>表头 2</th>
+<th>表头 3</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>单元格</td>
+<td>单元格</td>
+<td>单元格</td>
+</tr>
+</tbody></table>
+<p>$E &#x3D; mc^2$  # LaTeX 公式</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">### 2.5 常用魔法命令</span><br><span class="line"></span><br><span class="line">```python</span><br><span class="line"># 魔法命令（Magic Commands）</span><br><span class="line"></span><br><span class="line"># 时间相关</span><br><span class="line">%timeit result = sum(range(1000))      # 测量执行时间</span><br><span class="line">%time result = sum(range(1000000))     # 单次执行时间</span><br><span class="line"></span><br><span class="line"># 系统命令</span><br><span class="line">!ls -la                                # 执行 shell 命令</span><br><span class="line">!pip install package                   # 安装包</span><br><span class="line">!python script.py                      # 运行 Python 脚本</span><br><span class="line"></span><br><span class="line"># 工作目录</span><br><span class="line">%pwd                                   # 当前目录</span><br><span class="line">%ls                                    # 列出文件</span><br><span class="line">%cd /path/to/dir                       # 切换目录</span><br><span class="line"></span><br><span class="line"># 变量和状态</span><br><span class="line">%who                                   # 显示变量</span><br><span class="line">%whos                                  # 显示变量详情</span><br><span class="line">%env                                   # 显示环境变量</span><br><span class="line"></span><br><span class="line"># 代码执行</span><br><span class="line">%run script.py                         # 运行脚本</span><br><span class="line">%load script.py                        # 加载脚本到单元格</span><br><span class="line">%edit                                  # 打开编辑器</span><br><span class="line"></span><br><span class="line"># 调试</span><br><span class="line">%debug                                 # 进入调试模式</span><br><span class="line">%pdb                                   # 异常时自动调试</span><br><span class="line"></span><br><span class="line"># 其他</span><br><span class="line">%matplotlib inline                     # 内嵌显示 matplotlib 图表</span><br><span class="line">%config InlineBackend.figure_format = &#x27;retina&#x27;  # 高清图表</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-6-数据科学插件"><a href="#2-6-数据科学插件" class="headerlink" title="2.6 数据科学插件"></a>2.6 数据科学插件</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 安装常用数据科学库</span></span><br><span class="line">pip install numpy pandas matplotlib seaborn scikit-learn jupyter</span><br><span class="line"></span><br><span class="line"><span class="comment"># 导入</span></span><br><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"><span class="keyword">import</span> pandas <span class="keyword">as</span> pd</span><br><span class="line"><span class="keyword">import</span> matplotlib.pyplot <span class="keyword">as</span> plt</span><br><span class="line"><span class="keyword">import</span> seaborn <span class="keyword">as</span> sns</span><br><span class="line"></span><br><span class="line"><span class="comment"># 设置中文字体</span></span><br><span class="line">plt.rcParams[<span class="string">&#x27;font.sans-serif&#x27;</span>] = [<span class="string">&#x27;SimHei&#x27;</span>, <span class="string">&#x27;Arial Unicode MS&#x27;</span>, <span class="string">&#x27;DejaVu Sans&#x27;</span>]</span><br><span class="line">plt.rcParams[<span class="string">&#x27;axes.unicode_minus&#x27;</span>] = <span class="literal">False</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 设置图表样式</span></span><br><span class="line">sns.set_style(<span class="string">&quot;whitegrid&quot;</span>)</span><br><span class="line">plt.rcParams[<span class="string">&#x27;figure.figsize&#x27;</span>] = (<span class="number">12</span>, <span class="number">8</span>)</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-7-实用技巧"><a href="#2-7-实用技巧" class="headerlink" title="2.7 实用技巧"></a>2.7 实用技巧</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 1. 使用帮助</span></span><br><span class="line">?pd.read_csv           <span class="comment"># 查看函数文档</span></span><br><span class="line">pd.read_csv?           <span class="comment"># 同上</span></span><br><span class="line">??pd.read_csv          <span class="comment"># 查看源码</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 2. 自动补全</span></span><br><span class="line"><span class="comment"># 输入对象名后按 Tab 键</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 3. 对象信息</span></span><br><span class="line"><span class="built_in">dir</span>(<span class="built_in">object</span>)            <span class="comment"># 列出所有属性和方法</span></span><br><span class="line"><span class="built_in">type</span>(<span class="built_in">object</span>)           <span class="comment"># 查看类型</span></span><br><span class="line"><span class="built_in">help</span>(<span class="built_in">object</span>)           <span class="comment"># 查看帮助</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 4. 魔法命令自动补全</span></span><br><span class="line"><span class="comment"># 输入%后按 Tab</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 5. 笔记本书签</span></span><br><span class="line"><span class="comment"># 在 URL 中添加 #cellid=xxx 可以跳转到指定单元格</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 6. 导出为其他格式</span></span><br><span class="line"><span class="comment"># File -&gt; Download as -&gt; PDF/HTML/Python Script</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 7. 使用模板</span></span><br><span class="line"><span class="comment"># jupyter nbconvert --to slides notebook.ipynb</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 8. 隐藏代码/输出</span></span><br><span class="line"><span class="comment"># 在单元格开头添加：</span></span><br><span class="line"><span class="comment"># %hide_input</span></span><br><span class="line"><span class="comment"># %hide_output</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="2-8-扩展插件"><a href="#2-8-扩展插件" class="headerlink" title="2.8 扩展插件"></a>2.8 扩展插件</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 安装 Jupyter Notebook 扩展</span></span><br><span class="line">pip install jupyter_contrib_nbextensions</span><br><span class="line">jupyter contrib nbextension install --user</span><br><span class="line"></span><br><span class="line"><span class="comment"># 安装 JupyterLab 扩展</span></span><br><span class="line">pip install jupyterlab-git</span><br><span class="line">pip install @jupyterlab/toc  <span class="comment"># 目录</span></span><br><span class="line">pip install @jupyterlab/celltags  <span class="comment"># 单元格标签</span></span><br><span class="line">pip install jupyterlab-code-formatter  <span class="comment"># 代码格式化</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>常用扩展：</strong></p>
+<ul>
+<li>Table of Contents (toc2) - 目录</li>
+<li>Code Prettify - 代码格式化</li>
+<li>Hide Input&#x2F;Output - 隐藏输入输出</li>
+<li>ExecuteTime - 显示执行时间</li>
+<li>Variable Inspector - 变量检查器</li>
+<li>Spellchecker - 拼写检查</li>
+</ul>
+<h2 id="三、DataGrip"><a href="#三、DataGrip" class="headerlink" title="三、DataGrip"></a>三、DataGrip</h2><h3 id="3-1-简介与安装"><a href="#3-1-简介与安装" class="headerlink" title="3.1 简介与安装"></a>3.1 简介与安装</h3><p><strong>DataGrip</strong> 是 JetBrains 出品的专业数据库管理工具，支持多种数据库。</p>
+<p><strong>支持的数据库：</strong></p>
+<ul>
+<li>MySQL &#x2F; MariaDB</li>
+<li>PostgreSQL</li>
+<li>Oracle</li>
+<li>SQL Server</li>
+<li>SQLite</li>
+<li>MongoDB (通过插件)</li>
+<li>Redis (通过插件)</li>
+<li>以及更多…</li>
+</ul>
+<p><strong>下载安装：</strong></p>
+<ul>
+<li>官网：<a target="_blank" rel="noopener" href="https://www.jetbrains.com/datagrip/">https://www.jetbrains.com/datagrip/</a></li>
+<li>30 天试用，之后需要订阅</li>
+<li>学生可免费使用（凭学生证）</li>
+</ul>
+<h3 id="3-2-创建数据源"><a href="#3-2-创建数据源" class="headerlink" title="3.2 创建数据源"></a>3.2 创建数据源</h3><p><strong>连接 MySQL：</strong></p>
+<ol>
+<li>打开 DataGrip，点击 <code>File</code> -&gt; <code>New</code> -&gt; <code>Data Source</code> -&gt; <code>MySQL</code></li>
+<li>填写连接信息：<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">Host: localhost</span><br><span class="line">Port: 3306</span><br><span class="line">User: root</span><br><span class="line">Password: ******</span><br><span class="line">Database: (可选，连接后选择)</span><br></pre></td></tr></table></figure></li>
+<li>点击 <code>Test Connection</code> 测试</li>
+<li>点击 <code>OK</code> 保存</li>
+</ol>
+<p><strong>连接 PostgreSQL：</strong></p>
+<ol>
+<li><code>File</code> -&gt; <code>New</code> -&gt; <code>Data Source</code> -&gt; <code>PostgreSQL</code></li>
+<li>填写连接信息：<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">Host: localhost</span><br><span class="line">Port: 5432</span><br><span class="line">User: postgres</span><br><span class="line">Password: ******</span><br><span class="line">Database: postgres</span><br></pre></td></tr></table></figure></li>
+<li>测试并保存</li>
+</ol>
+<h3 id="3-3-界面介绍"><a href="#3-3-界面介绍" class="headerlink" title="3.3 界面介绍"></a>3.3 界面介绍</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">左侧：Database 面板（数据库结构树）</span><br><span class="line">中间：SQL 编辑器和结果面板</span><br><span class="line">右侧：工具窗口（Structure, Favorites 等）</span><br><span class="line">底部：Services 面板（数据源列表）</span><br></pre></td></tr></table></figure>
+
+<h3 id="3-4-SQL-编写技巧"><a href="#3-4-SQL-编写技巧" class="headerlink" title="3.4 SQL 编写技巧"></a>3.4 SQL 编写技巧</h3><p><strong>代码补全：</strong></p>
+<ul>
+<li><code>Ctrl + Space</code> - 基本补全</li>
+<li><code>Ctrl + Shift + Space</code> - 智能补全</li>
+<li><code>Ctrl + Q</code> - 查看文档</li>
+<li><code>Ctrl + B</code> - 跳转到定义</li>
+<li><code>Ctrl + Alt + B</code> - 查看实现</li>
+</ul>
+<p><strong>代码格式化：</strong></p>
+<ul>
+<li><code>Ctrl + Alt + L</code> - 格式化代码</li>
+<li><code>Code</code> -&gt; <code>Reformat Code</code></li>
+</ul>
+<p><strong>代码模板：</strong></p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- 输入缩写后按 Tab 键</span></span><br><span class="line"></span><br><span class="line">sel<span class="operator">*</span>     <span class="operator">-</span><span class="operator">&gt;</span> <span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span></span><br><span class="line">selt     <span class="operator">-</span><span class="operator">&gt;</span> <span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span></span><br><span class="line">ins      <span class="operator">-</span><span class="operator">&gt;</span> <span class="keyword">INSERT INTO</span></span><br><span class="line">upd      <span class="operator">-</span><span class="operator">&gt;</span> <span class="keyword">UPDATE</span></span><br><span class="line">del      <span class="operator">-</span><span class="operator">&gt;</span> <span class="keyword">DELETE</span> <span class="keyword">FROM</span></span><br><span class="line">cre      <span class="operator">-</span><span class="operator">&gt;</span> <span class="keyword">CREATE TABLE</span></span><br><span class="line">joi      <span class="operator">-</span><span class="operator">&gt;</span> <span class="keyword">JOIN</span></span><br><span class="line">wh       <span class="operator">-</span><span class="operator">&gt;</span> <span class="keyword">WHERE</span></span><br><span class="line">gro      <span class="operator">-</span><span class="operator">&gt;</span> <span class="keyword">GROUP</span> <span class="keyword">BY</span></span><br><span class="line">ord      <span class="operator">-</span><span class="operator">&gt;</span> <span class="keyword">ORDER</span> <span class="keyword">BY</span></span><br><span class="line">hav      <span class="operator">-</span><span class="operator">&gt;</span> <span class="keyword">HAVING</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="3-5-常用功能"><a href="#3-5-常用功能" class="headerlink" title="3.5 常用功能"></a>3.5 常用功能</h3><p><strong>执行 SQL：</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Ctrl + Enter        执行当前语句</span><br><span class="line">Alt + X             执行当前文件</span><br><span class="line">Ctrl + Shift + F10  执行当前语句（带运行配置）</span><br></pre></td></tr></table></figure>
+
+<p><strong>查看数据：</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">双击表名          打开表结构</span><br><span class="line">Ctrl + N          在表中查找</span><br><span class="line">F4              查看数据</span><br><span class="line">Ctrl + Shift + F  查找数据</span><br></pre></td></tr></table></figure>
+
+<p><strong>导出导入：</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">右键表名 -&gt; Import/Export -&gt; Export Data</span><br><span class="line">支持格式：CSV, Excel, SQL, JSON, XML 等</span><br></pre></td></tr></table></figure>
+
+<p><strong>生成 SQL：</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">右键表名 -&gt; SQL Scripts -&gt; DDL</span><br><span class="line">可以选择生成 CREATE/INSERT/UPDATE/DELETE 语句</span><br></pre></td></tr></table></figure>
+
+<h3 id="3-6-版本控制集成"><a href="#3-6-版本控制集成" class="headerlink" title="3.6 版本控制集成"></a>3.6 版本控制集成</h3><p>DataGrip 可以关联 SQL 文件到 Git：</p>
+<ol>
+<li>创建 <code>db/migrations</code> 目录</li>
+<li>将 SQL 脚本放入该目录</li>
+<li>DataGrip 会自动识别并关联到 Git</li>
+<li>可以像普通代码一样进行版本控制</li>
+</ol>
+<h3 id="3-7-实用配置"><a href="#3-7-实用配置" class="headerlink" title="3.7 实用配置"></a>3.7 实用配置</h3><p><strong>设置中的推荐配置：</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">Settings -&gt; Editor -&gt; General -&gt; Appearance</span><br><span class="line">  ✓ Show line numbers          显示行号</span><br><span class="line">  ✓ Show whitespaces           显示空白字符</span><br><span class="line">  ✓ Show intention lightbulb   显示意图灯泡</span><br><span class="line"></span><br><span class="line">Settings -&gt; Editor -&gt; Font</span><br><span class="line">  设置喜欢的字体和大小</span><br><span class="line"></span><br><span class="line">Settings -&gt; Editor -&gt; Color Scheme</span><br><span class="line">  选择喜欢的主题</span><br><span class="line"></span><br><span class="line">Settings -&gt; Database -&gt; SQL Dialects</span><br><span class="line">  设置全局 SQL 方言</span><br><span class="line"></span><br><span class="line">Settings -&gt; Database -&gt; User Parameters</span><br><span class="line">  设置常用参数模板</span><br></pre></td></tr></table></figure>
+
+<h3 id="3-8-快捷键"><a href="#3-8-快捷键" class="headerlink" title="3.8 快捷键"></a>3.8 快捷键</h3><p><strong>Windows&#x2F;Linux：</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">Ctrl + Space        代码补全</span><br><span class="line">Ctrl + Q          快速文档</span><br><span class="line">Ctrl + B            跳转到定义</span><br><span class="line">Ctrl + Alt + L      格式化代码</span><br><span class="line">Ctrl + /            行注释</span><br><span class="line">Ctrl + Shift + /    块注释</span><br><span class="line">Ctrl + F            查找</span><br><span class="line">Ctrl + R            替换</span><br><span class="line">Ctrl + G            跳转到行</span><br><span class="line">Ctrl + N            查找对象</span><br><span class="line">Ctrl + Shift + N    查找文件</span><br><span class="line">Alt + Enter         显示意图动作</span><br><span class="line">Ctrl + Alt + T      用结构包裹</span><br><span class="line">Ctrl + Shift + F10  运行</span><br><span class="line">Ctrl + Shift + F    查找用法</span><br></pre></td></tr></table></figure>
+
+<p><strong>macOS：</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">Cmd + Space         代码补全</span><br><span class="line">F1                快速文档</span><br><span class="line">Cmd + B             跳转到定义</span><br><span class="line">Cmd + Alt + L       格式化代码</span><br><span class="line">Cmd + /             行注释</span><br><span class="line">Cmd + Shift + /     块注释</span><br><span class="line">Cmd + F             查找</span><br><span class="line">Cmd + R             替换</span><br><span class="line">Cmd + G             跳转到行</span><br></pre></td></tr></table></figure>
+
+<h3 id="3-9-数据编辑器技巧"><a href="#3-9-数据编辑器技巧" class="headerlink" title="3.9 数据编辑器技巧"></a>3.9 数据编辑器技巧</h3><p><strong>单元格操作：</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">Enter             编辑单元格</span><br><span class="line">Escape            取消编辑</span><br><span class="line">Ctrl + Enter      提交编辑</span><br><span class="line">Ctrl + Alt + Enter  放弃编辑</span><br><span class="line">Delete            设置为 NULL</span><br><span class="line">Ctrl + D          复制行</span><br><span class="line">Ctrl + Y          删除行</span><br></pre></td></tr></table></figure>
+
+<p><strong>筛选和排序：</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">点击列头          排序</span><br><span class="line">右键列头 -&gt; Filter  添加筛选条件</span><br><span class="line">Ctrl + F          在结果中查找</span><br></pre></td></tr></table></figure>
+
+<p><strong>数据导航：</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Ctrl + G            跳转到行</span><br><span class="line">Ctrl + Alt + Left   上一页</span><br><span class="line">Ctrl + Alt + Right  下一页</span><br></pre></td></tr></table></figure>
+
+<h2 id="四、工具整合"><a href="#四、工具整合" class="headerlink" title="四、工具整合"></a>四、工具整合</h2><h3 id="4-1-VS-Code-Jupyter"><a href="#4-1-VS-Code-Jupyter" class="headerlink" title="4.1 VS Code + Jupyter"></a>4.1 VS Code + Jupyter</h3><p>在 VS Code 中运行 Jupyter Notebook：</p>
+<ol>
+<li>安装 <code>Jupyter</code> 和 <code>Python</code> 插件</li>
+<li>打开 <code>.ipynb</code> 文件</li>
+<li>选择 Python 内核</li>
+<li>运行单元格（<code>Shift + Enter</code>）</li>
+</ol>
+<p><strong>优势：</strong></p>
+<ul>
+<li>在 VS Code 中编辑 Notebook，享受 VS Code 的所有功能</li>
+<li>支持变量查看器、数据查看器</li>
+<li>支持交互式窗口</li>
+</ul>
+<h3 id="4-2-VS-Code-数据库"><a href="#4-2-VS-Code-数据库" class="headerlink" title="4.2 VS Code + 数据库"></a>4.2 VS Code + 数据库</h3><p>在 VS Code 中管理数据库：</p>
+<p><strong>安装插件：</strong></p>
+<ul>
+<li><code>MySQL</code> (Jun Han)</li>
+<li><code>PostgreSQL</code> (Microsoft)</li>
+<li><code>SQLTools</code> (Matheus Teixeira)</li>
+</ul>
+<p><strong>使用 SQLTools：</strong></p>
+<ol>
+<li>安装插件</li>
+<li>配置连接</li>
+<li>在侧边栏查看数据库结构</li>
+<li>执行 SQL 查询</li>
+</ol>
+<h3 id="4-3-工作流建议"><a href="#4-3-工作流建议" class="headerlink" title="4.3 工作流建议"></a>4.3 工作流建议</h3><p><strong>日常开发：</strong></p>
+<ul>
+<li><strong>代码编辑</strong>：VS Code</li>
+<li><strong>数据分析</strong>：Jupyter Notebook</li>
+<li><strong>数据库管理</strong>：DataGrip</li>
+</ul>
+<p><strong>数据科学项目：</strong></p>
+<ol>
+<li>用 DataGrip 探索和导出样本数据</li>
+<li>用 Jupyter 进行数据探索和建模</li>
+<li>用 VS Code 编写生产代码</li>
+<li>用 Git 进行版本控制</li>
+</ol>
+<h2 id="五、最佳实践"><a href="#五、最佳实践" class="headerlink" title="五、最佳实践"></a>五、最佳实践</h2><blockquote>
+<p><strong>提醒自己</strong>：</p>
+<ol>
+<li><strong>善用快捷键</strong>：提高效率，减少鼠标使用</li>
+<li><strong>配置同步</strong>：使用 Settings Sync 同步配置</li>
+<li><strong>插件适度</strong>：不要安装太多插件，影响性能</li>
+<li><strong>定期备份</strong>：Notebook 定期导出备份</li>
+<li><strong>代码格式化</strong>：保存时自动格式化</li>
+<li><strong>版本控制</strong>：所有代码（包括 SQL）都纳入 Git</li>
+<li><strong>敏感信息</strong>：数据库密码等不要硬编码</li>
+</ol>
+</blockquote>
+<h2 id="六、练习"><a href="#六、练习" class="headerlink" title="六、练习"></a>六、练习</h2><ol>
+<li>安装 VS Code，配置 Python 开发环境</li>
+<li>安装 Jupyter，创建一个数据分析 Notebook</li>
+<li>安装 DataGrip，连接本地或远程数据库</li>
+<li>在 VS Code 中安装并配置常用插件</li>
+<li>配置 Settings Sync，同步开发环境</li>
+<li>学习并使用每个工具的快捷键</li>
+<li>创建一个包含代码、文本、图表的完整 Notebook</li>
+</ol>
+<hr>
+<p><strong>上一篇</strong>：<a href="/2026/02/24/Git-%E7%89%88%E6%9C%AC%E6%8E%A7%E5%88%B6%E4%B8%8E%E5%9B%A2%E9%98%9F%E5%8D%8F%E4%BD%9C/">Git 版本控制与团队协作</a></p>
+<p><strong>系统与工具系列完成！</strong></p>
+<p><strong>参考资源</strong>：</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://code.visualstudio.com/docs">VS Code 官方文档</a></li>
+<li><a target="_blank" rel="noopener" href="https://jupyter.org/documentation">Jupyter 官方文档</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.jetbrains.com/help/datagrip/">DataGrip 官方文档</a></li>
+<li><a target="_blank" rel="noopener" href="https://code.visualstudio.com/docs/getstarted/keybindings">VS Code 快捷键</a></li>
+</ul>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://brian-lin-c.github.io">过拟合的炸鱼薯条</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://brian-lin-c.github.io/2026/02/24/IDE%20%E5%B7%A5%E5%85%B7%E9%85%8D%E7%BD%AE%EF%BC%9AVS%20Code%20+%20Jupyter%20+%20DataGrip/">https://brian-lin-c.github.io/2026/02/24/IDE%20%E5%B7%A5%E5%85%B7%E9%85%8D%E7%BD%AE%EF%BC%9AVS%20Code%20+%20Jupyter%20+%20DataGrip/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://brian-lin-c.github.io" target="_blank">过拟合的炸鱼薯条</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/IDE/">IDE</a><a class="post-meta__tags" href="/tags/VS-Code/">VS Code</a><a class="post-meta__tags" href="/tags/Jupyter/">Jupyter</a><a class="post-meta__tags" href="/tags/DataGrip/">DataGrip</a><a class="post-meta__tags" href="/tags/%E5%BC%80%E5%8F%91%E5%B7%A5%E5%85%B7/">开发工具</a></div><div class="post-share"><div class="social-share" data-image="/img/%E5%A4%B4%E5%83%8F.jpg" data-sites="facebook,x,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related full-width" href="/2026/02/24/Git%20%E7%89%88%E6%9C%AC%E6%8E%A7%E5%88%B6%E4%B8%8E%E5%9B%A2%E9%98%9F%E5%8D%8F%E4%BD%9C/" title="Git 版本控制与团队协作"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">Git 版本控制与团队协作</div></div><div class="info-2"><div class="info-item-1">Git 版本控制与团队协作Git 是现代软件开发中不可或缺的工具。本篇将介绍 Git 的核心概念、常用命令、分支管理和团队协作流程。 一、Git 基础1.1 版本控制简介版本控制系统（VCS） 用于跟踪文件的变化历史，主要类型：    类型 特点 代表    本地 VCS 单用户，单机器 RCS, SCCS   集中式 VCS 单服务器，多客户端 SVN, CVS   分布式 VCS 每人都有完整仓库 Git, Mercurial   1.2 Git 的特点 分布式：每个人都是完整的仓库 分支模型：轻量级分支，快速切换 快照模式：存储快照而非差异 数据校验：SHA-1 校验和保证数据完整性 支持非线性开发：强大的合并能力  1.3 Git 的三个区域12345工作目录 (Working Directory)    ↓ git add暂存区 (Staging Area / Index)    ↓ git commit仓库 (Repository / .git)   工作目录：你看到和编辑的文件 暂存区：准备提交的快照 仓库：永久存储的提交历史  1.4 安装与配置123456789...</div></div></div></a></nav></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/img/%E5%A4%B4%E5%83%8F.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">过拟合的炸鱼薯条</div><div class="author-info-description">好好学习，天天向上</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">26</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">68</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">7</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/Brian-Lin-C"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons"><a class="social-icon" href="https://github.com/Brian-Lin-C" target="_blank" title="Github"><i class="fab fa-github" style="color: #24292e;"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">欢迎来到我的个人博客！</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#IDE-%E5%B7%A5%E5%85%B7%E9%85%8D%E7%BD%AE%EF%BC%9AVS-Code-Jupyter-DataGrip"><span class="toc-number">1.</span> <span class="toc-text">IDE 工具配置：VS Code + Jupyter + DataGrip</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%80%E3%80%81VS-Code"><span class="toc-number">1.1.</span> <span class="toc-text">一、VS Code</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-1-%E7%AE%80%E4%BB%8B%E4%B8%8E%E5%AE%89%E8%A3%85"><span class="toc-number">1.1.1.</span> <span class="toc-text">1.1 简介与安装</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-2-%E5%9F%BA%E7%A1%80%E9%85%8D%E7%BD%AE"><span class="toc-number">1.1.2.</span> <span class="toc-text">1.2 基础配置</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-3-%E5%BF%85%E5%A4%87%E6%8F%92%E4%BB%B6"><span class="toc-number">1.1.3.</span> <span class="toc-text">1.3 必备插件</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-4-%E5%BF%AB%E6%8D%B7%E9%94%AE"><span class="toc-number">1.1.4.</span> <span class="toc-text">1.4 快捷键</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-5-%E4%BB%A3%E7%A0%81%E7%89%87%E6%AE%B5%EF%BC%88Snippets%EF%BC%89"><span class="toc-number">1.1.5.</span> <span class="toc-text">1.5 代码片段（Snippets）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-6-%E8%B0%83%E8%AF%95%E9%85%8D%E7%BD%AE"><span class="toc-number">1.1.6.</span> <span class="toc-text">1.6 调试配置</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%8C%E3%80%81Jupyter-Notebook"><span class="toc-number">1.2.</span> <span class="toc-text">二、Jupyter Notebook</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#2-1-%E7%AE%80%E4%BB%8B%E4%B8%8E%E5%AE%89%E8%A3%85"><span class="toc-number">1.2.1.</span> <span class="toc-text">2.1 简介与安装</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-2-JupyterLab"><span class="toc-number">1.2.2.</span> <span class="toc-text">2.2 JupyterLab</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-3-%E5%9F%BA%E6%9C%AC%E4%BD%BF%E7%94%A8"><span class="toc-number">1.2.3.</span> <span class="toc-text">2.3 基本使用</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-4-Markdown-%E5%8D%95%E5%85%83%E6%A0%BC"><span class="toc-number">1.2.4.</span> <span class="toc-text">2.4 Markdown 单元格</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-6-%E6%95%B0%E6%8D%AE%E7%A7%91%E5%AD%A6%E6%8F%92%E4%BB%B6"><span class="toc-number">1.2.5.</span> <span class="toc-text">2.6 数据科学插件</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-7-%E5%AE%9E%E7%94%A8%E6%8A%80%E5%B7%A7"><span class="toc-number">1.2.6.</span> <span class="toc-text">2.7 实用技巧</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-8-%E6%89%A9%E5%B1%95%E6%8F%92%E4%BB%B6"><span class="toc-number">1.2.7.</span> <span class="toc-text">2.8 扩展插件</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%89%E3%80%81DataGrip"><span class="toc-number">1.3.</span> <span class="toc-text">三、DataGrip</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#3-1-%E7%AE%80%E4%BB%8B%E4%B8%8E%E5%AE%89%E8%A3%85"><span class="toc-number">1.3.1.</span> <span class="toc-text">3.1 简介与安装</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-2-%E5%88%9B%E5%BB%BA%E6%95%B0%E6%8D%AE%E6%BA%90"><span class="toc-number">1.3.2.</span> <span class="toc-text">3.2 创建数据源</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-3-%E7%95%8C%E9%9D%A2%E4%BB%8B%E7%BB%8D"><span class="toc-number">1.3.3.</span> <span class="toc-text">3.3 界面介绍</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-4-SQL-%E7%BC%96%E5%86%99%E6%8A%80%E5%B7%A7"><span class="toc-number">1.3.4.</span> <span class="toc-text">3.4 SQL 编写技巧</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-5-%E5%B8%B8%E7%94%A8%E5%8A%9F%E8%83%BD"><span class="toc-number">1.3.5.</span> <span class="toc-text">3.5 常用功能</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-6-%E7%89%88%E6%9C%AC%E6%8E%A7%E5%88%B6%E9%9B%86%E6%88%90"><span class="toc-number">1.3.6.</span> <span class="toc-text">3.6 版本控制集成</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-7-%E5%AE%9E%E7%94%A8%E9%85%8D%E7%BD%AE"><span class="toc-number">1.3.7.</span> <span class="toc-text">3.7 实用配置</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-8-%E5%BF%AB%E6%8D%B7%E9%94%AE"><span class="toc-number">1.3.8.</span> <span class="toc-text">3.8 快捷键</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-9-%E6%95%B0%E6%8D%AE%E7%BC%96%E8%BE%91%E5%99%A8%E6%8A%80%E5%B7%A7"><span class="toc-number">1.3.9.</span> <span class="toc-text">3.9 数据编辑器技巧</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9B%9B%E3%80%81%E5%B7%A5%E5%85%B7%E6%95%B4%E5%90%88"><span class="toc-number">1.4.</span> <span class="toc-text">四、工具整合</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#4-1-VS-Code-Jupyter"><span class="toc-number">1.4.1.</span> <span class="toc-text">4.1 VS Code + Jupyter</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-2-VS-Code-%E6%95%B0%E6%8D%AE%E5%BA%93"><span class="toc-number">1.4.2.</span> <span class="toc-text">4.2 VS Code + 数据库</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-3-%E5%B7%A5%E4%BD%9C%E6%B5%81%E5%BB%BA%E8%AE%AE"><span class="toc-number">1.4.3.</span> <span class="toc-text">4.3 工作流建议</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%94%E3%80%81%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5"><span class="toc-number">1.5.</span> <span class="toc-text">五、最佳实践</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%85%AD%E3%80%81%E7%BB%83%E4%B9%A0"><span class="toc-number">1.6.</span> <span class="toc-text">六、练习</span></a></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/02/24/IDE%20%E5%B7%A5%E5%85%B7%E9%85%8D%E7%BD%AE%EF%BC%9AVS%20Code%20+%20Jupyter%20+%20DataGrip/" title="IDE 工具配置：VS Code + Jupyter + DataGrip">IDE 工具配置：VS Code + Jupyter + DataGrip</a><time datetime="2026-02-24T15:00:00.000Z" title="发表于 2026-02-24 23:00:00">2026-02-24</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/02/24/Git%20%E7%89%88%E6%9C%AC%E6%8E%A7%E5%88%B6%E4%B8%8E%E5%9B%A2%E9%98%9F%E5%8D%8F%E4%BD%9C/" title="Git 版本控制与团队协作">Git 版本控制与团队协作</a><time datetime="2026-02-24T14:00:00.000Z" title="发表于 2026-02-24 22:00:00">2026-02-24</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/02/24/Linux%20%E4%B8%8E%20Shell%EF%BC%88%E4%BA%8C%EF%BC%89Shell%20%E8%84%9A%E6%9C%AC%E7%BC%96%E5%86%99/" title="Linux 与 Shell（二）Shell 脚本编写">Linux 与 Shell（二）Shell 脚本编写</a><time datetime="2026-02-24T13:00:00.000Z" title="发表于 2026-02-24 21:00:00">2026-02-24</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/02/24/Linux%20%E4%B8%8E%20Shell%EF%BC%88%E4%B8%80%EF%BC%89Linux%20%E5%9F%BA%E7%A1%80%E4%B8%8E%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4/" title="Linux 与 Shell（一）Linux 基础与常用命令">Linux 与 Shell（一）Linux 基础与常用命令</a><time datetime="2026-02-24T12:00:00.000Z" title="发表于 2026-02-24 20:00:00">2026-02-24</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/02/24/Python%20%E5%B8%B8%E7%94%A8%E5%BA%93%EF%BC%88%E4%B8%89%EF%BC%89logging%20%E6%97%A5%E5%BF%97%E6%A8%A1%E5%9D%97/" title="Python 常用库（三）logging 日志模块">Python 常用库（三）logging 日志模块</a><time datetime="2026-02-24T11:00:00.000Z" title="发表于 2026-02-24 19:00:00">2026-02-24</time></div></div></div></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2025 - 2026 By 过拟合的炸鱼薯条</span><span class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 8.1.1</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.5.4</a></span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=5.5.4"></script><script src="/js/main.js?v=5.5.4"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><i class="fas fa-spinner fa-pulse" id="loading-status" hidden="hidden"></i><button class="search-close-button"><i class="fas fa-times"></i></button></nav><div class="text-center" id="loading-database"><i class="fas fa-spinner fa-pulse"></i><span>  数据加载中</span></div><div class="local-search-input"><input placeholder="搜索..." type="text"/></div><hr/><div id="local-search-results"></div><div class="ais-Pagination" id="local-search-pagination" style="display:none;"><ul class="ais-Pagination-list"></ul></div><div id="local-search-stats"></div></div><div id="search-mask"></div><script src="/js/search/local-search.js?v=5.5.4"></script></div></div></body></html>
