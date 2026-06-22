@@ -15607,4 +15607,70 @@
         <tag>PDU</tag>
       </tags>
   </entry>
+  <entry>
+    <title>电商运营中台知识体系 —— 7 节互动课程开源</title>
+    <url>/2026/06/22/2026-06-22-ecommerce-ops-course/</url>
+    <content><![CDATA[<h2 id="这是什么"><a href="#这是什么" class="headerlink" title="这是什么"></a>这是什么</h2><p>一套面向零基础新人的电商运营入门课程，7 节互动 HTML 页面，从商品、SKU、库存、订单、渠道、销售指标，一路讲到 AI Agent 如何重构电商运营流程。</p>
+<p>不需要任何电商基础，每节课 10 分钟读完，附带互动测验。</p>
+<h2 id="课程目录"><a href="#课程目录" class="headerlink" title="课程目录"></a>课程目录</h2><table>
+<thead>
+<tr>
+<th>#</th>
+<th>课程</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>01</td>
+<td>商品、SPU、SKU、类目</td>
+<td>电商商品体系的三层基石</td>
+</tr>
+<tr>
+<td>02</td>
+<td>库存基础</td>
+<td>入库出库、库存周转、安全库存</td>
+</tr>
+<tr>
+<td>03</td>
+<td>订单全链路</td>
+<td>OMS、状态机、拆单、售后</td>
+</tr>
+<tr>
+<td>04</td>
+<td>渠道管理</td>
+<td>官网&#x2F;平台&#x2F;分销、铺货、结算</td>
+</tr>
+<tr>
+<td>05</td>
+<td>销售核心指标</td>
+<td>GMV、转化率、客单价、拆解法</td>
+</tr>
+<tr>
+<td>06</td>
+<td>数据看板与对账</td>
+<td>SQL 模板、对账自动化、异常排查</td>
+</tr>
+<tr>
+<td>07</td>
+<td>AI Agent 重构电商运营</td>
+<td>Agent 七大应用场景与实操</td>
+</tr>
+</tbody></table>
+<h2 id="为什么做这个"><a href="#为什么做这个" class="headerlink" title="为什么做这个"></a>为什么做这个</h2><p>电商运营的知识散落在无数文章、论坛帖子和内部文档里，新人入门往往靠「师傅带」——碰到什么学什么，不成体系。我把自己梳理的电商运营中台知识整理了出来，希望帮到同样在入门的同学。</p>
+<p>课程引用了阿里、京东、有赞、vivo 等电商中台的实践经验，并且每课都设计了场景测验，不是「看完了就忘了」的那种。</p>
+<h2 id="在线浏览"><a href="#在线浏览" class="headerlink" title="在线浏览"></a>在线浏览</h2><p>👉 <strong><a href="https://brian-lin-c.github.io/ecommerce-ops-course/">brian-lin-c.github.io&#x2F;ecommerce-ops-course</a></strong></p>
+<p>暗黑主题，桌面和手机都能看。</p>
+<h2 id="项目地址"><a href="#项目地址" class="headerlink" title="项目地址"></a>项目地址</h2><p>GitHub: <strong><a href="https://github.com/Brian-Lin-C/ecommerce-ops-course">github.com&#x2F;Brian-Lin-C&#x2F;ecommerce-ops-course</a></strong></p>
+<p>欢迎 Star 和 PR。</p>
+]]></content>
+      <categories>
+        <category>项目</category>
+      </categories>
+      <tags>
+        <tag>电商</tag>
+        <tag>运营</tag>
+        <tag>开源</tag>
+        <tag>AI Agent</tag>
+      </tags>
+  </entry>
 </search>
