@@ -1,0 +1,212 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>AI数据运营课④：BI可视化——国内企业到底用什么工具？FineBI入门 | 过拟合的炸鱼薯条</title><meta name="author" content="过拟合的炸鱼薯条"><meta name="copyright" content="过拟合的炸鱼薯条"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="别学错工具了很多新人上来就学 Tableau——但广深地区的国内企业（制造业、零售、国企），90% 用的是帆软 FineBI。 面试官问「你会什么 BI 工具」，你说 Tableau → 对方心想「我们不用这个」。你说 FineBI → 「这个可以，来了直接上手」。 一、国内 BI 工具选择   工具 谁在用 广深 JD 命中率    FineBI（帆软） 制造业&#x2F;零售&#x2F;国企&amp;">
+<meta property="og:type" content="article">
+<meta property="og:title" content="AI数据运营课④：BI可视化——国内企业到底用什么工具？FineBI入门">
+<meta property="og:url" content="https://brian-lin-c.github.io/2026/06/22/2026-06-22-ai-data-ops-04-bi/index.html">
+<meta property="og:site_name" content="过拟合的炸鱼薯条">
+<meta property="og:description" content="别学错工具了很多新人上来就学 Tableau——但广深地区的国内企业（制造业、零售、国企），90% 用的是帆软 FineBI。 面试官问「你会什么 BI 工具」，你说 Tableau → 对方心想「我们不用这个」。你说 FineBI → 「这个可以，来了直接上手」。 一、国内 BI 工具选择   工具 谁在用 广深 JD 命中率    FineBI（帆软） 制造业&#x2F;零售&#x2F;国企&amp;">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://brian-lin-c.github.io/img/%E5%A4%B4%E5%83%8F.jpg">
+<meta property="article:published_time" content="2026-06-21T16:00:00.000Z">
+<meta property="article:modified_time" content="2026-06-22T12:28:02.674Z">
+<meta property="article:author" content="过拟合的炸鱼薯条">
+<meta property="article:tag" content="BI">
+<meta property="article:tag" content="FineBI">
+<meta property="article:tag" content="帆软">
+<meta property="article:tag" content="数据可视化">
+<meta property="article:tag" content="求职">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://brian-lin-c.github.io/img/%E5%A4%B4%E5%83%8F.jpg"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "AI数据运营课④：BI可视化——国内企业到底用什么工具？FineBI入门",
+  "url": "https://brian-lin-c.github.io/2026/06/22/2026-06-22-ai-data-ops-04-bi/",
+  "image": "https://brian-lin-c.github.io/img/%E5%A4%B4%E5%83%8F.jpg",
+  "datePublished": "2026-06-21T16:00:00.000Z",
+  "dateModified": "2026-06-22T12:28:02.674Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "过拟合的炸鱼薯条",
+      "url": "https://brian-lin-c.github.io"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://brian-lin-c.github.io/2026/06/22/2026-06-22-ai-data-ops-04-bi/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=5.5.4"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.1.0/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        if (!ttl) return
+        const expiry = Date.now() + ttl * 86400000
+        localStorage.setItem(key, JSON.stringify({ value, expiry }))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return undefined
+        const { value, expiry } = JSON.parse(itemStr)
+        if (Date.now() > expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return value
+      }
+    }
+
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        Object.entries(attr).forEach(([key, val]) => script.setAttribute(key, val))
+        script.onload = script.onreadystatechange = () => {
+          if (!script.readyState || /loaded|complete/.test(script.readyState)) resolve()
+        }
+        script.onerror = reject
+        document.head.appendChild(script)
+      }),
+      getCSS: (url, id) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onload = link.onreadystatechange = () => {
+          if (!link.readyState || /loaded|complete/.test(link.readyState)) resolve()
+        }
+        link.onerror = reject
+        document.head.appendChild(link)
+      }),
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"/search.xml","preload":true,"top_n_per_article":1,"unescape":false,"pagination":{"enable":false,"hitsPerPage":8},"languages":{"hits_empty":"未找到符合您查询的内容：${query}","hits_stats":"共找到 ${hits} 篇文章"}},
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.13.0/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'AI数据运营课④：BI可视化——国内企业到底用什么工具？FineBI入门',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><meta name="generator" content="Hexo 8.1.1"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/img/%E5%A4%B4%E5%83%8F.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">80</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">186</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">12</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user"></i><span> 关于</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">过拟合的炸鱼薯条</span></a><a class="nav-page-title" href="/"><span class="site-name">AI数据运营课④：BI可视化——国内企业到底用什么工具？FineBI入门</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div id="search-button"><span class="site-page social-icon search"><i class="fas fa-search fa-fw"></i><span> 搜索</span></span></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user"></i><span> 关于</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">AI数据运营课④：BI可视化——国内企业到底用什么工具？FineBI入门</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2026-06-21T16:00:00.000Z" title="发表于 2026-06-22 00:00:00">2026-06-22</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-06-22T12:28:02.674Z" title="更新于 2026-06-22 20:28:02">2026-06-22</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/AI%E6%95%B0%E6%8D%AE%E8%BF%90%E8%90%A5%E8%AF%BE/">AI数据运营课</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-wordcount"><i class="far fa-file-word fa-fw post-meta-icon"></i><span class="post-meta-label">总字数:</span><span class="word-count">488</span><span class="post-meta-separator">|</span><i class="far fa-clock fa-fw post-meta-icon"></i><span class="post-meta-label">阅读时长:</span><span>1分钟</span></span><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><h2 id="别学错工具了"><a href="#别学错工具了" class="headerlink" title="别学错工具了"></a>别学错工具了</h2><p>很多新人上来就学 Tableau——但广深地区的国内企业（制造业、零售、国企），<strong>90% 用的是帆软 FineBI</strong>。</p>
+<p>面试官问「你会什么 BI 工具」，你说 Tableau → 对方心想「我们不用这个」。你说 FineBI → 「这个可以，来了直接上手」。</p>
+<h2 id="一、国内-BI-工具选择"><a href="#一、国内-BI-工具选择" class="headerlink" title="一、国内 BI 工具选择"></a>一、国内 BI 工具选择</h2><table>
+<thead>
+<tr>
+<th>工具</th>
+<th>谁在用</th>
+<th align="center">广深 JD 命中率</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>FineBI（帆软）</strong></td>
+<td>制造业&#x2F;零售&#x2F;国企&#x2F;国内大厂</td>
+<td align="center">⭐⭐⭐</td>
+</tr>
+<tr>
+<td>Power BI</td>
+<td>外企&#x2F;跨境电商</td>
+<td align="center">⭐⭐</td>
+</tr>
+<tr>
+<td>Tableau</td>
+<td>外企&#x2F;金融&#x2F;咨询</td>
+<td align="center">⭐</td>
+</tr>
+</tbody></table>
+<p><strong>结论：投国内企业学 FineBI，投外企学 Power BI。</strong></p>
+<h2 id="二、FineBI-快速入门"><a href="#二、FineBI-快速入门" class="headerlink" title="二、FineBI 快速入门"></a>二、FineBI 快速入门</h2><p>FineBI 个人版免费，官网下载安装即可。官方入门教程是「连锁超市销售报告」案例，1 小时学会 80% 核心功能。</p>
+<p><strong>分析流程四步：</strong></p>
+<ol>
+<li><strong>数据准备</strong> — 导入 Excel&#x2F;CSV 或连接数据库 → 创建自助数据集</li>
+<li><strong>数据加工</strong> — 过滤、分组汇总、新增公式列、合并表</li>
+<li><strong>可视化</strong> — 拖拽字段生成图表</li>
+<li><strong>仪表板</strong> — 组合多个图表 + 添加筛选器 → 形成完整看板</li>
+</ol>
+<h2 id="三、标准看板结构"><a href="#三、标准看板结构" class="headerlink" title="三、标准看板结构"></a>三、标准看板结构</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">┌─────────────────────────────────────────┐</span><br><span class="line">│  KPI 概览行: GMV | 订单数 | 客单价 | 转化率  │</span><br><span class="line">├────────────────┬────────────────────────┤</span><br><span class="line">│  趋势图 (折线)   │  品类排行 (柱状图)        │</span><br><span class="line">├────────────────┼────────────────────────┤</span><br><span class="line">│  渠道分布 (饼图) │  地域热力图 (地图)        │</span><br><span class="line">├────────────────┴────────────────────────┤</span><br><span class="line">│  明细表: 支持日期/品类/区域筛选             │</span><br><span class="line">└─────────────────────────────────────────┘</span><br></pre></td></tr></table></figure>
+
+<p><strong>设计原则：从宏观到微观</strong>。左上角放核心 KPI，然后趋势→排行→分布→明细。</p>
+<h2 id="四、简历怎么写"><a href="#四、简历怎么写" class="headerlink" title="四、简历怎么写"></a>四、简历怎么写</h2><p>不要写「熟练使用 FineBI」——太弱了。写：</p>
+<blockquote>
+<p>「使用 FineBI 搭建连锁零售业务监控看板，包含 4 大模块（GMV 趋势、品类排行、渠道分布、地域分析），通过同比环比分析发现华东区 GMV 异常，定位某品类缺货导致下降 12%。」</p>
+</blockquote>
+<p>有场景、有数据、有结论——这才是面试官想看的。</p>
+<blockquote>
+<p>本文是《AI数据运营策略岗求职课程》第4课。完整课程：<a href="https://brian-lin-c.github.io/ai-data-ops-course/">brian-lin-c.github.io&#x2F;ai-data-ops-course</a></p>
+</blockquote>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://brian-lin-c.github.io">过拟合的炸鱼薯条</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://brian-lin-c.github.io/2026/06/22/2026-06-22-ai-data-ops-04-bi/">https://brian-lin-c.github.io/2026/06/22/2026-06-22-ai-data-ops-04-bi/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://brian-lin-c.github.io" target="_blank">过拟合的炸鱼薯条</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E6%B1%82%E8%81%8C/">求职</a><a class="post-meta__tags" href="/tags/BI/">BI</a><a class="post-meta__tags" href="/tags/FineBI/">FineBI</a><a class="post-meta__tags" href="/tags/%E5%B8%86%E8%BD%AF/">帆软</a><a class="post-meta__tags" href="/tags/%E6%95%B0%E6%8D%AE%E5%8F%AF%E8%A7%86%E5%8C%96/">数据可视化</a></div><div class="post-share"><div class="social-share" data-image="/img/%E5%A4%B4%E5%83%8F.jpg" data-sites="facebook,x,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related" href="/2026/06/22/2026-06-22-ai-data-ops-06-pm/" title="AI数据运营课⑥：数据项目管理——为什么传统Scrum在数据团队经常翻车？"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">AI数据运营课⑥：数据项目管理——为什么传统Scrum在数据团队经常翻车？</div></div><div class="info-2"><div class="info-item-1">数据项目和软件项目是两码事JD 写「项目统筹」「收益刻画」—— 很多数据分析师说不清楚自己怎么管项目。这节课给你一套可以直接用的框架。 BixTech 的实战研究指出：数据项目的前 20% 工作（数据接入 + 探查）往往占 80% 的时间。这不是效率问题，是数据工作的天然特性。 一、数据项目的五大特殊性   挑战 软件开发 数据&#x2F;BI 项目    依赖 清晰的 API 和模块 隐藏依赖：数据源系统、权限审批、上游变更   需求 明确的用户故事 探索型：从问题出发，不是从需求出发   数据质量 输入可控 不可控：缺失值、重复、口径不一致   交付物 可运行的功能 可审查的增量：一个经验证的指标定义也是交付   干系人 明确的产品经理 模糊：「我要一个看板」不是完整问题描述   二、数据项目的交付标准不是每个 Sprint 都要交付一个完整看板。以下都是合格的 Sprint 产出：  ✅ 一个经验证的指标定义（如「活跃客户」的业务口径 + 技术实现） ✅ 一个清洗好、文档化的数据集 ✅ 一个可用的看板切片（一个人群 × 一个决策） ✅ 一份带洞察和建议的分析报告（不只是图表...</div></div></div></a><a class="pagination-related" href="/2026/06/22/2026-06-22-ai-data-ops-05-llm/" title="AI数据运营课⑤：大模型赋能数据工作——NL2SQL、自动报告、智能清洗"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">AI数据运营课⑤：大模型赋能数据工作——NL2SQL、自动报告、智能清洗</div></div><div class="info-2"><div class="info-item-1">这是你跟纯数据分析师拉开差距的地方JD 写「大模型赋能数据管理」——很多候选人会说「我用过 ChatGPT」。但如果你能说「我搭建过 NL2SQL 原型，业务人员用自然语言就能查数据库」，面试官会记住你。 一、NL2SQL——自然语言转 SQL这是大模型在数据领域最成熟的应用。AWS 和 Google 都有成熟的实践方案。 三步流程：  自然语言理解 — 解析用户输入：「上月华东区销售额排名」 SQL 生成 — LLM 将意图转为可执行的 SQL 执行 + 返回 — 在数据库执行 SQL，返回结果  Prompt 的核心要素（AWS 最佳实践）：  Schema 上下文：告诉 LLM 有什么表、什么字段 Few-shot 示例：给 2-3 组「自然语言 → SQL」对照 数据库方言：指定 MySQL &#x2F; Hive &#x2F; PostgreSQL  二、自动分析报告第二个落地场景：把数据摘要扔给 LLM，让它自动生成分析报告。 应用场景：每天早上自动拉取昨日核心指标，生成一份 200 字的业务日报，发到企业微信群。原来人工写要 30 分钟，现在 1 分钟。 国内大模型...</div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/2026/06/22/2026-06-22-ai-data-ops-01-sql/" title="AI数据运营课①：SQL从学术到生产——面试官要的窗口函数与Hive差异"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-06-22</div><div class="info-item-2">AI数据运营课①：SQL从学术到生产——面试官要的窗口函数与Hive差异</div></div><div class="info-2"><div class="info-item-1">你以为会SQL，面试官不这么想学校里写 SELECT * FROM 拿个成绩就够了。面试官上来就问：「用窗口函数取每个品类销售额前三的商品」。你写不出来，这轮就结束了。 数据分析岗 JD 100% 要求 SQL。但面试考的和你学校学的是两套东西。 一、窗口函数——面试必杀技窗口函数的核心：保留每一行明细的同时做分组计算。GROUP BY 会丢掉明细行，窗口函数不会。 四大金刚：    函数 作用 面试场景    ROW_NUMBER() 唯一序号 (1,2,3…) 去重取最新一条   RANK() 排名，并列跳号 (1,2,2,4) 销售额排名   DENSE_RANK() 排名，并列不跳 (1,2,2,3) 连续排名   LAG()/LEAD() 取前一行&#x2F;后一行 环比计算、连续判断   实战：每个品类销售额 TOP3 商品（国内电商数据分析面试原题） 12345678910SELECT category, product_name, total_salesFROM (  SELECT category, product_name,    SUM(amount) AS...</div></div></div></a><a class="pagination-related" href="/2026/06/22/2026-06-22-ai-data-ops-05-llm/" title="AI数据运营课⑤：大模型赋能数据工作——NL2SQL、自动报告、智能清洗"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-06-22</div><div class="info-item-2">AI数据运营课⑤：大模型赋能数据工作——NL2SQL、自动报告、智能清洗</div></div><div class="info-2"><div class="info-item-1">这是你跟纯数据分析师拉开差距的地方JD 写「大模型赋能数据管理」——很多候选人会说「我用过 ChatGPT」。但如果你能说「我搭建过 NL2SQL 原型，业务人员用自然语言就能查数据库」，面试官会记住你。 一、NL2SQL——自然语言转 SQL这是大模型在数据领域最成熟的应用。AWS 和 Google 都有成熟的实践方案。 三步流程：  自然语言理解 — 解析用户输入：「上月华东区销售额排名」 SQL 生成 — LLM 将意图转为可执行的 SQL 执行 + 返回 — 在数据库执行 SQL，返回结果  Prompt 的核心要素（AWS 最佳实践）：  Schema 上下文：告诉 LLM 有什么表、什么字段 Few-shot 示例：给 2-3 组「自然语言 → SQL」对照 数据库方言：指定 MySQL &#x2F; Hive &#x2F; PostgreSQL  二、自动分析报告第二个落地场景：把数据摘要扔给 LLM，让它自动生成分析报告。 应用场景：每天早上自动拉取昨日核心指标，生成一份 200 字的业务日报，发到企业微信群。原来人工写要 30 分钟，现在 1 分钟。 国内大模型...</div></div></div></a><a class="pagination-related" href="/2026/06/22/2026-06-22-ai-data-ops-07-interview/" title="AI数据运营课⑦：面试模拟——SQL题、案例题、AI认知题、项目管理题全攻略"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-06-22</div><div class="info-item-2">AI数据运营课⑦：面试模拟——SQL题、案例题、AI认知题、项目管理题全攻略</div></div><div class="info-2"><div class="info-item-1">AI 数据运营岗的面试考什么？这不是纯数据分析岗。面试有 4 类题，每类都有标准答题框架。    题型 权重 典型时长    SQL 笔试 30% 30-45min   案例分析 30% 30-45min   大模型认知 20% 20-30min   项目管理 20% 20-30min   一、SQL 题——三道必练① 各品类销售额 Top 3 商品（窗口函数） 123456SELECT category, product_name, total_sales FROM (  SELECT category, product_name, SUM(amount) AS total_sales,    ROW_NUMBER() OVER (PARTITION BY category ORDER BY SUM(amount) DESC) AS rn  FROM orders WHERE dt &gt;= DATE_SUB(CURDATE(), INTERVAL 1 MONTH)  GROUP BY category, product_name) t WHERE rn &lt;= 3;  ...</div></div></div></a><a class="pagination-related" href="/2026/06/22/2026-06-22-ai-data-ops-02-metrics/" title="AI数据运营课②：指标体系——你的北极星是什么？异动怎么排查？"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-06-22</div><div class="info-item-2">AI数据运营课②：指标体系——你的北极星是什么？异动怎么排查？</div></div><div class="info-2"><div class="info-item-1">指标不是越多越好很多新人觉得「指标体系」就是列一堆指标。错了。好的指标体系像一张地图——一个北极星指标是你的目的地，二级指标是路标，三级指标是你脚下的每一步。 Amplitude（全球最大产品分析平台）的定义：北极星指标是唯一能最好地捕捉客户从产品中获得价值的指标。 一、不同业务的北极星   业务类型 北极星指标 为什么不是注册量？    电商 GMV &#x2F; 下单用户数 注册了不买东西 &#x3D; 无效用户   内容社区 DAU（日活） 注册了不来 &#x3D; 死用户   SaaS MRR（月经常性收入） 免费注册不付费 &#x3D; 白嫖   游戏 付费用户数 &#x2F; ARPU 注册量可以刷，付费不行   注意：国内互联网大厂特别看重「付费」相关指标——免费用户再多，不能变现的业务在字节&#x2F;腾讯是活不下去的。 二、OSM框架——指标体系的骨架 O &#x3D; Objective（目标）→ S &#x3D; Strategy（策略）→ M &#x3D; Measure（度量）  以电商 GMV 为例： 12345O: 提升 GMV（北极星）├─ S1:...</div></div></div></a><a class="pagination-related" href="/2026/06/22/2026-06-22-ai-data-ops-03-python/" title="AI数据运营课③：Python数据分析——2025年之后，AI替你写代码"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-06-22</div><div class="info-item-2">AI数据运营课③：Python数据分析——2025年之后，AI替你写代码</div></div><div class="info-2"><div class="info-item-1">你不需要从零手写每一行代码了Wes McKinney（pandas 创始人）2026 年公开说：「Python 是为人类设计的。AI 刚刚改变了一切。」 2025 年以后的数据分析师不是「写代码」的，是「指挥 AI 写代码，然后审查代码」的。但前提是——你能读懂 pandas，能判断 AI 生成的代码对不对。 一、分析师必备的 Pandas 五招1234567891011121314151617import pandas as pddf = pd.read_csv(&#x27;sales.csv&#x27;)# 1. 分组聚合df.groupby(&#x27;category&#x27;).agg(&#123;&#x27;amount&#x27;: [&#x27;sum&#x27;,&#x27;mean&#x27;,&#x27;count&#x27;]&#125;)# 2. 多表合并pd.merge(orders, users, on=&#x27;user_id&#x27;, how=&#x27;left&#x27;)# 3. 透视表df.pivot_table(values=&...</div></div></div></a><a class="pagination-related" href="/2026/06/22/2026-06-22-ai-data-ops-course/" title="AI 数据运营策略岗求职课程 —— 7 节互动课程开源"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-06-22</div><div class="info-item-2">AI 数据运营策略岗求职课程 —— 7 节互动课程开源</div></div><div class="info-2"><div class="info-item-1">这是什么一套针对 「AI + 数据运营策略」 岗位的系统化求职课程。覆盖 JD 三大核心能力：数据分析、大模型应用、项目管理。 适合：数据科学&#x2F;统计学硕士应届生，或有一定数据分析基础想转 AI 数据方向的求职者。不需要大模型经验——课程会从零教你如何将 LLM 应用到数据工作流中。 课程特点 🔴 每节课都引用了真实来源（Amplitude、AWS、BixTech、PMI 等 30+ 权威资料） 🟡 暗黑主题 HTML 互动课件，含测验 + 面试模拟回答 🟢 聚焦差异化：不是纯数据分析课程——核心卖点是 大模型赋能数据工作  课程目录   # 课程 核心内容    1 SQL 从学术到生产 窗口函数、多表 JOIN、CTE、Hive 差异   2 业务指标体系 北极星指标、OSM 框架、异动归因五步法   3 Python + AI 辅助分析 pandas 实战 + LLM 辅助编码新范式   4 BI 可视化实战 FineBI 业务监控看板搭建   5 大模型赋能数据工作 NL2SQL、自动报告、智能数据清洗   6 数据项目管理 Scrum 适配、收益刻画、风险...</div></div></div></a></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/img/%E5%A4%B4%E5%83%8F.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">过拟合的炸鱼薯条</div><div class="author-info-description">好好学习，天天向上</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">80</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">186</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">12</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/Brian-Lin-C"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons"><a class="social-icon" href="https://github.com/Brian-Lin-C" target="_blank" title="Github"><i class="fab fa-github" style="color: #24292e;"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">欢迎来到我的个人博客！</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%88%AB%E5%AD%A6%E9%94%99%E5%B7%A5%E5%85%B7%E4%BA%86"><span class="toc-number">1.</span> <span class="toc-text">别学错工具了</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%80%E3%80%81%E5%9B%BD%E5%86%85-BI-%E5%B7%A5%E5%85%B7%E9%80%89%E6%8B%A9"><span class="toc-number">2.</span> <span class="toc-text">一、国内 BI 工具选择</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%8C%E3%80%81FineBI-%E5%BF%AB%E9%80%9F%E5%85%A5%E9%97%A8"><span class="toc-number">3.</span> <span class="toc-text">二、FineBI 快速入门</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%89%E3%80%81%E6%A0%87%E5%87%86%E7%9C%8B%E6%9D%BF%E7%BB%93%E6%9E%84"><span class="toc-number">4.</span> <span class="toc-text">三、标准看板结构</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9B%9B%E3%80%81%E7%AE%80%E5%8E%86%E6%80%8E%E4%B9%88%E5%86%99"><span class="toc-number">5.</span> <span class="toc-text">四、简历怎么写</span></a></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/06/22/2026-06-22-ecommerce-ops-course/" title="电商运营中台知识体系 —— 7 节互动课程开源">电商运营中台知识体系 —— 7 节互动课程开源</a><time datetime="2026-06-21T16:00:00.000Z" title="发表于 2026-06-22 00:00:00">2026-06-22</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/06/22/2026-06-22-ai-data-ops-course/" title="AI 数据运营策略岗求职课程 —— 7 节互动课程开源">AI 数据运营策略岗求职课程 —— 7 节互动课程开源</a><time datetime="2026-06-21T16:00:00.000Z" title="发表于 2026-06-22 00:00:00">2026-06-22</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/06/22/2026-06-22-ai-data-ops-01-sql/" title="AI数据运营课①：SQL从学术到生产——面试官要的窗口函数与Hive差异">AI数据运营课①：SQL从学术到生产——面试官要的窗口函数与Hive差异</a><time datetime="2026-06-21T16:00:00.000Z" title="发表于 2026-06-22 00:00:00">2026-06-22</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/06/22/2026-06-22-ai-data-ops-03-python/" title="AI数据运营课③：Python数据分析——2025年之后，AI替你写代码">AI数据运营课③：Python数据分析——2025年之后，AI替你写代码</a><time datetime="2026-06-21T16:00:00.000Z" title="发表于 2026-06-22 00:00:00">2026-06-22</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/06/22/2026-06-22-ai-data-ops-02-metrics/" title="AI数据运营课②：指标体系——你的北极星是什么？异动怎么排查？">AI数据运营课②：指标体系——你的北极星是什么？异动怎么排查？</a><time datetime="2026-06-21T16:00:00.000Z" title="发表于 2026-06-22 00:00:00">2026-06-22</time></div></div></div></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2025 - 2026 By 过拟合的炸鱼薯条</span><span class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 8.1.1</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.5.4</a></span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=5.5.4"></script><script src="/js/main.js?v=5.5.4"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><i class="fas fa-spinner fa-pulse" id="loading-status" hidden="hidden"></i><button class="search-close-button"><i class="fas fa-times"></i></button></nav><div class="text-center" id="loading-database"><i class="fas fa-spinner fa-pulse"></i><span>  数据加载中</span></div><div class="local-search-input"><input placeholder="搜索..." type="text"/></div><hr/><div id="local-search-results"></div><div class="ais-Pagination" id="local-search-pagination" style="display:none;"><ul class="ais-Pagination-list"></ul></div><div id="local-search-stats"></div></div><div id="search-mask"></div><script src="/js/search/local-search.js?v=5.5.4"></script></div></div></body></html>
